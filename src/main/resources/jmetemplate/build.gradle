@@ -1,0 +1,83 @@
+plugins {
+    id 'application'
+}
+
+description = '[GAME_NAME] application'
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+ext.jmonkeyengineVersion = '[JME_VERSION]' // from mavenCentral
+//ext.jmonkeyengineVersion = '3.5.0-SNAPSHOT' // from mavenLocal
+
+mainClassName = '[GAME_PACKAGE].[GAME_NAME]'
+if (!hasProperty('mainClass')) {
+    ext.mainClass = mainClassName
+}
+jar.manifest.attributes('Main-Class': mainClassName)
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // You can read more about how to add dependencies here:
+    //   https://docs.gradle.org/current/userguide/dependency_management.html#sec:how_to_declare_your_dependencies
+
+    // from mavenCentral (or mavenLocal) repositories:
+    implementation 'org.jmonkeyengine:jme3-core:' + jmonkeyengineVersion
+    implementation 'org.jmonkeyengine:jme3-desktop:' + jmonkeyengineVersion
+    runtimeOnly 'org.jmonkeyengine:jme3-jogg:' + jmonkeyengineVersion
+    runtimeOnly 'org.jmonkeyengine:jme3-plugins:' + jmonkeyengineVersion
+
+    [CORE_JME_DEPENDENCIES]
+    //implementation 'org.jmonkeyengine:jme3-effects:' + jmonkeyengineVersion
+    //implementation 'org.jmonkeyengine:jme3-networking:' + jmonkeyengineVersion
+    //implementation 'org.jmonkeyengine:jme3-niftygui:' + jmonkeyengineVersion
+    //implementation 'org.jmonkeyengine:jme3-terrain:' + jmonkeyengineVersion
+
+    runtimeOnly 'org.jmonkeyengine:jme3-lwjgl3:' + jmonkeyengineVersion // LWJGL 3.x
+
+    [OTHER_DEPENDENCIES]
+
+    //physics
+    //implementation 'com.github.stephengold:Minie:4.4.0'
+    //implementation 'org.jmonkeyengine:jme3-jbullet:' + jmonkeyengineVersion
+
+    // BasicGame doesn't use physics. If your game needs physics, select either:
+    //    1. Minie
+    //implementation 'com.github.stephengold:Minie:4.4.0'
+    // OR
+    //    2. jme3-jbullet
+    //implementation 'org.jmonkeyengine:jme3-jbullet:' + jmonkeyengineVersion
+
+    // BasicGame doesn't use jme3-jogg or jme3-plugins
+    //  -- they are included solely to avoid warnings from AssetConfig
+
+
+    // libraries related to the Lemur GUI and Groovy:
+    //implementation 'com.simsilica:lemur:1.15.0'
+    //implementation 'com.simsilica:lemur-props:1.1.1'
+    //implementation 'com.simsilica:lemur-proto:1.12.0'
+    //runtimeOnly 'org.codehaus.groovy:groovy-jsr223:3.0.8'
+
+    // other libraries:
+    //implementation 'com.github.stephengold:Heart:7.1.0'
+    //implementation 'com.simsilica:sim-math:1.4.1'
+    //runtimeOnly 'org.jmonkeyengine:jme3-testdata:' + jmonkeyengineVersion
+}
+
+// cleanup tasks
+clean.dependsOn('cleanDLLs', 'cleanDyLibs', 'cleanLogs', 'cleanSOs')
+task cleanDLLs(type: Delete) {
+    delete fileTree(dir: '.', include: '*.dll')
+}
+task cleanDyLibs(type: Delete) {
+    delete fileTree(dir: '.', include: '*.dylib')
+}
+task cleanLogs(type: Delete) {
+    delete fileTree(dir: '.', include: 'hs_err_pid*.log')
+}
+task cleanSOs(type: Delete) {
+    delete fileTree(dir: '.', include: '*.so')
+}

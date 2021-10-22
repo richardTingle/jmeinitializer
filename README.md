@@ -1,29 +1,18 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
-
 ### What is this repository for? ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+This is a server side application to support rest calls (probably from a web UI "somewhere") that will produce a starter
+gradle JMonkey project as a zip based on user choices. 
+
+It also contains a basic HTML page for accessing that rest API, however that is for local testing only and isn't 
+"real"
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
+* You will need a java 17 JDK & IDE of your choice that supports gradle
+* Start the application by running JmeInitializerApplication
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+* Original creator: richtea

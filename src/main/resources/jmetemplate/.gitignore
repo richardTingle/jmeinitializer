@@ -1,0 +1,11 @@
+/.gradle/
+/.nb-gradle/
+/build/
+/private/
+/*.dll
+/*.dylib
+/*.so
+
+#Although most of the .idea directory should not be committed there is a legitimate purpose for committing run configurations
+/.idea/
+!/.idea/runConfigurations/
