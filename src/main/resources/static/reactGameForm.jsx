@@ -8,22 +8,55 @@ class ReactGameForm extends React.Component {
         this.state = {
             gameName: "",
             package : "",
-            selectedLibraries: []
+            freeSelectLibraries: [],
+            platformLibrary: null,
+            availableLibraryData : null
         };
-        this.handleSetGameName = this.handleSetGameName.bind(this);
-        this.handleSetPackage = this.handleSetPackage.bind(this);
     }
 
-    handleSetGameName(event){
+    componentDidMount() {
+        fetch('/jme-initialiser/libraries')
+            .then(res => res.json())
+            .then((data) => {
+                this.setState({ availableLibraryData: data })
+            })
+            .catch(console.log)
+    }
+
+    handleSetGameName = (event) => {
         this.setState({gameName: event.target.value});
     }
 
-    handleSetPackage(event){
+    handleSetPackage = (event) => {
         this.setState({package: event.target.value});
     }
 
-    handleSubmit(event) {
-        log(this.state);
+    handleSetPlatform = (event) => {
+        this.setState({platformLibrary: event.target.value});
+    }
+
+
+    handleSubmit = (event) =>  {
+        console.log(this.state);
+    }
+
+    renderPlatformRadios(){
+        if (this.state.availableLibraryData === null){
+            return <div></div>
+        }else{
+            const platformRadios = [];
+
+            this.state.availableLibraryData.jmePlatforms.forEach(platform => {
+                platformRadios.push(<div className="form-check" key = {"platformRadioDiv" + platform.key}>
+                    <input className="form-check-input" type="radio" name="platformRadios" id={"platformRadio" + platform.key} value={platform.key} />
+                    <label className="form-check-label" htmlFor={"platformRadio" + platform.key}>
+                        {platform.libraryName}
+                    </label>
+                </div>);
+            });
+            return <div onChange={this.handleSetPlatform}>{platformRadios}</div>;
+        }
+
     }
 
     render() {
@@ -38,6 +71,14 @@ class ReactGameForm extends React.Component {
                 <input className="form-control" value={this.state.package} onChange={this.handleSetPackage} id="gamePackage" aria-describedby="gamePackageHelp" placeholder="e.g. com.mycompany"/>
                 <small id="gameNameHelp" className="form-text text-muted">A package name keeps your classes unique. If you have a website it's traditionally the website backwards (all lower case). So myamazinggame.co.uk would become uk.co.myamazinggame. If you don't have a website choose something like that, or just leave it blank</small>
             </div>
+
+            <h2>
+                Platform
+            </h2>
+            <p>JMonkeyEngine can target many platforms, select the platform your game will target</p>
+            {this.renderPlatformRadios()}
+
+            <br/>
             <button type="submit" className="btn btn-primary">Download a starter project</button>
         </form>
     }
