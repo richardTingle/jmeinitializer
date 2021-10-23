@@ -23,7 +23,11 @@ TO BE FILLED IN
 ## Next Steps
 You may wish to commit your project to a git repository to keep track of your changes (so you can roll back if anything goes wrong)
 
+## Adding more libraries
+During the JMonkey Initializer you chose from a small subset of the available java libraries.
+You can add more by editing the dependencies section in the build.gradle file
+
 ## txt vs md
 
-This readme is provided as a .txt as that is a common format openable on any machine. However it would more normally be a .md, this will allow it to be nicely formatted by most git repositories (assuming you commit it to git). Just change the extension from .txt to .md, the syntax is already correct for an md file
+This readme is provided as a .txt as that is a common format openable on any machine. However, it would more normally be a .md, this will allow it to be nicely formatted by most git repositories (assuming you commit it to git). Just change the extension from .txt to .md, the syntax is already correct for an md file
 
