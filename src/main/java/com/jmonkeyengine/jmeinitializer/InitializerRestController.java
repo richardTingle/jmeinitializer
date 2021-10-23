@@ -1,5 +1,6 @@
 package com.jmonkeyengine.jmeinitializer;
 
+import com.jmonkeyengine.jmeinitializer.uisupport.UiLibraryDataDto;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
@@ -22,6 +23,11 @@ public class InitializerRestController {
 
     public InitializerRestController (InitializerZipService initializerZipService) {
         this.initializerZipService = initializerZipService;
+    }
+
+    @GetMapping("/jme-initialiser/libraries")
+    public UiLibraryDataDto getDataForUi(){
+        return UiLibraryDataDto.INSTANCE;
     }
 
     @ResponseBody

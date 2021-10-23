@@ -56,7 +56,7 @@ public class VersionService {
     public void fetchNewVersions(){
         log.info("fetching new library versions");
 
-        //fetchMostRecentStableVersion("org.jmonkeyengine", "jme3-core", Optional.of(".*-stable")).ifPresent(newVersion -> this.jmeVersion=newVersion);
+        fetchMostRecentStableVersion("org.jmonkeyengine", "jme3-core", ".*-stable").ifPresent(newVersion -> this.jmeVersion=newVersion);
 
         for(Library library : Library.nonJmeLibraries()) {
             String group = library.getGroupId();
