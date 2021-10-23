@@ -10,6 +10,8 @@ class ReactGameForm extends React.Component {
             package : "",
             //all the libaries that aren't radios are in here
             freeSelectLibraries: [],
+            //these are groups which are determined by the server (e.g. networking)
+            groupSelectedLibraries: {},
             platformLibrary: null,
             availableLibraryData : null
         };
@@ -50,16 +52,31 @@ class ReactGameForm extends React.Component {
         console.log(this.state);
     }
 
+    handleSetLibrarySelectedInGroup =  (group, library)=>{
+        let newSelectedLibraries = Object.assign({}, this.state.groupSelectedLibraries);
+        newSelectedLibraries[group] = library;
+        this.setState({selectedLibraries:newSelectedLibraries});
+    }
+
+    isLibrarySelectedInGroup = (group, library) => {
+        if ( group in this.state.groupSelectedLibraries ){
+            return this.state.groupSelectedLibraries[group] === library;
+        }else{
+            return false;
+        }
+    }
+
+
     renderPlatformRadios(){
         if (this.state.availableLibraryData === null){
-            return <div></div>
+            return <div/>
         }else{
             const platformRadios = [];
 
             this.state.availableLibraryData.jmePlatforms.forEach(platform => {
                 platformRadios.push(<div className="form-check" key = {"platformRadioDiv" + platform.key}>
-                    <input className="form-check-input" type="radio" name="platformRadios" id={"platformRadio" + platform.key} value={platform.key} checked = {this.state.platformLibrary === platform.key} />
-                    <label className="form-check-label ml-3 text-sm font-medium text-gray-700" htmlFor={"platformRadio" + platform.key}>
+                    <input className="form-check-input" type="radio" name="platformRadios" id={"platformRadio" + platform.key} value={platform.key} checked = {this.state.platformLibrary === platform.key} onChange={this.handleSetPlatform} />
+                    <label className="form-check-label" htmlFor={"platformRadio" + platform.key}>
                         <b>{platform.libraryName}</b>
                         <p>{platform.libraryDescription}</p>
                     </label>
@@ -71,7 +88,7 @@ class ReactGameForm extends React.Component {
 
     renderFreeFormJmeLibraries(){
         if (this.state.availableLibraryData === null){
-            return <div></div>
+            return <div/>
         }else{
             const jmeLibraryRadios = [];
 
@@ -85,6 +102,36 @@ class ReactGameForm extends React.Component {
                 </div>);
             });
             return jmeLibraryRadios;
+        }
+    }
+
+    renderExclusiveGroups(){
+
+        if (this.state.availableLibraryData === null){
+            return <div/>
+        }else{
+            const groups = [];
+            this.state.availableLibraryData.specialCategories.forEach(specialCategory => {
+
+                const thisGroupRadios = [];
+
+                specialCategory.libraries.forEach(library => {
+                    thisGroupRadios.push(<div className="form-check" key = {"platformRadioDiv" + library.key}>
+                        <input className="form-check-input" type="radio" name={specialCategory.category.key+"Radios"} id={specialCategory.category.key+"Radio" + library.key} value={library.key} checked = {this.isLibrarySelectedInGroup(specialCategory.category.key, library.key)} onChange={event => this.handleSetLibrarySelectedInGroup(specialCategory.category.key, library.key)} />
+                        <label className="form-check-label" htmlFor={specialCategory.category.key+"Radio" + library.key}>
+                            <b>{library.libraryName}</b>
+                            <p>{library.libraryDescription}</p>
+                        </label>
+                    </div>)
+                })
+
+                groups.push(<div key = {specialCategory.category.key}>
+                    <h2>{specialCategory.category.categoryDisplayName}</h2>
+                    <p>{specialCategory.category.categoryDescription}</p>
+                    {thisGroupRadios}
+                </div>)
+            })
+            return groups;
         }
     }
 
@@ -112,6 +159,8 @@ class ReactGameForm extends React.Component {
             </h2>
             <p>Essential JME libraries are included by default but select any more that may be useful here</p>
             {this.renderFreeFormJmeLibraries()}
+
+            {this.renderExclusiveGroups()}
 
             <br/>
             <button type="submit" className="btn btn-primary">Download a starter project</button>

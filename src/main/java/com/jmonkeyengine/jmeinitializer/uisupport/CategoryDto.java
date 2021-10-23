@@ -7,11 +7,12 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class CategoryDto {
+    String key;
     String categoryDisplayName;
     String categoryDescription;
     boolean onlyOneAllowed;
 
     public CategoryDto (LibraryCategory category) {
-        this(category.getDisplayName(), category.getDescription(), category.isOnlyOneAllowed());
+        this(category.name(), category.getDisplayName(), category.getDescription(), category.isOnlyOneAllowed());
     }
 }

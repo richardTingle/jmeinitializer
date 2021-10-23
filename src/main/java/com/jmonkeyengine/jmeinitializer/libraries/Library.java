@@ -16,7 +16,7 @@ public enum Library {
     JME_EFFECTS("JME Effects","org.jmonkeyengine","jme3-effects", true, LibraryCategory.JME_GENERAL, true, "A JME library for effects, like explosions, smoke etc"),
     JME_TERRAIN("JME Terrain", "org.jmonkeyengine","jme3-terrain", true, LibraryCategory.JME_GENERAL, false, " A JME library for terrain"),
     JME_NETWORKING("JME Networking", "org.jmonkeyengine","jme3-networking", true, LibraryCategory.NETWORKING, false, "A JME library to support multiplayer games' network communication "),
-    JME_NIFTY("Nifty Gui","org.jmonkeyengine","jme3-niftygui", true, LibraryCategory.GUI, false, "Nifty GUI, a Gui library \n \n No longer actively supported by JME but still available"),
+    JME_NIFTY("Nifty Gui","org.jmonkeyengine","jme3-niftygui", true, LibraryCategory.GUI, false, "Nifty GUI, a Gui library. No longer actively supported by JME but still available"),
     JME_ANDROID("JME Android", "org.jmonkeyengine","jme3-android", true, LibraryCategory.JME_PLATFORM, false, "Android Game development"),
     JME_JBULLET("JBullet", "org.jmonkeyengine","jme3-jbullet", true, LibraryCategory.PHYSICS, false, "A Java port of the popular C++ bullet physics library"),
     JME_IOS("JME iOS", "org.jmonkeyengine","jme3-ios", true, LibraryCategory.JME_GENERAL, false, "A JME library supporting iOS deployment"),
