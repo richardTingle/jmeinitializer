@@ -25,7 +25,7 @@ public enum Library {
     MINIE("Minie", "com.github.stephengold", "Minie", false, LibraryCategory.PHYSICS, true, "An alternative binding to the C++ bullet library, produced by a member of the JMonkey community"),
     //lemur is not currently on maven.org so can't get a version for it. Is it moving off jCentre?
     //LEMUR("com.simsilica", List.of("lemur", "lemur-proto"), false, LibraryCategory.GUI, true, Optional.empty())
-    LOG4j2("Log4j2", "org.apache.logging.log4j", List.of("log4j-core", "log4j-api"), false, LibraryCategory.GENERAL, false, "A popular java logging library, useful to produce text logs of whats going on in your game", "[\\.\\d]*")
+    LOG4j2("Log4j2", "org.apache.logging.log4j", List.of("log4j-core", "log4j-api"), false, LibraryCategory.GENERAL, false, "[\\.\\d]*", "A popular java logging library, useful to produce text logs of whats going on in your game" )
     ;
 
     String displayName;

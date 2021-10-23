@@ -93,18 +93,18 @@ class ReactGameForm extends React.Component {
         if (this.state.availableLibraryData === null){
             return <div/>
         }else{
-            const jmeLibraryRadios = [];
+            const jmeLibraryChecks = [];
 
-            this.state.availableLibraryData.jmeGeneralLibraries.forEach(platform => {
-                jmeLibraryRadios.push(<div className="form-check" key = {"platformRadioDiv" + platform.key}>
-                    <input className="form-check-input" type="checkbox" value={platform.key} id={"platformCheck" + platform.key} checked = {this.state.freeSelectLibraries.includes(platform.key)} onChange = {event => this.handleToggleFreeFormLibrary(platform.key)} />
-                        <label className="form-check-label" htmlFor={"platformCheck" + platform.key}>
-                            <b>{platform.libraryName}</b>
-                            <p>{platform.libraryDescription}</p>
+            this.state.availableLibraryData.jmeGeneralLibraries.forEach(library => {
+                jmeLibraryChecks.push(<div className="form-check" key = {"libraryCheckDiv" + library.key}>
+                    <input className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                        <label className="form-check-label" htmlFor={"platformCheck" + library.key}>
+                            <b>{library.libraryName}</b>
+                            <p>{library.libraryDescription}</p>
                         </label>
                 </div>);
             });
-            return jmeLibraryRadios;
+            return jmeLibraryChecks;
         }
     }
 
@@ -146,15 +146,34 @@ class ReactGameForm extends React.Component {
         }
     }
 
+    renderOtherLibraries(){
+        if (this.state.availableLibraryData === null){
+            return <div/>
+        }else{
+            const libraryChecks = [];
+
+            this.state.availableLibraryData.generalLibraries.forEach(library => {
+                libraryChecks.push(<div className="form-check" key = {"libraryDiv" + library.key}>
+                    <input className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <label className="form-check-label" htmlFor={"libraryCheck" + library.key}>
+                        <b>{library.libraryName}</b>
+                        <p>{library.libraryDescription}</p>
+                    </label>
+                </div>);
+            });
+            return libraryChecks;
+        }
+    }
+
     render() {
         return <form onSubmit={this.handleSubmit}>
             <div className="form-group">
-                <label htmlFor="gameName">Game Name</label>
+                <label htmlFor="gameName"><b>Game Name</b></label>
                 <input className="form-control" value={this.state.gameName} onChange={this.handleSetGameName} id="gameName" aria-describedby="gameNameHelp" placeholder="e.g. Asteroids"/>
                 <small id="gameNameHelp" className="form-text text-muted">This will be the name of your project. Try to keep to english letters as it will also be used in your java source</small>
             </div>
             <div className="form-group">
-                <label htmlFor="gamePackage">Package Name (Optional)</label>
+                <label htmlFor="gamePackage"><b>Package Name (Optional)</b></label>
                 <input className="form-control" value={this.state.package} onChange={this.handleSetPackage} id="gamePackage" aria-describedby="gamePackageHelp" placeholder="e.g. com.mycompany"/>
                 <small id="gameNameHelp" className="form-text text-muted">A package name keeps your classes unique. If you have a website it's traditionally the website backwards (all lower case). So myamazinggame.co.uk would become uk.co.myamazinggame. If you don't have a website choose something like that, or just leave it blank</small>
             </div>
@@ -165,6 +184,10 @@ class ReactGameForm extends React.Component {
             <p>JMonkeyEngine can target many platforms, select the platform your game will target</p>
             {this.renderPlatformRadios()}
 
+            <div className="alert alert-secondary" role="alert">
+                Don't worry if you're not sure about libraries, you can always add more later
+            </div>
+
             <h2>
                 Additional JME libraries
             </h2>
@@ -172,6 +195,10 @@ class ReactGameForm extends React.Component {
             {this.renderFreeFormJmeLibraries()}
 
             {this.renderExclusiveGroups()}
+
+            <h2>Other</h2>
+            <p>Libraries often found to be useful in JME games</p>
+            {this.renderOtherLibraries()}
 
             <br/>
             <button type="submit" className="btn btn-primary">Download a starter project</button>
