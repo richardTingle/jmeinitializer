@@ -8,6 +8,7 @@ class ReactGameForm extends React.Component {
         this.state = {
             gameName: "",
             package : "",
+            //all the libaries that aren't radios are in here
             freeSelectLibraries: [],
             platformLibrary: null,
             availableLibraryData : null
@@ -35,6 +36,15 @@ class ReactGameForm extends React.Component {
         this.setState({platformLibrary: event.target.value});
     }
 
+    handleToggleFreeFormLibrary = (libraryKey) => {
+        let currentlySelected = this.state.freeSelectLibraries.includes(libraryKey)
+        if (currentlySelected){
+            let newFreeSelectLibraries = this.state.freeSelectLibraries.filter( v => v !== libraryKey )
+            this.setState({freeSelectLibraries: newFreeSelectLibraries});
+        }else{
+            this.setState({freeSelectLibraries: [...this.state.freeSelectLibraries, libraryKey]});
+        }
+    }
 
     handleSubmit = (event) =>  {
         console.log(this.state);
@@ -48,15 +58,34 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.jmePlatforms.forEach(platform => {
                 platformRadios.push(<div className="form-check" key = {"platformRadioDiv" + platform.key}>
-                    <input className="form-check-input" type="radio" name="platformRadios" id={"platformRadio" + platform.key} value={platform.key} />
-                    <label className="form-check-label" htmlFor={"platformRadio" + platform.key}>
-                        {platform.libraryName}
+                    <input className="form-check-input" type="radio" name="platformRadios" id={"platformRadio" + platform.key} value={platform.key} checked = {this.state.platformLibrary === platform.key} />
+                    <label className="form-check-label ml-3 text-sm font-medium text-gray-700" htmlFor={"platformRadio" + platform.key}>
+                        <b>{platform.libraryName}</b>
+                        <p>{platform.libraryDescription}</p>
                     </label>
                 </div>);
             });
             return <div onChange={this.handleSetPlatform}>{platformRadios}</div>;
         }
+    }
 
+    renderFreeFormJmeLibraries(){
+        if (this.state.availableLibraryData === null){
+            return <div></div>
+        }else{
+            const jmeLibraryRadios = [];
+
+            this.state.availableLibraryData.jmeGeneralLibraries.forEach(platform => {
+                jmeLibraryRadios.push(<div className="form-check" key = {"platformRadioDiv" + platform.key}>
+                    <input className="form-check-input" type="checkbox" value={platform.key} id={"platformCheck" + platform.key} checked = {this.state.freeSelectLibraries.includes(platform.key)} onChange = {event => this.handleToggleFreeFormLibrary(platform.key)} />
+                        <label className="form-check-label" htmlFor={"platformCheck" + platform.key}>
+                            <b>{platform.libraryName}</b>
+                            <p>{platform.libraryDescription}</p>
+                        </label>
+                </div>);
+            });
+            return jmeLibraryRadios;
+        }
     }
 
     render() {
@@ -77,6 +106,12 @@ class ReactGameForm extends React.Component {
             </h2>
             <p>JMonkeyEngine can target many platforms, select the platform your game will target</p>
             {this.renderPlatformRadios()}
+
+            <h2>
+                Additional JME libraries
+            </h2>
+            <p>Essential JME libraries are included by default but select any more that may be useful here</p>
+            {this.renderFreeFormJmeLibraries()}
 
             <br/>
             <button type="submit" className="btn btn-primary">Download a starter project</button>
