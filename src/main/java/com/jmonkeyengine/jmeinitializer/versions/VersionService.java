@@ -32,12 +32,6 @@ import java.util.stream.Collectors;
 public class VersionService {
 
     /**
-     * Any version that contains any of these terms will not be considered for "whats the most recent"
-     * purposes.
-     */
-    Set<String> versionRejectingStrings = Set.of( "alpha", "beta", "snapshot", "releasecandidate", "debug" );
-
-    /**
      * A search URL (With merge fields) that will return json as to all the versions of that artifact
      * E.g. https://search.maven.org/solrsearch/select?q=g:%22org.jmonkeyengine%22+AND+a:%22jme3-core%22&core=gav&rows=20&wt=json
      *
@@ -62,7 +56,7 @@ public class VersionService {
     public void fetchNewVersions(){
         log.info("fetching new library versions");
 
-        fetchMostRecentStableVersion("org.jmonkeyengine", "jme3-core", Optional.of(".*-stable")).ifPresent(newVersion -> this.jmeVersion=newVersion);
+        //fetchMostRecentStableVersion("org.jmonkeyengine", "jme3-core", Optional.of(".*-stable")).ifPresent(newVersion -> this.jmeVersion=newVersion);
 
         for(Library library : Library.nonJmeLibraries()) {
             String group = library.getGroupId();
@@ -78,9 +72,9 @@ public class VersionService {
      * Will make an api call to attempt to get the most recent version of a library. If the api call fails Optional.empty will
      * be returned, in which case the old cached value should be retained.
      *
-     * If an acceptableLibraryRegex is passed it overrides the normal "is this a release version" check with that regex
+     * The acceptableLibraryRegex is used to determine if its a "release" version
      */
-    public Optional<String> fetchMostRecentStableVersion(String group, String artifact, Optional<String> acceptableLibraryRegex){
+    public Optional<String> fetchMostRecentStableVersion(String group, String artifact, String acceptableLibraryRegex){
         return fetchRawVersionsForLibrary(group, artifact, acceptableLibraryRegex)
                 .filter( listOfVersions -> !listOfVersions.isEmpty())
                 .map( listOfVersions ->
@@ -95,7 +89,7 @@ public class VersionService {
      * Will make an api call to attempt to get all the versions of a library. If the api call fails Optional.empty will
      * be returned, in which case the old cached value should be retained.
      */
-    private Optional<List<String>> fetchRawVersionsForLibrary(String group, String artifact, Optional<String> acceptableLibraryRegex){
+    private Optional<List<String>> fetchRawVersionsForLibrary(String group, String artifact, String acceptableLibraryRegex){
         String searchUrl = versionSearchUrl.replace("[GROUP]",group).replace("[ARTIFACT]", artifact);
 
         ResponseEntity<MavenVersionApiResponseDto> apiResponse = restTemplate.getForEntity(searchUrl, MavenVersionApiResponseDto.class);
@@ -103,15 +97,8 @@ public class VersionService {
         if (apiResponse.getStatusCode().is2xxSuccessful()){
             return Optional.of(apiResponse.getBody().getResponse().getDocs().stream()
                     .map(DocsDto::getV)
-                    .filter(version ->
-                    {
-                        if (acceptableLibraryRegex.isPresent()){
-                            return version.matches(acceptableLibraryRegex.get());
-                        }else{
-                            return versionRejectingStrings.stream().noneMatch(rejects -> version.toLowerCase().contains(rejects));
-                        }
-
-                    }).collect(Collectors.toList()));
+                    .filter(version -> version.matches(acceptableLibraryRegex))
+                    .collect(Collectors.toList()));
         }else{
             log.error("Failed to get a version response for " + group + ":" + artifact);
             log.error(apiResponse);

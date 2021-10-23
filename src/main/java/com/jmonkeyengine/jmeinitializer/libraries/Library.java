@@ -25,8 +25,10 @@ public enum Library {
     JME_ANDROID_NATIVE("org.jmonkeyengine","jme3-android-native", true, LibraryCategory.JME_GENERAL, false),
     JME_VR("org.jmonkeyengine","jme3-vr", true, LibraryCategory.JME_PLATFORM, false),
 
-    MINIE("com.github.stephengold", List.of("Minie"), false, LibraryCategory.PHYSICS, true, Optional.of("[\\.\\d]*")),
-    LEMUR("com.simsilica", List.of("lemur", "lemur-proto"), false, LibraryCategory.GUI, true, Optional.empty())
+    MINIE("com.github.stephengold", "Minie", false, LibraryCategory.PHYSICS, true),
+    //lemur is not currently on maven.org so can't get a version for it. Is it moving off jCentre?
+    //LEMUR("com.simsilica", List.of("lemur", "lemur-proto"), false, LibraryCategory.GUI, true, Optional.empty())
+    LOG4j2("org.apache.logging.log4j", List.of("log4j-core", "log4j-api"), false, LibraryCategory.GENERAL, false, "[\\.\\d]*")
     ;
 
     String groupId;
@@ -36,10 +38,10 @@ public enum Library {
     boolean defaultSelected;
 
     /**
-     * When searching for library versions the application has a good go at figuring out what is a release candidate,
-     * or alpha or beta release. But sometimes there is a library specific pattern. In those cases a regex can be set here
+     * When searching for library versions the application uses this regex to determine if its a "release" version
+     * (And not a beta, release candidate etc)
      */
-    Optional<String> libraryVersionRegex = Optional.empty();
+    String libraryVersionRegex = "[\\.\\d]*";
 
     Library (String groupId, String artifactId, boolean usesJmeVersion, LibraryCategory category, boolean defaultSelected) {
         this.groupId = groupId;
