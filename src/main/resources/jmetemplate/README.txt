@@ -1,4 +1,4 @@
-# [GAME_NAME_LONG]
+# [GAME_NAME_FULL]
 
 ## Project set up
 This is a gradle project using JMonkey Engine and other java libraries
