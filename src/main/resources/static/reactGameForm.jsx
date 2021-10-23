@@ -55,7 +55,7 @@ class ReactGameForm extends React.Component {
     handleSetLibrarySelectedInGroup =  (group, library)=>{
         let newSelectedLibraries = Object.assign({}, this.state.groupSelectedLibraries);
         newSelectedLibraries[group] = library;
-        this.setState({selectedLibraries:newSelectedLibraries});
+        this.setState({groupSelectedLibraries:newSelectedLibraries});
     }
 
     isLibrarySelectedInGroup = (group, library) => {
@@ -66,6 +66,9 @@ class ReactGameForm extends React.Component {
         }
     }
 
+    hasNoLibraryForGroup = (group) => {
+        return !( group in this.state.groupSelectedLibraries ) || this.state.groupSelectedLibraries[group] == null;
+    }
 
     renderPlatformRadios(){
         if (this.state.availableLibraryData === null){
@@ -124,6 +127,14 @@ class ReactGameForm extends React.Component {
                         </label>
                     </div>)
                 })
+
+                thisGroupRadios.push(<div className="form-check" key = {"platformRadioDivNone"}>
+                    <input className="form-check-input" type="radio" name={specialCategory.category.key+"Radios"} id={specialCategory.category.key+"RadioNone"} value="" checked = {this.hasNoLibraryForGroup(specialCategory.category.key)} onChange={event => this.handleSetLibrarySelectedInGroup(specialCategory.category.key, null)} />
+                    <label className="form-check-label" htmlFor={specialCategory.category.key+"RadioNone"}>
+                        <b>None</b>
+                        <p>Do not include a library for this category</p>
+                    </label>
+                </div>)
 
                 groups.push(<div key = {specialCategory.category.key}>
                     <h2>{specialCategory.category.categoryDisplayName}</h2>
