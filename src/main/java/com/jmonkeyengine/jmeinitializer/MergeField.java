@@ -1,6 +1,6 @@
 package com.jmonkeyengine.jmeinitializer;
 
-public enum MergeFields {
+public enum MergeField {
 
     /**
      * The game name as it appears in Class names and gradle artifact. A sanitised version of the true name
