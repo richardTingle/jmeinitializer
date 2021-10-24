@@ -69,13 +69,26 @@ class ReactGameForm extends React.Component {
         this.setState({ hasDownloaded:true });
         event.preventDefault(); //don't refresh the page
         //doesn't "actually" change the page location because its a download link
-        location.href = "/jme-initialiser/zip";
+        location.href = "/jme-initialiser/zip?gameName=" + encodeURIComponent(this.state.gameName) + "&packageName=" +encodeURIComponent(this.state.package)+"&libraryList=" + encodeURIComponent(this.getRequiredLibrariesAsCommaSeperatedList());
     }
 
     handleSetLibrarySelectedInGroup =  (group, library)=>{
         let newSelectedLibraries = Object.assign({}, this.state.groupSelectedLibraries);
         newSelectedLibraries[group] = library;
         this.setState({groupSelectedLibraries:newSelectedLibraries});
+    }
+
+    getRequiredLibrariesAsCommaSeperatedList = () => {
+        let fullRequiredLibrarys = []
+        fullRequiredLibrarys.push(this.state.platformLibrary);
+        fullRequiredLibrarys = fullRequiredLibrarys.concat(this.state.freeSelectLibraries);
+        for(const categoryKey in this.state.groupSelectedLibraries){
+            const library = this.state.groupSelectedLibraries[categoryKey];
+            if (library != null){
+                fullRequiredLibrarys.push(library);
+            }
+        }
+        return fullRequiredLibrarys.join(",");
     }
 
     isLibrarySelectedInGroup = (group, library) => {
