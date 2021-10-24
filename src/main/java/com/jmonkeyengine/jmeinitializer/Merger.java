@@ -1,10 +1,12 @@
 package com.jmonkeyengine.jmeinitializer;
 
+import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import org.apache.commons.text.CaseUtils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Merger {
 
@@ -12,8 +14,10 @@ public class Merger {
 
     /**
      * Given the information provided by the user will evaluate merge fields in files and paths.
+     *
+     * libraryVersions is a map of a string of the form groupId:artifactId -> version
      */
-    public Merger(String gameName, String gamePackage, List<String> libraryKeys, String jmeVersion){
+    public Merger(String gameName, String gamePackage, List<Library> librariesRequired, String jmeVersion, Map<String,String> libraryVersions){
         mergeData.put(MergeField.GAME_NAME_FULL, gameName);
         mergeData.put(MergeField.GAME_NAME, sanitiseToJavaClass(gameName));
 
@@ -24,7 +28,30 @@ public class Merger {
         mergeData.put(MergeField.GAME_PACKAGE, proposedPackage);
         mergeData.put(MergeField.GAME_PACKAGE_FOLDER, convertPackageToFolder(mergeData.get(MergeField.GAME_PACKAGE)));
         mergeData.put(MergeField.JME_VERSION, jmeVersion);
+        mergeData.put(MergeField.JME_DEPENDENCIES, formJmeRequiredLibrariesMergeField(librariesRequired));
+        mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredLibrariesMergeField(librariesRequired, libraryVersions));
+    }
+    
+    protected static String formJmeRequiredLibrariesMergeField(List<Library> librariesRequired){
+        return librariesRequired.stream()
+                .filter(Library::isUsesJmeVersion)
+                .flatMap(l ->
+                    l.getArtifactIds().stream()
+                            .map(artifactId -> "    implementation '" + l.getGroupId() + ":" + artifactId + "'+ jmonkeyengineVersion")
+                ).collect(Collectors.joining("\n"));
 
+    }
+
+    protected static String formNonJmeRequiredLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions){
+        return librariesRequired.stream()
+                .filter(Library::isUsesJmeVersion)
+                .flatMap(l ->
+                        l.getArtifactIds().stream()
+                                .map(artifactId -> {
+                                    String mavenCoordinate = l.getGroupId() + ":" + artifactId;
+                                    return "    implementation '" + mavenCoordinate + ":" + libraryVersions.getOrDefault(mavenCoordinate, "[MISSING_VERSION]")  + "'";
+                                })
+                ).collect(Collectors.joining("\n"));
     }
 
     protected static String sanitiseToPackage(String proposedPackage){
