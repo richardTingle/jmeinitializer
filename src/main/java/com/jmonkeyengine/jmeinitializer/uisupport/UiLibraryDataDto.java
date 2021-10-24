@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * This is all the information the front end will need to render its options in a single packet
+ * This is all the information the front end will need to render its options in a single packet.
+ *
+ * This dto represents json sent to the front end
  */
 @Data
 @AllArgsConstructor

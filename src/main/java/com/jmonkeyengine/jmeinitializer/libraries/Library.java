@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * This enum represents libraries that the tool will propose. A library may include sevreal artifacts (e.g. log4j2 which
+ * has both log4j-core and log4j-api)
+ */
 @AllArgsConstructor
 @Getter
 public enum Library {

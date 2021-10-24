@@ -8,6 +8,8 @@ gradle JMonkey project as a zip based on user choices.
 It also contains a basic HTML page for accessing that rest API, however that is for local testing only and isn't 
 "real"
 
+There is a general approach of merge fields which allow both file path segments and file content to be replaced with user data
+
 ### How do I get set up? ###
 
 * You will need a java 17 JDK & IDE of your choice that supports gradle

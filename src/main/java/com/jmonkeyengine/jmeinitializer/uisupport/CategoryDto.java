@@ -4,6 +4,9 @@ import com.jmonkeyengine.jmeinitializer.libraries.LibraryCategory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * This dto represents json sent to the front end
+ */
 @Data
 @AllArgsConstructor
 public class CategoryDto {

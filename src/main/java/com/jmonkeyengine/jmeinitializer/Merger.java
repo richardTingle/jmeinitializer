@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The merger is responsible for replacing merge fields in text documents and paths with their merged data
+ */
 public class Merger {
 
     private final Map<MergeField, String> mergeData = new HashMap<>();

@@ -4,6 +4,9 @@ import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * This dto represents json sent to the front end
+ */
 @Data
 @AllArgsConstructor
 public class LibraryDto {
@@ -14,6 +17,9 @@ public class LibraryDto {
 
     String libraryDescription;
 
+    /**
+     * If true this library will be preselected in the UI
+     */
     boolean selectedByDefault;
 
     public LibraryDto (Library library) {

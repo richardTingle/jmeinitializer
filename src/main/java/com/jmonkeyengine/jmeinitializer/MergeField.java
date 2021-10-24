@@ -1,5 +1,10 @@
 package com.jmonkeyengine.jmeinitializer;
 
+/**
+ * These are the supported merge fields that the {@link Merger} will insert information into. They allow fields
+ * with these names (represented by [NAME]) in both paths and file contents in the template to be replaced by
+ * dynamic content
+ */
 public enum MergeField {
 
     /**

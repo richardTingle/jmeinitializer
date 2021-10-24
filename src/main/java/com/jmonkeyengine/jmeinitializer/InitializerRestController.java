@@ -18,6 +18,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * Represents endpoints used by the front end
+ */
 @RestController
 public class InitializerRestController {
 

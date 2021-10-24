@@ -3,6 +3,10 @@ package com.jmonkeyengine.jmeinitializer.libraries;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * Categories are used to group what is offered by the UI. Sometimes a group will only allow 1 item to be selected
+ * within it (e.g. it only makes sense to have 1 physics engine)
+ */
 @AllArgsConstructor
 @Getter
 public enum LibraryCategory {
@@ -27,7 +31,16 @@ public enum LibraryCategory {
 
     String displayName;
 
+    /**
+     * Used in the UI to describe the general purpose of the category
+     */
     String description;
 
+    /**
+     * If true a radio selector will be presented in the UI. If false checkboxes are presented.
+     *
+     * NOT ACTUALLY CURRENTLY RESPECTED BY THE UI. Currently, some categories are manually set as checkbox in the UI and
+     * the rest are radio
+     */
     boolean onlyOneAllowed;
 }

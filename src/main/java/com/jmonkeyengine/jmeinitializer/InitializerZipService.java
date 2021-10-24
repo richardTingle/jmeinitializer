@@ -26,6 +26,10 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Given the user's choices produces a ByteArrayOutputStream that is a zip containing a starter project with those
+ * choices
+ */
 @Service
 public class InitializerZipService {
 

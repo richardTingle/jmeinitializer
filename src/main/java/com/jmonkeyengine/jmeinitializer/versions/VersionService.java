@@ -67,7 +67,6 @@ public class VersionService {
                 fetchMostRecentStableVersion(group, artifactId, library.getLibraryVersionRegex()).ifPresent(newVersion -> versionCache.put(group + ":" + artifactId, newVersion));
             }
         }
-        int a=0;
     }
 
 
