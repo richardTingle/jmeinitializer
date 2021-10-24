@@ -1,4 +1,4 @@
-package com.jmonkeyengine.jmeinitializer.versions.dto;
+package com.jmonkeyengine.jmeinitializer.dto;
 
 import lombok.Data;
 

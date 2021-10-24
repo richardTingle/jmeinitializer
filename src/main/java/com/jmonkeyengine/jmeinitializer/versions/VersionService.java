@@ -1,8 +1,8 @@
 package com.jmonkeyengine.jmeinitializer.versions;
 
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
-import com.jmonkeyengine.jmeinitializer.versions.dto.DocsDto;
-import com.jmonkeyengine.jmeinitializer.versions.dto.MavenVersionApiResponseDto;
+import com.jmonkeyengine.jmeinitializer.dto.DocsDto;
+import com.jmonkeyengine.jmeinitializer.dto.MavenVersionApiResponseDto;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

@@ -1,7 +1,6 @@
-package com.jmonkeyengine.jmeinitializer.versions.dto;
+package com.jmonkeyengine.jmeinitializer.dto;
 
 import lombok.Data;
-import lombok.NonNull;
 
 /**
  * This represents the json returned from the api at https://search.maven.org/solrsearch.
