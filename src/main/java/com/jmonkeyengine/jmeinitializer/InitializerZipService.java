@@ -2,6 +2,10 @@ package com.jmonkeyengine.jmeinitializer;
 
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.versions.VersionService;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -31,6 +35,7 @@ import java.util.zip.ZipOutputStream;
  * choices
  */
 @Service
+@Log4j2
 public class InitializerZipService {
 
     private static String templatePath = "/jmetemplate";
@@ -87,40 +92,19 @@ public class InitializerZipService {
         if (resourceUrl == null){
             throw new RuntimeException("Resource at " + templatePath + " does not exist");
         }
-        FileSystem fileSystem = null;
         try {
-            URI uri = resourceUrl.toURI();
-            Path templateRootPath;
-            if (uri.getScheme().equals("jar")) {
-                fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
-                templateRootPath = fileSystem.getPath(templatePath);
-            } else {
-                templateRootPath = Paths.get(uri);
-            }
-            Stream<Path> walk = Files.walk(templateRootPath);
-            walk.forEach(path -> {
-                try {
-                    if (Files.isRegularFile(path)) {
-                        String pathWithStandardSlashes = path.toString().toString().replace("\\","/"); //change windows paths to linux paths
-                        String withinTemplatePath = unwantedPathRegex.matcher(pathWithStandardSlashes).replaceAll("");
-                        templateFiles.put(withinTemplatePath, Files.readAllBytes(path));
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException("Exception during loading file from template", e);
+            Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(null).getResources("classpath:jmetemplate/**");
+            for (Resource resource : resources) {
+                if (resource.isReadable()){ //isReadable means "file, or file like thing. Not a directory
+                    String pathWithStandardSlashes = Paths.get(resource.getURI()).toString().replace("\\","/"); //change windows paths to linux paths
+                    String withinTemplatePath = unwantedPathRegex.matcher(pathWithStandardSlashes).replaceAll("");
+                    templateFiles.put(withinTemplatePath, resource.getInputStream().readAllBytes());
                 }
-            });
+            }
+
             return templateFiles;
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             throw new RuntimeException("Exception during loading template", e);
-        } finally {
-            try {
-                if (fileSystem!=null) {
-                    fileSystem.close();
-                }
-            } catch (IOException e) {
-                //shouldn't throw exceptions within a finally block as it can hide the true exception
-                e.printStackTrace();
-            }
         }
     }
 
