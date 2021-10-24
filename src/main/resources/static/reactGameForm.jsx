@@ -68,6 +68,8 @@ class ReactGameForm extends React.Component {
         console.log(this.state);
         this.setState({ hasDownloaded:true });
         event.preventDefault(); //don't refresh the page
+        //doesn't "actually" change the page location because its a download link
+        location.href = "/jme-initialiser/zip";
     }
 
     handleSetLibrarySelectedInGroup =  (group, library)=>{
