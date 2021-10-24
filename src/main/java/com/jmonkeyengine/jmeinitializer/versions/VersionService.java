@@ -3,6 +3,7 @@ package com.jmonkeyengine.jmeinitializer.versions;
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.versions.dto.DocsDto;
 import com.jmonkeyengine.jmeinitializer.versions.dto.MavenVersionApiResponseDto;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -45,12 +46,14 @@ public class VersionService {
      * Periodically the application will scan for the most recent version of a library and caches it here. Then
      * requests to build starter zips using that library will use this cached version
      */
+    @Getter
     Map<String,String> versionCache = new ConcurrentHashMap<>();
 
     /**
      * Because many libraries use the same JME version this is a special case held separately
      */
-    String jmeVersion;
+    @Getter
+    String jmeVersion = "[JME_VERSION_COULD_NOT_BE_DETERMINED]";
 
     @Scheduled(fixedDelay = 24, timeUnit = TimeUnit.HOURS)
     public void fetchNewVersions(){
@@ -74,7 +77,7 @@ public class VersionService {
      *
      * The acceptableLibraryRegex is used to determine if its a "release" version
      */
-    public Optional<String> fetchMostRecentStableVersion(String group, String artifact, String acceptableLibraryRegex){
+    private Optional<String> fetchMostRecentStableVersion(String group, String artifact, String acceptableLibraryRegex){
         return fetchRawVersionsForLibrary(group, artifact, acceptableLibraryRegex)
                 .filter( listOfVersions -> !listOfVersions.isEmpty())
                 .map( listOfVersions ->

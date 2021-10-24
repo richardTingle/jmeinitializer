@@ -1,5 +1,7 @@
 package com.jmonkeyengine.jmeinitializer;
 
+import com.jmonkeyengine.jmeinitializer.libraries.Library;
+import com.jmonkeyengine.jmeinitializer.versions.VersionService;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -15,9 +17,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -33,13 +37,32 @@ public class InitializerZipService {
      */
     private static Set<String> fileExtensionsToTreatAsBlobs = Set.of(".jar");
 
-    public ByteArrayOutputStream produceZipInMemory(){
+    VersionService versionService;
+
+    public InitializerZipService (VersionService versionService) {
+        this.versionService = versionService;
+    }
+
+    public ByteArrayOutputStream produceZipInMemory(String gameName, String packageName, List<String> requiredLibraryKeys ){
+
+        List<Library> requiredLibraries = requiredLibraryKeys
+                .stream()
+                .flatMap(lk -> Library.tryValueOf(lk).stream())
+                .collect(Collectors.toList());
+
+        Merger merger = new Merger(gameName, packageName, requiredLibraries, versionService.getJmeVersion(), versionService.getVersionCache() );
+
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try(ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
             for( Map.Entry<String,byte[]> templateFile : getRawTemplatePaths().entrySet()){
-                ZipEntry entry = new ZipEntry(templateFile.getKey());
+                ZipEntry entry = new ZipEntry(merger.mergePath(templateFile.getKey()));
                 zipOutputStream.putNextEntry(entry);
-                zipOutputStream.write(templateFile.getValue());
+                if (fileExtensionsToTreatAsBlobs.stream().anyMatch(fe -> templateFile.getKey().contains(fe))){
+                    zipOutputStream.write(templateFile.getValue());
+                }else{
+                    zipOutputStream.write(merger.mergeFileContents(templateFile.getValue()));
+                }
+
                 zipOutputStream.closeEntry();
             }
         }catch(IOException ioe) {

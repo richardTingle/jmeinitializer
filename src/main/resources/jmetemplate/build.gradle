@@ -18,6 +18,7 @@ jar.manifest.attributes('Main-Class': mainClassName)
 
 repositories {
     mavenCentral()
+    jcenter() //jcentre is likely to stop working soon, but for now if required for certain dependencies
 }
 
 dependencies {

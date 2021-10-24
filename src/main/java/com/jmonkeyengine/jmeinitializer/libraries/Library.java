@@ -82,4 +82,12 @@ public enum Library {
 
         return defaultsInCategory.isEmpty() ? Optional.empty() : Optional.of(defaultsInCategory.get(0));
     }
+
+    public static Optional<Library> tryValueOf(String name){
+        try{
+            return Optional.of(Library.valueOf(name));
+        }catch ( IllegalArgumentException e){
+            return Optional.empty();
+        }
+    }
 }

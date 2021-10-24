@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 @RestController
 public class InitializerRestController {
@@ -35,7 +36,7 @@ public class InitializerRestController {
     @GetMapping("/jme-initialiser/zip")
     public ResponseEntity<Resource> serveFile(@RequestParam String gameName,@RequestParam String packageName, @RequestParam String libraryList) throws IOException {
 
-        try(ByteArrayOutputStream byteArrayOutputStream = initializerZipService.produceZipInMemory()){
+        try(ByteArrayOutputStream byteArrayOutputStream = initializerZipService.produceZipInMemory( gameName, packageName, Arrays.asList(libraryList.split(",")) )){
 
             ByteArrayResource resource = new ByteArrayResource(byteArrayOutputStream.toByteArray());
             return ResponseEntity.ok()
@@ -43,7 +44,7 @@ public class InitializerRestController {
                     .contentLength(resource.contentLength())
                     .header(HttpHeaders.CONTENT_DISPOSITION,
                             ContentDisposition.attachment()
-                                    .filename("gameName.zip")
+                                    .filename( Merger.sanitiseToJavaClass(gameName) + ".zip") //a java class name is a valid file name as well. Seems a reasonable name for the zip
                                     .build().toString())
                     .body(resource);
         }

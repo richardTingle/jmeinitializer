@@ -53,5 +53,7 @@ class MergerTest {
         assertEquals("MyAmazingGame", Merger.sanitiseToJavaClass("%My Amazing Game!!"));
         assertEquals("MyGame", Merger.sanitiseToJavaClass(""));
         assertEquals("AlreadyCamelCase", Merger.sanitiseToJavaClass("AlreadyCamelCase"));
+        assertEquals("LowerCaseSentence", Merger.sanitiseToJavaClass("lower case sentence"));
+        assertEquals("SentenceWithExcessiveSpace", Merger.sanitiseToJavaClass("  Sentence  with   excessive space  "));
     }
 }

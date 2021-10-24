@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class Merger {
 
-    Map<MergeField, String> mergeData = new HashMap<>();
+    private final Map<MergeField, String> mergeData = new HashMap<>();
 
     /**
      * Given the information provided by the user will evaluate merge fields in files and paths.
@@ -58,14 +58,14 @@ public class Merger {
                 .filter(Library::isUsesJmeVersion)
                 .flatMap(l ->
                     l.getArtifactIds().stream()
-                            .map(artifactId -> "    implementation '" + l.getGroupId() + ":" + artifactId + "'+ jmonkeyengineVersion")
+                            .map(artifactId -> "    implementation '" + l.getGroupId() + ":" + artifactId + ":'+ jmonkeyengineVersion")
                 ).collect(Collectors.joining("\n"));
 
     }
 
     protected static String formNonJmeRequiredLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions){
         return librariesRequired.stream()
-                .filter(Library::isUsesJmeVersion)
+                .filter(l -> !l.isUsesJmeVersion())
                 .flatMap(l ->
                         l.getArtifactIds().stream()
                                 .map(artifactId -> {
@@ -97,7 +97,7 @@ public class Merger {
      */
     protected static String sanitiseToJavaClass(String proposedName){
         //remove illegal characters (possibly a bit overaggressive, but whatever
-        proposedName = proposedName.replaceAll("[^a-zA-Z]", "");
+        proposedName = proposedName.replaceAll("[^a-zA-Z ]", "");
 
         //in case the regex killed the whole string, produce a fall back
         if (proposedName.isBlank()){
