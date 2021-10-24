@@ -88,15 +88,12 @@ public class InitializerZipService {
     private Map<String,byte[]> getRawTemplatePaths(){
 
         Map<String,byte[]> templateFiles = new HashMap<>();
-        URL resourceUrl = InitializerZipService.class.getResource(templatePath);
-        if (resourceUrl == null){
-            throw new RuntimeException("Resource at " + templatePath + " does not exist");
-        }
         try {
             Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(null).getResources("classpath:jmetemplate/**");
             for (Resource resource : resources) {
-                if (resource.isReadable()){ //isReadable means "file, or file like thing. Not a directory
-                    String pathWithStandardSlashes = Paths.get(resource.getURI()).toString().replace("\\","/"); //change windows paths to linux paths
+                if (resource.isReadable()){ //isReadable means "file, or file like thing". Not a directory
+                    String pathWithStandardSlashes = resource.getURI().toString().replace("\\","/"); //change windows paths to linux paths
+                    pathWithStandardSlashes = pathWithStandardSlashes.replace("%5b", "[").replace("%5d", "]");
                     String withinTemplatePath = unwantedPathRegex.matcher(pathWithStandardSlashes).replaceAll("");
                     templateFiles.put(withinTemplatePath, resource.getInputStream().readAllBytes());
                 }
