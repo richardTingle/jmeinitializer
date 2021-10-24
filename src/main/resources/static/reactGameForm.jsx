@@ -8,11 +8,13 @@ class ReactGameForm extends React.Component {
         this.state = {
             gameName: "",
             package : "",
-            //all the libaries that aren't radios are in here
+            //all the libaries that aren't radios are in here.Its just a big list of selected library keys
             freeSelectLibraries: [],
-            //these are groups which are determined by the server (e.g. networking)
+            //these are groups which are determined by the server (e.g. networking). This is a map of group key -> selected library
             groupSelectedLibraries: {},
+            //libary key of the libary that supports desktop, VR etc
             platformLibrary: null,
+            //this is the big bundle of data that comes down from the server to say what libraries are available, what the defaults are etc
             availableLibraryData : null
         };
     }
@@ -26,6 +28,12 @@ class ReactGameForm extends React.Component {
                     freeSelectLibraries:data.defaultSelectedFreeChoiceLibraries,
                     platformLibrary:data.defaultPlatform
                 };
+                //add defaults (if available) for the groupSelectedLibraries
+                let groupSelectedLibraries = {};
+                data.specialCategories.forEach( specialCategoryData => {
+                    groupSelectedLibraries[specialCategoryData.category.key] = specialCategoryData.defaultLibrary;
+                })
+                stateUpdate.groupSelectedLibraries = groupSelectedLibraries;
 
                 this.setState(stateUpdate)
             })
