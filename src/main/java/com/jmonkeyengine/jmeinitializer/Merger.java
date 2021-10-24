@@ -3,6 +3,7 @@ package com.jmonkeyengine.jmeinitializer;
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import org.apache.commons.text.CaseUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,27 @@ public class Merger {
         mergeData.put(MergeField.JME_DEPENDENCIES, formJmeRequiredLibrariesMergeField(librariesRequired));
         mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredLibrariesMergeField(librariesRequired, libraryVersions));
     }
-    
+
+    public String mergePath (String pathTemplate){
+        String path = pathTemplate;
+        for(Map.Entry<MergeField, String> merges : mergeData.entrySet()){
+            path = path.replace(merges.getKey().getMergeFieldInText(), merges.getValue());
+        }
+        return path;
+    }
+
+    /**
+     * Treats the byte array as a UTF-8 String and merges it
+     */
+    public byte[] mergeFileContents(byte[] fileContents){
+        String fileContentsAsString = new String(fileContents, StandardCharsets.UTF_8 );
+
+        for(Map.Entry<MergeField, String> merges : mergeData.entrySet()){
+            fileContentsAsString = fileContentsAsString.replace(merges.getKey().getMergeFieldInText(), merges.getValue());
+        }
+        return fileContentsAsString.getBytes(StandardCharsets.UTF_8);
+    }
+
     protected static String formJmeRequiredLibrariesMergeField(List<Library> librariesRequired){
         return librariesRequired.stream()
                 .filter(Library::isUsesJmeVersion)
@@ -67,7 +88,6 @@ public class Merger {
 
     protected static String convertPackageToFolder(String fullPackage){
         fullPackage = fullPackage.replace(".", "/");
-        fullPackage = fullPackage + "/";
         return fullPackage;
     }
 

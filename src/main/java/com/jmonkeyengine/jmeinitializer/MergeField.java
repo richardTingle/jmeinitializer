@@ -21,8 +21,8 @@ public enum MergeField {
     GAME_PACKAGE,
 
     /**
-     * The games package in folder style. E.g. com/myexcellentgame/
-     * Note the trailing slash but no preceding slash
+     * The games package in folder style. E.g. com/myexcellentgame
+     * Note the no trailing slash and no preceding slash
      */
     GAME_PACKAGE_FOLDER,
 
@@ -53,6 +53,14 @@ public enum MergeField {
      *     implementation 'com.github.stephengold:Minie:4.4.0
      *     com.simsilica:lemur:1.15.0
      */
-    OTHER_DEPENDENCIES,
+    OTHER_DEPENDENCIES;
+
+    /**
+     * What should be searched for in strings to be replaced by this merge field's data
+     * @return
+     */
+    public String getMergeFieldInText(){
+        return "[" + name() + "]";
+    }
 
 }
