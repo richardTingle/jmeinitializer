@@ -1,12 +1,15 @@
 # [GAME_NAME_FULL]
 
+This is the readme for [GAME_NAME_FULL], try to keep it up to date with any information future-you will wish past-you
+remembered to write down
+
 ## Project set up
 This is a gradle project using JMonkey Engine and other java libraries
 
 ## How to run (for development)
 You'll want a java 11 JDK installed on your machine (Your IDE may do this for you, IntelliJ does)
 
-Open this application in your preferred IDE (IntelliJ, Eclipse will support Gradle by default, netbeans will support it with a plugin). The remaining instructions are for IntelliJ but the basic principal will be the same for any IDE)
+Open this application in your preferred IDE (IntelliJ and Eclipse will support Gradle by default, netbeans will support it with a plugin). The remaining instructions are for IntelliJ but the basic principle will be the same for any IDE)
 
 ### Development in IntelliJ
 - Download the latest version of IntelliJ Community (IntelliJ Ultimate is a paid for version the features of which you may consider useful but are not essential for a JMonkey project)

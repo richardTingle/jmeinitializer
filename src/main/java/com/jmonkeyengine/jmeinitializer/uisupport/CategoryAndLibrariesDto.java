@@ -10,4 +10,5 @@ import java.util.List;
 public class CategoryAndLibrariesDto {
     CategoryDto category;
     List<LibraryDto> libraries;
+    String defaultLibrary;
 }

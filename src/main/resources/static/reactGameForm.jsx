@@ -21,7 +21,13 @@ class ReactGameForm extends React.Component {
         fetch('/jme-initialiser/libraries')
             .then(res => res.json())
             .then((data) => {
-                this.setState({ availableLibraryData: data })
+                let stateUpdate = {
+                    availableLibraryData: data,
+                    freeSelectLibraries:data.defaultSelectedFreeChoiceLibraries,
+                    platformLibrary:data.defaultPlatform
+                };
+
+                this.setState(stateUpdate)
             })
             .catch(console.log)
     }

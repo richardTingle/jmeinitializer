@@ -6,6 +6,7 @@ import lombok.Getter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -62,5 +63,23 @@ public enum Library {
 
     public static List<Library> librariesOfCategory(LibraryCategory category){
         return Arrays.stream(values()).filter(l -> l.getCategory().equals(category)).collect(Collectors.toList());
+    }
+
+    /**
+     * This is intended for {@link LibraryCategory}s which have either 1 or zero defaults (so are represented by radios.
+     * This returns the library that is the default for that category
+     */
+    public static Optional<Library> defaultLibraryInExclusiveCategory(LibraryCategory category){
+        if (!category.isOnlyOneAllowed()){
+            throw new RuntimeException("Method only applicable for exclusive categories but " + category.name() + " allows multiple selected values");
+        }
+
+        List<Library> defaultsInCategory = librariesOfCategory(category).stream().filter(Library::isDefaultSelected).collect(Collectors.toList());
+
+        if (defaultsInCategory.size() > 1){
+            throw new RuntimeException(category.name() + " has more than one default");
+        }
+
+        return defaultsInCategory.isEmpty() ? Optional.empty() : Optional.of(defaultsInCategory.get(0));
     }
 }
