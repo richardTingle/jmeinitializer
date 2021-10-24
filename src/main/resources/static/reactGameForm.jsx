@@ -15,7 +15,9 @@ class ReactGameForm extends React.Component {
             //libary key of the libary that supports desktop, VR etc
             platformLibrary: null,
             //this is the big bundle of data that comes down from the server to say what libraries are available, what the defaults are etc
-            availableLibraryData : null
+            availableLibraryData : null,
+            //if the user has clicked download (but not updated the data) a message is displayed. This controls that
+            hasDownloaded: false
         };
     }
 
@@ -41,29 +43,31 @@ class ReactGameForm extends React.Component {
     }
 
     handleSetGameName = (event) => {
-        this.setState({gameName: event.target.value});
+        this.setState({gameName: event.target.value, hasDownloaded:false});
     }
 
     handleSetPackage = (event) => {
-        this.setState({package: event.target.value});
+        this.setState({package: event.target.value, hasDownloaded:false});
     }
 
     handleSetPlatform = (event) => {
-        this.setState({platformLibrary: event.target.value});
+        this.setState({platformLibrary: event.target.value, hasDownloaded:false});
     }
 
     handleToggleFreeFormLibrary = (libraryKey) => {
         let currentlySelected = this.state.freeSelectLibraries.includes(libraryKey)
         if (currentlySelected){
             let newFreeSelectLibraries = this.state.freeSelectLibraries.filter( v => v !== libraryKey )
-            this.setState({freeSelectLibraries: newFreeSelectLibraries});
+            this.setState({freeSelectLibraries: newFreeSelectLibraries, hasDownloaded:false });
         }else{
-            this.setState({freeSelectLibraries: [...this.state.freeSelectLibraries, libraryKey]});
+            this.setState({freeSelectLibraries: [...this.state.freeSelectLibraries, libraryKey], hasDownloaded:false});
         }
     }
 
     handleSubmit = (event) =>  {
         console.log(this.state);
+        this.setState({ hasDownloaded:true });
+        event.preventDefault(); //don't refresh the page
     }
 
     handleSetLibrarySelectedInGroup =  (group, library)=>{
@@ -215,7 +219,13 @@ class ReactGameForm extends React.Component {
             {this.renderOtherLibraries()}
 
             <br/>
+            {this.state.hasDownloaded && <div className="alert alert-success" role="alert">
+                <p>A zip will now download. Unzip it and use it as a starter project in the IDE of your choice.</p>
+                <p>IntelliJ and Eclipse will support this project by default, Netbeans will support it with the Gradle plugin installed</p>
+            </div>}
             <button type="submit" className="btn btn-primary">Download a starter project</button>
+
+
         </form>
     }
 }
