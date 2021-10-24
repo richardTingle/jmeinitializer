@@ -202,7 +202,7 @@ class ReactGameForm extends React.Component {
         return <form onSubmit={this.handleSubmit}>
             <div className="form-group">
                 <label htmlFor="gameName"><b>Game Name</b></label>
-                <input className="form-control" value={this.state.gameName} onChange={this.handleSetGameName} id="gameName" aria-describedby="gameNameHelp" placeholder="e.g. Asteroids"/>
+                <input className="form-control" value={this.state.gameName} onChange={this.handleSetGameName} id="gameName" aria-describedby="gameNameHelp" placeholder="e.g. Asteroids" required/>
                 <small id="gameNameHelp" className="form-text text-muted">This will be the name of your project. Try to keep to english letters as it will also be used in your java source</small>
             </div>
             <div className="form-group">
