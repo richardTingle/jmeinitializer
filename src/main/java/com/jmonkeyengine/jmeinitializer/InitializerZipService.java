@@ -1,32 +1,21 @@
 package com.jmonkeyengine.jmeinitializer;
 
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
+import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import com.jmonkeyengine.jmeinitializer.versions.VersionService;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -46,17 +35,20 @@ public class InitializerZipService {
      */
     private static Set<String> fileExtensionsToTreatAsBlobs = Set.of(".jar");
 
-    VersionService versionService;
+    private final VersionService versionService;
 
-    public InitializerZipService (VersionService versionService) {
+    private final LibraryService libraryService;
+
+    public InitializerZipService (VersionService versionService, LibraryService libraryService) {
         this.versionService = versionService;
+        this.libraryService = libraryService;
     }
 
     public ByteArrayOutputStream produceZipInMemory(String gameName, String packageName, List<String> requiredLibraryKeys ){
 
         List<Library> requiredLibraries = requiredLibraryKeys
                 .stream()
-                .flatMap(lk -> Library.tryValueOf(lk).stream())
+                .flatMap(lk -> libraryService.getLibraryFromKey(lk).stream())
                 .collect(Collectors.toList());
 
         Merger merger = new Merger(gameName, packageName, requiredLibraries, versionService.getJmeVersion(), versionService.getVersionCache() );

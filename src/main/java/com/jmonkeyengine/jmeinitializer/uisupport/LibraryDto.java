@@ -23,6 +23,6 @@ public class LibraryDto {
     boolean selectedByDefault;
 
     public LibraryDto (Library library) {
-        this(library.name(), library.getDisplayName(), library.getDescriptionText(), library.isDefaultSelected());
+        this(library.key(), library.displayName(), library.descriptionText(), library.defaultSelected());
     }
 }

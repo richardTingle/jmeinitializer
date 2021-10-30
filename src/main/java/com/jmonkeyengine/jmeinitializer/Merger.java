@@ -58,22 +58,22 @@ public class Merger {
 
     protected static String formJmeRequiredLibrariesMergeField(List<Library> librariesRequired){
         return librariesRequired.stream()
-                .filter(Library::isUsesJmeVersion)
+                .filter(Library::usesJmeVersion)
                 .flatMap(l ->
-                    l.getArtifactIds().stream()
-                            .map(artifactId -> "    implementation '" + l.getGroupId() + ":" + artifactId + ":'+ jmonkeyengineVersion")
+                    l.artifacts().stream()
+                            .map(artifact -> "    implementation '" + l.groupId() + ":" + artifact.artifactId() + ":'+ jmonkeyengineVersion")
                 ).collect(Collectors.joining("\n"));
 
     }
 
     protected static String formNonJmeRequiredLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions){
         return librariesRequired.stream()
-                .filter(l -> !l.isUsesJmeVersion())
+                .filter(l -> !l.usesJmeVersion())
                 .flatMap(l ->
-                        l.getArtifactIds().stream()
-                                .map(artifactId -> {
-                                    String mavenCoordinate = l.getGroupId() + ":" + artifactId;
-                                    return "    implementation '" + mavenCoordinate + ":" + libraryVersions.getOrDefault(mavenCoordinate, "[MISSING_VERSION]")  + "'";
+                        l.artifacts().stream()
+                                .map(artifact -> {
+                                    String mavenCoordinate = l.groupId() + ":" + artifact.artifactId();
+                                    return "    implementation '" + mavenCoordinate + ":" + libraryVersions.getOrDefault(mavenCoordinate, artifact.fallbackVersion())  + "'";
                                 })
                 ).collect(Collectors.joining("\n"));
     }

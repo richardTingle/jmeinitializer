@@ -1,5 +1,6 @@
 package com.jmonkeyengine.jmeinitializer;
 
+import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import com.jmonkeyengine.jmeinitializer.uisupport.UiLibraryDataDto;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -25,14 +26,16 @@ import java.util.Arrays;
 public class InitializerRestController {
 
     private final InitializerZipService initializerZipService;
+    private final LibraryService libraryService;
 
-    public InitializerRestController (InitializerZipService initializerZipService) {
+    public InitializerRestController (InitializerZipService initializerZipService, LibraryService libraryService) {
         this.initializerZipService = initializerZipService;
+        this.libraryService = libraryService;
     }
 
     @GetMapping("/jme-initialiser/libraries")
     public UiLibraryDataDto getDataForUi(){
-        return UiLibraryDataDto.INSTANCE;
+        return libraryService.getUiLibraryDataDto();
     }
 
     @ResponseBody

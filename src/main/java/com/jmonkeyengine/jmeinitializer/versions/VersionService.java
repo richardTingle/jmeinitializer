@@ -1,8 +1,10 @@
 package com.jmonkeyengine.jmeinitializer.versions;
 
-import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.dto.DocsDto;
 import com.jmonkeyengine.jmeinitializer.dto.MavenVersionApiResponseDto;
+import com.jmonkeyengine.jmeinitializer.libraries.Artifact;
+import com.jmonkeyengine.jmeinitializer.libraries.Library;
+import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -50,16 +52,22 @@ public class VersionService {
     @Getter
     String jmeVersion = "[JME_VERSION_COULD_NOT_BE_DETERMINED]";
 
+    private final LibraryService libraryService;
+
+    public VersionService (LibraryService libraryService) {
+        this.libraryService = libraryService;
+    }
+
     @Scheduled(fixedDelay = 24, timeUnit = TimeUnit.HOURS)
     public void fetchNewVersions(){
         log.info("fetching new library versions");
 
         fetchMostRecentStableVersion("org.jmonkeyengine", "jme3-core", ".*-stable").ifPresent(newVersion -> this.jmeVersion=newVersion);
 
-        for(Library library : Library.nonJmeLibraries()) {
-            String group = library.getGroupId();
-            for (String artifactId : library.getArtifactIds()) {
-                fetchMostRecentStableVersion(group, artifactId, library.getLibraryVersionRegex()).ifPresent(newVersion -> versionCache.put(group + ":" + artifactId, newVersion));
+        for(Library library : libraryService.nonJmeLibraries()) {
+            String group = library.groupId();
+            for (Artifact artifact : library.artifacts()) {
+                fetchMostRecentStableVersion(group, artifact.artifactId(), library.libraryVersionRegex()).ifPresent(newVersion -> versionCache.put(group + ":" + artifact.artifactId(), newVersion));
             }
         }
     }
