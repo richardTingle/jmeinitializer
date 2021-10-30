@@ -7,7 +7,7 @@
         <RollingFile name="FILE_LOG" >
             <fileName>${sys:user.home}/[GAME_NAME]/logs/log.txt</fileName>
             <filePattern>${sys:user.home}/[GAME_NAME]/logs/log__%d{yyyy-MM-dd HH-mm-ss}.txt</filePattern>
-            <PatternLayout pattern="%d %-5p %-20c{2} - %-15m%n"/>
+            <PatternLayout pattern="%d %-5p %-20c{2} - %-15m%n"/> 
             <Policies>
                 <OnStartupTriggeringPolicy/>
             </Policies>
