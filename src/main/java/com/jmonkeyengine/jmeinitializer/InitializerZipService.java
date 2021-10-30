@@ -68,15 +68,16 @@ public class InitializerZipService {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try(ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
             for( Map.Entry<String,byte[]> templateFile : getRawTemplatePaths().entrySet()){
-                ZipEntry entry = new ZipEntry(merger.mergePath(templateFile.getKey()));
-                zipOutputStream.putNextEntry(entry);
-                if (fileExtensionsToTreatAsBlobs.stream().anyMatch(fe -> templateFile.getKey().contains(fe))){
-                    zipOutputStream.write(templateFile.getValue());
-                }else{
-                    zipOutputStream.write(merger.mergeFileContents(templateFile.getValue()));
+                if (merger.pathShouldBeAllowed(templateFile.getKey())) {
+                    ZipEntry entry = new ZipEntry(merger.mergePath(templateFile.getKey())); 
+                    zipOutputStream.putNextEntry(entry);
+                    if (fileExtensionsToTreatAsBlobs.stream().anyMatch(fe -> templateFile.getKey().contains(fe))) {
+                        zipOutputStream.write(templateFile.getValue());
+                    } else {
+                        zipOutputStream.write(merger.mergeFileContents(templateFile.getValue()));
+                    }
+                    zipOutputStream.closeEntry();
                 }
-
-                zipOutputStream.closeEntry();
             }
         }catch(IOException ioe) {
             throw new RuntimeException("Exception while forming zip", ioe);
@@ -104,7 +105,12 @@ public class InitializerZipService {
             for (Resource resource : resources) {
                 if (resource.isReadable()){ //isReadable means "file, or file like thing". Not a directory
                     String pathWithStandardSlashes = resource.getURI().toString().replace("\\","/"); //change windows paths to linux paths
-                    pathWithStandardSlashes = pathWithStandardSlashes.replace("%5b", "[").replace("%5d", "]");
+                    pathWithStandardSlashes = pathWithStandardSlashes
+                            .replace("%5b", "[")
+                            .replace("%5B", "[")
+                            .replace("%5d", "]")
+                            .replace("%5D", "]")
+                    ;
                     String withinTemplatePath = unwantedPathRegex.matcher(pathWithStandardSlashes).replaceAll("");
                     templateFiles.put(withinTemplatePath, resource.getInputStream().readAllBytes());
                 }

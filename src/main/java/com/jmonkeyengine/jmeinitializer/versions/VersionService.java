@@ -58,7 +58,7 @@ public class VersionService {
         this.libraryService = libraryService;
     }
 
-    @Scheduled(fixedDelay = 24, timeUnit = TimeUnit.HOURS)
+    //@Scheduled(fixedDelay = 24, timeUnit = TimeUnit.HOURS)
     public void fetchNewVersions(){
         log.info("fetching new library versions");
 

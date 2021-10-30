@@ -7,14 +7,34 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * The merger is responsible for replacing merge fields in text documents and paths with their merged data
+ * The merger is responsible for replacing merge fields in text documents and paths with their merged data.
+ *
+ * Merge fields are of the form
+ *
+ * [PROPERTY]
+ *
+ * For which the data for the merge field as specified in {@link MergeField}
+ *
+ * Or (in a file path)
+ *
+ * [IF=LIBRARY]
+ *
+ * In which case the file is only included if that library is active
  */
 public class Merger {
 
+    //the "anything but = is to avoid double ifs merging
+    private Pattern mergeIfConditionPattern = Pattern.compile("\\[IF=([^=]*)]");
+
     private final Map<MergeField, String> mergeData = new HashMap<>();
+
+    Set<String> libraryKeysInUse;
 
     /**
      * Given the information provided by the user will evaluate merge fields in files and paths.
@@ -34,6 +54,19 @@ public class Merger {
         mergeData.put(MergeField.JME_VERSION, jmeVersion);
         mergeData.put(MergeField.JME_DEPENDENCIES, formJmeRequiredLibrariesMergeField(librariesRequired));
         mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredLibrariesMergeField(librariesRequired, libraryVersions));
+
+        libraryKeysInUse = librariesRequired.stream().map(Library::key).collect(Collectors.toSet());
+    }
+
+    public boolean pathShouldBeAllowed(String pathTemplate){
+        Matcher matcher = mergeIfConditionPattern.matcher(pathTemplate);
+
+        if ( matcher.find() ){
+            String requiredLibrary = matcher.group(1);
+            return libraryKeysInUse.contains(requiredLibrary);
+        }else{
+            return true; //no if condition, just allowed
+        }
     }
 
     public String mergePath (String pathTemplate){
@@ -41,6 +74,8 @@ public class Merger {
         for(Map.Entry<MergeField, String> merges : mergeData.entrySet()){
             path = path.replace(merges.getKey().getMergeFieldInText(), merges.getValue());
         }
+        //any "ifs" are removed from the path (they should have already been used to assess if the file should be included
+        path = path.replaceAll("\\[IF=([^=]*)]", "");
         return path;
     }
 
@@ -107,7 +142,7 @@ public class Merger {
             proposedName = "MyGame";
         }
         //camelcase a sentence
-        if (proposedName.contains(" ")) {
+        if (proposedName.contains(" ") || Character.isLowerCase(proposedName.charAt(0))) {
             proposedName = CaseUtils.toCamelCase(proposedName, true, ' ', '_');
         }
         return proposedName;
