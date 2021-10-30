@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -105,12 +106,10 @@ public class InitializerZipService {
             for (Resource resource : resources) {
                 if (resource.isReadable()){ //isReadable means "file, or file like thing". Not a directory
                     String pathWithStandardSlashes = resource.getURI().toString().replace("\\","/"); //change windows paths to linux paths
-                    pathWithStandardSlashes = pathWithStandardSlashes
-                            .replace("%5b", "[")
-                            .replace("%5B", "[")
-                            .replace("%5d", "]")
-                            .replace("%5D", "]")
-                    ;
+
+                    //we get things like %5b instead of [, this converts them back to their true form
+                    pathWithStandardSlashes = URLDecoder.decode(pathWithStandardSlashes, StandardCharsets.UTF_8);
+
                     String withinTemplatePath = unwantedPathRegex.matcher(pathWithStandardSlashes).replaceAll("");
                     templateFiles.put(withinTemplatePath, resource.getInputStream().readAllBytes());
                 }
