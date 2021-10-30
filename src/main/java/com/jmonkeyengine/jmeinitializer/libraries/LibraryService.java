@@ -37,7 +37,7 @@ public class LibraryService {
             new Library("JME_IOS","JME iOS", "org.jmonkeyengine","jme3-ios", true, LibraryCategory.JME_GENERAL, false, "A JME library supporting iOS deployment"),
             new Library("JME_VR","JME VR","org.jmonkeyengine","jme3-vr", true, LibraryCategory.JME_PLATFORM, false, "Virtual reality support"),
             new Library("MINIE","Minie", "com.github.stephengold", "Minie", false, LibraryCategory.PHYSICS, true, "An alternative binding to the C++ bullet library, produced by a member of the JMonkey community"),
-            new Library("LEMUR","Lemur", "com.simsilica", List.of(new Artifact("lemur","1.15.0"),new Artifact( "lemur-proto","1.11.0")), false, LibraryCategory.GUI, true,"Lemur is GUI toolkit for making user interfaces in jMonkeyEngine applications. It supports standard 2D UIs as well as fully 3D UIs. The modular design allows an application to use all or some of it as needed or even to build a completely new custom GUI library on top.", "[\\.\\d]*"),
+            new Library("LEMUR","Lemur", "com.simsilica", List.of(new Artifact("lemur","1.15.0"),new Artifact( "lemur-proto","1.12.0")), false, LibraryCategory.GUI, true,"Lemur is GUI toolkit for making user interfaces in jMonkeyEngine applications. It supports standard 2D UIs as well as fully 3D UIs. The modular design allows an application to use all or some of it as needed or even to build a completely new custom GUI library on top.", "[\\.\\d]*"),
             new Library("LOG4J2","Log4j2", "org.apache.logging.log4j", List.of(new Artifact("log4j-core"), new Artifact("log4j-api")), false, LibraryCategory.GENERAL, false, "A popular java logging library, useful to produce text logs of whats going on in your game", "[\\.\\d]*" )
     );
 
