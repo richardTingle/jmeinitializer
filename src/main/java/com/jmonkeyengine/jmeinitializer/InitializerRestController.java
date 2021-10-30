@@ -33,13 +33,13 @@ public class InitializerRestController {
         this.libraryService = libraryService;
     }
 
-    @GetMapping("/jme-initialiser/libraries")
+    @GetMapping("/jme-initializer/libraries")
     public UiLibraryDataDto getDataForUi(){
         return libraryService.getUiLibraryDataDto();
     }
 
     @ResponseBody
-    @GetMapping("/jme-initialiser/zip")
+    @GetMapping("/jme-initializer/zip")
     public ResponseEntity<Resource> serveFile(@RequestParam String gameName,@RequestParam String packageName, @RequestParam String libraryList) throws IOException {
 
         try(ByteArrayOutputStream byteArrayOutputStream = initializerZipService.produceZipInMemory( gameName, packageName, Arrays.asList(libraryList.split(",")) )){
@@ -56,4 +56,11 @@ public class InitializerRestController {
         }
     }
 
+    @ResponseBody
+    @GetMapping("/jme-initializer/gradle-preview")
+    public ResponseEntity<String> previewGradleFile(@RequestParam String gameName,@RequestParam String packageName, @RequestParam String libraryList) throws IOException {
+        String gradleFile = initializerZipService.produceGradleFilePreview(gameName, packageName, Arrays.asList(libraryList.split(",")));
+
+        return ResponseEntity.ok().body(gradleFile);
+    }
  }

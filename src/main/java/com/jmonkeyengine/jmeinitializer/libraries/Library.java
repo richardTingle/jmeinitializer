@@ -25,7 +25,7 @@ public record Library (
 ) {
 
     public Library ( String key, String displayName, String groupId, String artifactIds, boolean usesJmeVersion, LibraryCategory category, boolean defaultSelected, String descriptionText) {
-        this(key, displayName, groupId, List.of(new Artifact(artifactIds, null)), usesJmeVersion, category, defaultSelected, descriptionText, "[\\.\\d]*");
+        this(key, displayName, groupId, List.of(new Artifact(artifactIds)), usesJmeVersion, category, defaultSelected, descriptionText, "[\\.\\d]*");
     }
 
     public Library ( String key, String displayName, String groupId, Collection<Artifact> artifactIds, boolean usesJmeVersion, LibraryCategory category, boolean defaultSelected, String descriptionText) {

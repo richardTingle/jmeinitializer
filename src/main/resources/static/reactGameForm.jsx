@@ -17,12 +17,13 @@ class ReactGameForm extends React.Component {
             //this is the big bundle of data that comes down from the server to say what libraries are available, what the defaults are etc
             availableLibraryData : null,
             //if the user has clicked download (but not updated the data) a message is displayed. This controls that
-            hasDownloaded: false
+            hasDownloaded: false,
+            gradlePreview: null
         };
     }
 
     componentDidMount() {
-        fetch('/jme-initialiser/libraries')
+        fetch('/jme-initializer/libraries')
             .then(res => res.json())
             .then((data) => {
                 let stateUpdate = {
@@ -69,7 +70,11 @@ class ReactGameForm extends React.Component {
         this.setState({ hasDownloaded:true });
         event.preventDefault(); //don't refresh the page
         //doesn't "actually" change the page location because its a download link
-        location.href = "/jme-initialiser/zip?gameName=" + encodeURIComponent(this.state.gameName) + "&packageName=" +encodeURIComponent(this.state.package)+"&libraryList=" + encodeURIComponent(this.getRequiredLibrariesAsCommaSeperatedList());
+        location.href = "/jme-initializer/zip?" + this.formOptionsQueryString();
+    }
+
+    formOptionsQueryString = () => {
+        return "gameName=" + encodeURIComponent(this.state.gameName) + "&packageName=" +encodeURIComponent(this.state.package)+"&libraryList=" + encodeURIComponent(this.getRequiredLibrariesAsCommaSeperatedList())
     }
 
     handleSetLibrarySelectedInGroup =  (group, library)=>{
@@ -101,6 +106,18 @@ class ReactGameForm extends React.Component {
 
     hasNoLibraryForGroup = (group) => {
         return !( group in this.state.groupSelectedLibraries ) || this.state.groupSelectedLibraries[group] == null;
+    }
+
+    fetchGradlePreview = (event) => {
+        event.preventDefault(); //don't submit the form
+
+        fetch('/jme-initializer/gradle-preview?' + this.formOptionsQueryString())
+            .then(response => response.text())
+            .then((data) => {
+                console.log(data);
+                this.setState({gradlePreview:data});
+            })
+            .catch(console.log)
     }
 
     renderPlatformRadios(){
@@ -198,6 +215,19 @@ class ReactGameForm extends React.Component {
         }
     }
 
+    renderGradlePreview(){
+        return <div>
+            <h2>build.gradle preview</h2>
+            <p>This is the build file for your requested libraries. The full download will contain this and other important files</p>
+            <div style={{backgroundColor: "black"}}>
+                <pre className="pre-scrollable" style={{ marginLeft: "2px"}}>
+                    <code style={{color : "white"}}>{this.state.gradlePreview}</code>
+                </pre>
+            </div>
+
+        </div>
+    }
+
     render() {
         return <form onSubmit={this.handleSubmit}>
             <div className="form-group">
@@ -234,12 +264,18 @@ class ReactGameForm extends React.Component {
             {this.renderOtherLibraries()}
 
             <br/>
+
+            { this.state.gradlePreview !== null && this.renderGradlePreview() }
+
             {this.state.hasDownloaded && <div className="alert alert-success" role="alert">
                 <p>A zip will now download. Unzip it and use it as a starter project in the IDE of your choice.</p>
                 <p>IntelliJ and Eclipse will support this project by default, Netbeans will support it with the Gradle plugin installed</p>
             </div>}
-            <button type="submit" className="btn btn-primary">Download a starter project</button>
-
+            <div className="btn-group" role="group" aria-label="Basic example">
+                <button type="submit" className="btn btn-primary mr-2">Download a starter project</button>
+                <button className="btn btn-secondary mr-2" onClick={this.fetchGradlePreview}>Preview build.gradle file</button>
+            </div>
+            <br/>
 
         </form>
     }

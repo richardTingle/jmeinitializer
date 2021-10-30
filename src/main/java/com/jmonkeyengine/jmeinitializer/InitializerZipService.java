@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,13 +45,24 @@ public class InitializerZipService {
         this.libraryService = libraryService;
     }
 
+    public String produceGradleFilePreview(String gameName, String packageName, List<String> requiredLibraryKeys ){
+        List<Library> requiredLibraries = parseLibraryKeys(requiredLibraryKeys);
+        Merger merger = new Merger(gameName, packageName, requiredLibraries, versionService.getJmeVersion(), versionService.getVersionCache() );
+
+        Resource buildGradleResource = ResourcePatternUtils.getResourcePatternResolver(null).getResource("classpath:jmetemplate/build.gradle");
+
+        byte[] buildGradleTemplate;
+        try {
+            buildGradleTemplate = buildGradleResource.getInputStream().readAllBytes();
+        } catch(IOException ioe) {
+            throw new RuntimeException("Exception while loading buildGradleTemplate", ioe);
+        }
+        return new String(merger.mergeFileContents(buildGradleTemplate), StandardCharsets.UTF_8);
+    }
+
     public ByteArrayOutputStream produceZipInMemory(String gameName, String packageName, List<String> requiredLibraryKeys ){
 
-        List<Library> requiredLibraries = requiredLibraryKeys
-                .stream()
-                .flatMap(lk -> libraryService.getLibraryFromKey(lk).stream())
-                .collect(Collectors.toList());
-
+        List<Library> requiredLibraries = parseLibraryKeys(requiredLibraryKeys);
         Merger merger = new Merger(gameName, packageName, requiredLibraries, versionService.getJmeVersion(), versionService.getVersionCache() );
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -70,6 +82,13 @@ public class InitializerZipService {
             throw new RuntimeException("Exception while forming zip", ioe);
         }
         return byteArrayOutputStream;
+    }
+
+    private List<Library> parseLibraryKeys(List<String> requiredLibraryKeys){
+        return requiredLibraryKeys
+                .stream()
+                .flatMap(lk -> libraryService.getLibraryFromKey(lk).stream())
+                .collect(Collectors.toList());
     }
 
     /**
