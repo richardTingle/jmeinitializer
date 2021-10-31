@@ -1,0 +1,73 @@
+/*
+* The right way to do themeing would probably be to use https://getbootstrap.com/docs/4.0/getting-started/theming/.
+* However, using the jmonkey stylesheet and this bonus styles its possible to get a nice looking UI from boostrap that
+* fits the jmonkey theme
+*/
+:root {
+    /*
+     * Not all of these variables are used, but they are the "menu" of colours used in jmonkey
+     */
+    --foreground: #dfdfdf;
+    --foreground2: #b8b8b8;
+    --highlightFg: #ffbb00;
+    --highlightFg2: #ffe292;
+    --background: #222222;
+    --background2: rgb(27, 27, 27);
+    --background3: rgb(20, 20, 20);
+    --background4: rgb(37, 37, 37);
+    --twitter: #1DA1F2;
+
+    --buttonColor: #2f2f2f;
+    --buttonColorFg: var(--foreground);
+
+    --docsColor: #0c5858;
+    --docsColorFg: var(--foreground);
+
+    --bugsColor: #680404;
+    --bugsColorFg: var(--foreground);
+
+    --codeColor: #6d003f;
+    --codeColorFg: var(--foreground);
+
+
+    --discordColor: #44013b;
+    --discordColorFg: var(--foreground);
+
+    --storeColor: #686602;
+    --storeColorFg: var(--foreground);
+
+    --donateColor: #8cc800;
+    --donateColorFg: #212700;
+
+
+    --itchColor: #b11f38;
+    --itchColorFg: var(--foreground);
+
+    --youtubeColor: #c4302b;
+    --youtubeColorFg: var(--foreground);
+
+    --twitterColor: #1475b1;
+    --twitterColorFg: var(--foreground);
+
+    --highlightedColor: #ffbb00;
+    --highlightedColorFg: #242424;
+
+    --textShadowColor: var(--background3);
+    --boxShadowColor: var(--background2);
+}
+
+/*
+ * Note that this smooshes all types of alert into a single jmonkey style
+ */
+.alert {
+    background: var(--background2) !important;
+    color: var(--highlightFg) !important;
+    border: 1px solid var(--highlightedColor) !important;
+}
+.form-control {
+    background: var(--background2) !important;
+    color: var(--foreground) !important;
+}
+.jumbotron {
+    background: none!important;
+}
