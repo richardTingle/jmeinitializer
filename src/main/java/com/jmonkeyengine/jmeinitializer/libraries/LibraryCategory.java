@@ -19,7 +19,7 @@ public enum LibraryCategory {
     /**
      * Contains the targeted platform (Desktop, VR, android etc)
      */
-    JME_PLATFORM( "JME Platform", "JME can target many platforms, select the platform your game will target", true),
+    JME_PLATFORM( "JME Platform", "JME can target many platforms, select the platform your game will target", false),
 
     PHYSICS( "Physics Libraries", "A physics library handles collisions and forces like gravity", true),
 

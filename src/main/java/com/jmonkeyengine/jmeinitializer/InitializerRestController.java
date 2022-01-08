@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Represents endpoints used by the front end
@@ -58,8 +59,8 @@ public class InitializerRestController {
 
     @ResponseBody
     @GetMapping("/jme-initializer/gradle-preview")
-    public ResponseEntity<String> previewGradleFile(@RequestParam String gameName,@RequestParam String packageName, @RequestParam String libraryList) throws IOException {
-        String gradleFile = initializerZipService.produceGradleFilePreview(gameName, packageName, Arrays.asList(libraryList.split(",")));
+    public ResponseEntity<Map<String, String>> previewGradleFile(@RequestParam String gameName,@RequestParam String packageName, @RequestParam String libraryList) throws IOException {
+        Map<String, String> gradleFile = initializerZipService.produceGradleFilePreview(gameName, packageName, Arrays.asList(libraryList.split(",")));
 
         return ResponseEntity.ok().body(gradleFile);
     }

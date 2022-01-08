@@ -112,7 +112,7 @@ class ReactGameForm extends React.Component {
         event.preventDefault(); //don't submit the form
 
         fetch('/jme-initializer/gradle-preview?' + this.formOptionsQueryString())
-            .then(response => response.text())
+            .then(response => response.json())
             .then((data) => {
                 console.log(data);
                 this.setState({gradlePreview:data});
@@ -216,16 +216,39 @@ class ReactGameForm extends React.Component {
     }
 
     renderGradlePreview(){
+        let numberOfFiles = Object.keys(this.state.gradlePreview).length;
+
+        var introductoryText = "";
+        if (numberOfFiles === 1){
+            introductoryText = "This is the build file for your requested libraries. The full download will contain this and other important files";
+        }else{
+            introductoryText = "This is the build files for your requested libraries (As a multiplatform project there are multiple build.gradle files). The full download will contain this and other important files";
+        }
+
+        const gradleFiles = [];
+        for( var path in this.state.gradlePreview){
+
+            if (this.state.gradlePreview.hasOwnProperty(path)) {
+                var content = this.state.gradlePreview[path];
+
+                gradleFiles.push(<div key = {path}>
+                    {numberOfFiles >1 && <h3>{path}</h3>}
+                    <div style={{backgroundColor: "black"}}>
+                        <pre className="pre-scrollable" style={{marginLeft: "2px"}}>
+                            <code style={{color: "white"}}>{content}</code>
+                        </pre>
+                    </div>
+                </div>)
+            }
+        }
+
+
         return <div>
             <h2>build.gradle preview</h2>
-            <p>This is the build file for your requested libraries. The full download will contain this and other important files</p>
-            <div style={{backgroundColor: "black"}}>
-                <pre className="pre-scrollable" style={{ marginLeft: "2px"}}>
-                    <code style={{color : "white"}}>{this.state.gradlePreview}</code>
-                </pre>
-            </div>
-
+            <p>{introductoryText}</p>
+            {gradleFiles}
         </div>
+
     }
 
     render() {

@@ -22,12 +22,14 @@ import java.util.stream.Stream;
 @Service
 public class LibraryService {
 
+    private static final Library JME_DESKTOP = new Library("JME_DESKTOP", "JME Desktop", "org.jmonkeyengine","jme3-desktop", true, LibraryCategory.JME_PLATFORM, true, "Desktop Game development including Windows, Mac and Linux");
+
     /**
      * These are the tool provided libraries, it allows for non standard things like regexes to be set, or
      * where the library doesn't come from the jmonkey store
      */
     private final Collection<Library> toolProvidedLibraries = List.of(
-            new Library("JME_DESKTOP", "JME Desktop", "org.jmonkeyengine","jme3-desktop", true, LibraryCategory.JME_PLATFORM, true, "Desktop Game development including Windows, Mac and Linux"),
+            JME_DESKTOP,
             new Library("JME_EFFECTS","JME Effects","org.jmonkeyengine","jme3-effects", true, LibraryCategory.JME_GENERAL, true, "A JME library for effects, like explosions, smoke etc"),
             new Library("JME_TERRAIN","JME Terrain", "org.jmonkeyengine","jme3-terrain", true, LibraryCategory.JME_GENERAL, false, " A JME library for terrain"),
             new Library("JME_NETWORKING","JME Networking", "org.jmonkeyengine","jme3-networking", true, LibraryCategory.NETWORKING, false, "A JME library to support multiplayer games' network communication "),
@@ -91,7 +93,7 @@ public class LibraryService {
                 specialCategories,
                 librariesOfCategory(LibraryCategory.GENERAL).stream().map(LibraryDto::new).collect(Collectors.toList()),
                 Stream.of(LibraryCategory.JME_GENERAL, LibraryCategory.GENERAL).flatMap(c -> librariesOfCategory(c).stream()).filter(Library::defaultSelected).map(Library::key).collect(Collectors.toList()),
-                defaultLibraryInExclusiveCategory(LibraryCategory.JME_PLATFORM).map(Library::key).orElse(null)
+                JME_DESKTOP.key()
         );
     }
 

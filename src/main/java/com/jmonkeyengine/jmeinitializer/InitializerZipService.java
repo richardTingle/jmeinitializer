@@ -13,6 +13,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,26 +49,32 @@ public class InitializerZipService {
         this.libraryService = libraryService;
     }
 
-    public String produceGradleFilePreview(String gameName, String packageName, List<String> requiredLibraryKeys ){
+    public Map<String, String> produceGradleFilePreview(String gameName, String packageName, List<String> requiredLibraryKeys ){
         List<Library> requiredLibraries = parseLibraryKeys(requiredLibraryKeys);
-        Merger merger = new Merger(gameName, packageName, requiredLibraries, List.of(), versionService.getJmeVersion(), versionService.getVersionCache() );
+        Merger merger = new Merger(gameName, packageName, requiredLibraries,  calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
 
         Resource buildGradleResource = ResourcePatternUtils.getResourcePatternResolver(null).getResource("classpath:jmetemplate/build.gradle");
 
-        byte[] buildGradleTemplate;
-        try {
-            buildGradleTemplate = buildGradleResource.getInputStream().readAllBytes();
-        } catch(IOException ioe) {
-            throw new RuntimeException("Exception while loading buildGradleTemplate", ioe);
+        Map<String, String> gradleFiles = new HashMap<>();
+
+        //find and merge all the build.gradle files (there may be more than one in a multimodule project
+        for( Map.Entry<String,byte[]> templateFile : getRawTemplatePaths().entrySet()){
+            if (merger.pathShouldBeAllowed(templateFile.getKey())) {
+                String mergedPath = merger.mergePath(templateFile.getKey());
+                if (mergedPath.endsWith("build.gradle")){
+                    gradleFiles.put(mergedPath, new String(merger.mergeFileContents(templateFile.getValue()), StandardCharsets.UTF_8));
+                }
+            }
         }
-        return new String(merger.mergeFileContents(buildGradleTemplate), StandardCharsets.UTF_8);
+
+        return gradleFiles;
     }
 
     public ByteArrayOutputStream produceZipInMemory(String gameName, String packageName, List<String> requiredLibraryKeys ){
 
         List<Library> requiredLibraries = parseLibraryKeys(requiredLibraryKeys);
 
-        Merger merger = new Merger(gameName, packageName, requiredLibraries, List.of(), versionService.getJmeVersion(), versionService.getVersionCache() );
+        Merger merger = new Merger(gameName, packageName, requiredLibraries, calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try(ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
@@ -121,6 +129,19 @@ public class InitializerZipService {
         } catch (IOException e) {
             throw new RuntimeException("Exception during loading template", e);
         }
+    }
+
+    private Collection<String> calculateAdditionalProfiles(Collection<Library> requestedLibraries){
+        List<String> additionalProfiles = new ArrayList<>();
+
+        long numberOfPlatforms = requestedLibraries.stream().filter(l -> l.category() == LibraryCategory.JME_PLATFORM).count();
+
+        if (numberOfPlatforms > 1) {
+            additionalProfiles.add("MULTIPLATFORM");
+        }else{
+            additionalProfiles.add("SINGLEPLATFORM");
+        }
+        return additionalProfiles;
     }
 
 }
