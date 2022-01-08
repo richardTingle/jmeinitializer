@@ -1,6 +1,7 @@
 package com.jmonkeyengine.jmeinitializer;
 
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
+import com.jmonkeyengine.jmeinitializer.libraries.LibraryCategory;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import com.jmonkeyengine.jmeinitializer.versions.VersionService;
 import lombok.extern.log4j.Log4j2;
@@ -48,7 +49,7 @@ public class InitializerZipService {
 
     public String produceGradleFilePreview(String gameName, String packageName, List<String> requiredLibraryKeys ){
         List<Library> requiredLibraries = parseLibraryKeys(requiredLibraryKeys);
-        Merger merger = new Merger(gameName, packageName, requiredLibraries, versionService.getJmeVersion(), versionService.getVersionCache() );
+        Merger merger = new Merger(gameName, packageName, requiredLibraries, List.of(), versionService.getJmeVersion(), versionService.getVersionCache() );
 
         Resource buildGradleResource = ResourcePatternUtils.getResourcePatternResolver(null).getResource("classpath:jmetemplate/build.gradle");
 
@@ -64,7 +65,8 @@ public class InitializerZipService {
     public ByteArrayOutputStream produceZipInMemory(String gameName, String packageName, List<String> requiredLibraryKeys ){
 
         List<Library> requiredLibraries = parseLibraryKeys(requiredLibraryKeys);
-        Merger merger = new Merger(gameName, packageName, requiredLibraries, versionService.getJmeVersion(), versionService.getVersionCache() );
+
+        Merger merger = new Merger(gameName, packageName, requiredLibraries, List.of(), versionService.getJmeVersion(), versionService.getVersionCache() );
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try(ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {

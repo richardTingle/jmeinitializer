@@ -4,7 +4,10 @@ import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import org.apache.commons.text.CaseUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,17 +34,23 @@ public class Merger {
 
     //the "anything but = is to avoid double ifs merging
     private Pattern mergeIfConditionPattern = Pattern.compile("\\[IF=([^=]*)]");
+    /**
+     * After the allowed ifs have been processed this is used to eliminate forbidden ifs
+     */
+    private Pattern mergeIfInFileEliminationPattern = Pattern.compile("\\[IF=([^=]*)]");
 
     private final Map<MergeField, String> mergeData = new HashMap<>();
 
-    Set<String> libraryKeysInUse;
+    Set<String> libraryKeysAndProfilesInUse;
 
     /**
      * Given the information provided by the user will evaluate merge fields in files and paths.
      *
      * libraryVersions is a map of a string of the form groupId:artifactId -> version
+     *
+     * additionalProfiles are things that can be used in [IF=] conditions in addition to libraries (things like MULTIPLATFORM)
      */
-    public Merger(String gameName, String gamePackage, List<Library> librariesRequired, String jmeVersion, Map<String,String> libraryVersions){
+    public Merger(String gameName, String gamePackage, List<Library> librariesRequired, Collection<String> additionalProfiles, String jmeVersion, Map<String,String> libraryVersions){
         mergeData.put(MergeField.GAME_NAME_FULL, gameName);
         mergeData.put(MergeField.GAME_NAME, sanitiseToJavaClass(gameName));
 
@@ -55,18 +64,21 @@ public class Merger {
         mergeData.put(MergeField.JME_DEPENDENCIES, formJmeRequiredLibrariesMergeField(librariesRequired));
         mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredLibrariesMergeField(librariesRequired, libraryVersions));
 
-        libraryKeysInUse = librariesRequired.stream().map(Library::key).collect(Collectors.toSet());
+        libraryKeysAndProfilesInUse = librariesRequired.stream().map(Library::key).collect(Collectors.toSet());
+        libraryKeysAndProfilesInUse.addAll(additionalProfiles);
     }
 
     public boolean pathShouldBeAllowed(String pathTemplate){
         Matcher matcher = mergeIfConditionPattern.matcher(pathTemplate);
 
-        if ( matcher.find() ){
+        while( matcher.find() ){
             String requiredLibrary = matcher.group(1);
-            return libraryKeysInUse.contains(requiredLibrary);
-        }else{
-            return true; //no if condition, just allowed
+            if (!libraryKeysAndProfilesInUse.contains(requiredLibrary)){
+                return false;
+            }
         }
+
+        return true;
     }
 
     public String mergePath (String pathTemplate){
@@ -76,6 +88,8 @@ public class Merger {
         }
         //any "ifs" are removed from the path (they should have already been used to assess if the file should be included
         path = path.replaceAll("\\[IF=([^=]*)]", "");
+        path = path.replace("//", "/"); //if the if is the entirety of the folder than redundant folder is collapsed
+
         return path;
     }
 
@@ -83,11 +97,40 @@ public class Merger {
      * Treats the byte array as a UTF-8 String and merges it
      */
     public byte[] mergeFileContents(byte[] fileContents){
-        String fileContentsAsString = new String(fileContents, StandardCharsets.UTF_8 );
+        String fileContentsAsString = new String(fileContents, StandardCharsets.UTF_8);
 
         for(Map.Entry<MergeField, String> merges : mergeData.entrySet()){
             fileContentsAsString = fileContentsAsString.replace(merges.getKey().getMergeFieldInText(), merges.getValue());
         }
+
+        /*
+         * Now run the if statement merges. This is achieved by first removing all [IF] and [/IF] blocks for everything
+         * that should be included, then eliminating everything thats left within an if block
+         */
+        for(String validProfile : libraryKeysAndProfilesInUse){
+            fileContentsAsString = fileContentsAsString.replace("[IF=" + validProfile + "]", "");
+            fileContentsAsString = fileContentsAsString.replace("[/IF=" + validProfile + "]", "");
+        }
+
+        //I suspect a single really advanced regex could do the below in one go, but its a painful double "not this" so I've gone for this probably less efficient approach
+        Set<String> remainingIfs = new HashSet<>();
+        Matcher remainingIfsMatcher = mergeIfConditionPattern.matcher(fileContentsAsString);
+        while(remainingIfsMatcher.find()){
+            remainingIfs.add(remainingIfsMatcher.group(1));
+        }
+
+        for(int i=0;i<2;i++){
+            for(String remainingIf : remainingIfs){
+                //this 2 step process of first eliminating down to a _eliminated_ string and then removing that is to get any whitespace eliminated nicely
+                String regex = "\\[IF=" + remainingIf + "]((?!IF=).)*\\[/IF=" + remainingIf + "]";
+                fileContentsAsString = Pattern.compile(regex, Pattern.DOTALL).matcher(fileContentsAsString).replaceAll("_eliminated_");
+            }
+            //kill including the new line after the closure, if thats the only thing on the lin
+            fileContentsAsString = fileContentsAsString.replaceAll("\\R *_eliminated_ *\\R", "\n");
+            //then get rid of anything thats on a line with allowed text
+            fileContentsAsString = fileContentsAsString.replace("_eliminated_", "");
+        }
+
         return fileContentsAsString.getBytes(StandardCharsets.UTF_8);
     }
 
