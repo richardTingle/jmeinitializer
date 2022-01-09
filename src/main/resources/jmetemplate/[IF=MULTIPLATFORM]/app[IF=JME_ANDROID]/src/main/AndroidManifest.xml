@@ -10,8 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:extractNativeLibs="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar"
-        tools:ignore="AllowBackup">
+        android:theme="@style/Theme.AppCompat.NoActionBar">
         <activity
             android:name=".AndroidLauncher"
             android:exported="true"

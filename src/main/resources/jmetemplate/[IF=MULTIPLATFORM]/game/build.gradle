@@ -11,7 +11,9 @@ ext.jmonkeyengineVersion = '[JME_VERSION]'
 
 dependencies {
     implementation 'org.jmonkeyengine:jme3-core:' + 'jmonkeyengineVersion'
-    implementation 'org.jmonkeyengine:jme3-effects:' + 'jmonkeyengineVersion'
-    implementation 'org.jmonkeyengine:jme3-lwjgl3:' + 'jmonkeyengineVersion'
-    implementation 'org.jmonkeyengine:jme3-desktop:' + 'jmonkeyengineVersion'
+    runtimeOnly 'org.jmonkeyengine:jme3-jogg:' + jmonkeyengineVersion
+    runtimeOnly 'org.jmonkeyengine:jme3-plugins:' + jmonkeyengineVersion
+
+    [JME_DEPENDENCIES]
+    [OTHER_DEPENDENCIES]
 }
