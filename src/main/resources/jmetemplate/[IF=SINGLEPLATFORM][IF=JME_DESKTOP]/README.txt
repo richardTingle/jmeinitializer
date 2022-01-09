@@ -11,6 +11,8 @@ You'll want a java 11 JDK installed on your machine (Your IDE may do this for yo
 
 Open this application in your preferred IDE (IntelliJ and Eclipse will support Gradle by default, netbeans will support it with a plugin). The remaining instructions are for IntelliJ but the basic principle will be the same for any IDE)
 
+[IF=JME_ANDROID]As an android project android studio will provide good support (it's based on IntelliJ)[/IF=JME_ANDROID]
+
 ### Development in IntelliJ
 - Download the latest version of IntelliJ Community (IntelliJ Ultimate is a paid for version the features of which you may consider useful but are not essential for a JMonkey project)
 - File > Open > select the top level folder of this project ( i.e. [GAME_NAME]) > Ok.

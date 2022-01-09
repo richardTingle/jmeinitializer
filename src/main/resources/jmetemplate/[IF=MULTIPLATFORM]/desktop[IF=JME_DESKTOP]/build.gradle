@@ -1,0 +1,71 @@
+plugins {
+    id 'application'
+}
+
+group '[GAME_PACKAGE]'
+version '3.2-testcase'
+mainClassName = '[GAME_PACKAGE].desktopmodule.DesktopLauncher'
+String dependenciesString = ""
+
+java {
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+}
+
+ext.jmonkeyengineVersion = '[JME_VERSION]'
+
+dependencies {
+    implementation project(path: ':game')
+    implementation 'org.jmonkeyengine:jme3-core:3.4.0-stable'
+    implementation "org.jmonkeyengine:jme3-effects:3.4.0-stable"
+    implementation "org.jmonkeyengine:jme3-lwjgl3:3.4.0-stable"
+    implementation "org.jmonkeyengine:jme3-desktop:3.4.0-stable"
+}
+task copyJars(type: Copy) {
+    from (sourceSets.main.runtimeClasspath){
+        include '**/*.jar'
+    }
+    from(sourceSets.main.compileClasspath){
+        include '**/*.jar'
+    }
+    into('build/libs/dependencies')
+    includeEmptyDirs = false
+    setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+/**
+ * Better approach described below, but the 2 of them are vial ones
+ */
+task createJar(type : Jar, dependsOn : copyJars){
+    //get the copied jars
+    final String project = rootDir.getPath()
+    final File dependencies = new File(project + "/desktop/build/libs/dependencies/")
+    if(dependencies.exists()) {
+        if (dependencies.listFiles().length > 0) {
+            final File[] files = dependencies.listFiles()
+            for (int i = 0; i < files.length; i++) {
+                final String fileName = files[i].getName()
+                if (fileName.contains(".jar")) {
+                    dependenciesString += "dependencies/" + fileName + " "
+                }
+            }
+        }
+    }
+    manifest{
+        attributes('Main-Class': mainClassName)
+        //pass the jars to the manifest
+        attributes('Class-Path' : dependenciesString)
+        attributes('Created-By' : 'Jme3-Gradle')
+    }
+    with jar
+}
+/**
+ * A Suggestion of better code by : Mikhail Bobrutskov (aka wizzardo)
+ */
+task releaseJar(type: Jar, dependsOn: copyJars) {
+    manifest {
+        attributes("Main-Class": mainClassName,
+                "Class-Path": sourceSets.main.runtimeClasspath.filter {it.isFile() }.collect { "dependencies/${it.name}" }.join(' '))
+    }
+    //tag the jar task to inject this task into it
+    with jar
+}

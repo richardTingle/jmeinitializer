@@ -1,0 +1,17 @@
+plugins {
+    id 'java-library'
+}
+
+java {
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+}
+
+ext.jmonkeyengineVersion = '[JME_VERSION]'
+
+dependencies {
+    implementation 'org.jmonkeyengine:jme3-core:' + 'jmonkeyengineVersion'
+    implementation 'org.jmonkeyengine:jme3-effects:' + 'jmonkeyengineVersion'
+    implementation 'org.jmonkeyengine:jme3-lwjgl3:' + 'jmonkeyengineVersion'
+    implementation 'org.jmonkeyengine:jme3-desktop:' + 'jmonkeyengineVersion'
+}

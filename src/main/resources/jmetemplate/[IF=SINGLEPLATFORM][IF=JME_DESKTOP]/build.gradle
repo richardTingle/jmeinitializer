@@ -5,8 +5,10 @@ plugins {
 
 description = '[GAME_NAME] application'
 
-sourceCompatibility = '11'
-targetCompatibility = '11'
+java {
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+}
 
 ext.jmonkeyengineVersion = '[JME_VERSION]'
 
@@ -30,7 +32,6 @@ dependencies {
     runtimeOnly 'org.jmonkeyengine:jme3-plugins:' + jmonkeyengineVersion
 
 [JME_DEPENDENCIES]
-
     runtimeOnly 'org.jmonkeyengine:jme3-lwjgl3:' + jmonkeyengineVersion
 
 [OTHER_DEPENDENCIES]

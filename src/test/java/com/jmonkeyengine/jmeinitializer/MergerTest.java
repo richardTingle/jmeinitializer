@@ -16,6 +16,7 @@ class MergerTest {
     void mergePath(){
         Merger merger = new Merger("MyGame", "my.excellent.company", List.of(), List.of(), "1", Map.of());
         assertEquals("/src/main/java/my/excellent/company/MyGame.java", merger.mergePath("/src/main/java/[GAME_PACKAGE_FOLDER]/[GAME_NAME].java"));
+        assertEquals("path/something.java", merger.mergePath("path/something.java.jmetemplate"));
     }
 
     @Test
@@ -122,6 +123,7 @@ class MergerTest {
 
         assertEquals("/common/or/garden/path", merger.mergePath("/common/or/garden/path"));
         assertEquals("/path/path", merger.mergePath("/path/[IF=testLibraryA]/path"));
+        assertEquals("/path/path", merger.mergePath("/path/[IF=testLibraryA]/[IF=testLibraryB]/path"));
         assertEquals("/path/something/path/path", merger.mergePath("/path/something[IF=testLibraryA]/path/[IF=testLibraryB]/path"));
         assertEquals("/path/path", merger.mergePath("/path/[IF=SINGLEPLATFORM]/path"));
     }

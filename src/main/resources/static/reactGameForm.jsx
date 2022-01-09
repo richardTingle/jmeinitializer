@@ -13,7 +13,7 @@ class ReactGameForm extends React.Component {
             //these are groups which are determined by the server (e.g. networking). This is a map of group key -> selected library
             groupSelectedLibraries: {},
             //libary key of the libary that supports desktop, VR etc
-            platformLibrary: null,
+            platformLibraries: [],
             //this is the big bundle of data that comes down from the server to say what libraries are available, what the defaults are etc
             availableLibraryData : null,
             //if the user has clicked download (but not updated the data) a message is displayed. This controls that
@@ -29,7 +29,7 @@ class ReactGameForm extends React.Component {
                 let stateUpdate = {
                     availableLibraryData: data,
                     freeSelectLibraries:data.defaultSelectedFreeChoiceLibraries,
-                    platformLibrary:data.defaultPlatform
+                    platformLibraries:[data.defaultPlatform]
                 };
                 //add defaults (if available) for the groupSelectedLibraries
                 let groupSelectedLibraries = {};
@@ -51,8 +51,14 @@ class ReactGameForm extends React.Component {
         this.setState({package: event.target.value, hasDownloaded:false});
     }
 
-    handleSetPlatform = (event) => {
-        this.setState({platformLibrary: event.target.value, hasDownloaded:false});
+    handleTogglePlatformLibrary = (libraryKey) => {
+        let currentlySelected = this.state.platformLibraries.includes(libraryKey)
+        if (currentlySelected){
+            let newFreeSelectLibraries = this.state.platformLibraries.filter( v => v !== libraryKey )
+            this.setState({platformLibraries: newFreeSelectLibraries, hasDownloaded:false });
+        }else{
+            this.setState({platformLibraries: [...this.state.platformLibraries, libraryKey], hasDownloaded:false});
+        }
     }
 
     handleToggleFreeFormLibrary = (libraryKey) => {
@@ -85,7 +91,7 @@ class ReactGameForm extends React.Component {
 
     getRequiredLibrariesAsCommaSeperatedList = () => {
         let fullRequiredLibrarys = []
-        fullRequiredLibrarys.push(this.state.platformLibrary);
+        fullRequiredLibrarys = fullRequiredLibrarys.concat(this.state.platformLibraries);
         fullRequiredLibrarys = fullRequiredLibrarys.concat(this.state.freeSelectLibraries);
         for(const categoryKey in this.state.groupSelectedLibraries){
             const library = this.state.groupSelectedLibraries[categoryKey];
@@ -120,22 +126,26 @@ class ReactGameForm extends React.Component {
             .catch(console.log)
     }
 
-    renderPlatformRadios(){
+    renderPlatformCheckboxes(){
         if (this.state.availableLibraryData === null){
             return <div/>
         }else{
-            const platformRadios = [];
+            const platformCheckboxes = [];
 
             this.state.availableLibraryData.jmePlatforms.forEach(platform => {
-                platformRadios.push(<div className="form-check" key = {"platformRadioDiv" + platform.key}>
-                    <input className="form-check-input" type="radio" name="platformRadios" id={"platformRadio" + platform.key} value={platform.key} checked = {this.state.platformLibrary === platform.key} onChange={this.handleSetPlatform} />
+                platformCheckboxes.push(<div className="form-check" key = {"platformRadioDiv" + platform.key}>
+                    <input className="form-check-input" type="checkbox" name="platformRadios" id={"platformRadio" + platform.key} value={platform.key} checked = {this.state.platformLibraries.includes(platform.key)} onChange={event => this.handleTogglePlatformLibrary(platform.key)} />
                     <label className="form-check-label" htmlFor={"platformRadio" + platform.key}>
                         <b>{platform.libraryName}</b>
                         <p>{platform.libraryDescription}</p>
                     </label>
                 </div>);
+
             });
-            return <div onChange={this.handleSetPlatform}>{platformRadios}</div>;
+            return <div onChange={this.handleSetPlatform}>
+                {platformCheckboxes}
+                <small>Select at least 1 platform</small>
+            </div>;
         }
     }
 
@@ -268,8 +278,9 @@ class ReactGameForm extends React.Component {
                 Platform
             </h2>
             <p>JMonkeyEngine can target many platforms, select the platform your game will target</p>
-            {this.renderPlatformRadios()}
+            {this.renderPlatformCheckboxes()}
 
+            <br/> <br/>
             <div className="alert alert-secondary" role="alert">
                 Don't worry if you're not sure about libraries, you can always add more later
             </div>
