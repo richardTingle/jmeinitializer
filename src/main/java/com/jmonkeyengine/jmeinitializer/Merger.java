@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class Merger {
 
     //the "anything but = is to avoid double ifs merging
-    private Pattern mergeIfConditionPattern = Pattern.compile("\\[IF=([^=]*)]");
+    private Pattern mergeIfConditionPattern = Pattern.compile("\\[IF=([^\\]]*)]");
     /**
      * After the allowed ifs have been processed this is used to eliminate forbidden ifs
      */

@@ -112,6 +112,9 @@ class MergerTest {
         assertFalse(merger.pathShouldBeAllowed("/path/[IF=testLibraryC]/path"));
 
         assertTrue(merger.pathShouldBeAllowed("/path/[IF=SINGLEPLATFORM]/path"));
+
+        assertTrue(merger.pathShouldBeAllowed("[IF=testLibraryA][IF=testLibraryB]/src/main/java/[GAME_PACKAGE_FOLDER]/[GAME_NAME].java"));
+
     }
 
     @Test
