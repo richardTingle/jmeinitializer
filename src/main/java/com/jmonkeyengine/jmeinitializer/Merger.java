@@ -1,6 +1,7 @@
 package com.jmonkeyengine.jmeinitializer;
 
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
+import com.jmonkeyengine.jmeinitializer.libraries.LibraryCategory;
 import org.apache.commons.text.CaseUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -137,6 +138,7 @@ public class Merger {
     protected static String formJmeRequiredLibrariesMergeField(List<Library> librariesRequired){
         return librariesRequired.stream()
                 .filter(Library::usesJmeVersion)
+                .filter(l -> l.category() != LibraryCategory.JME_PLATFORM) //platforms are hard coded into the templates to better support multimodule
                 .flatMap(l ->
                     l.artifacts().stream()
                             .map(artifact -> "    implementation '" + l.groupId() + ":" + artifact.artifactId() + ":'+ jmonkeyengineVersion")
