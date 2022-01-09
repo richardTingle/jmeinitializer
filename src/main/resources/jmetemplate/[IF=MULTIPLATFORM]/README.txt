@@ -12,7 +12,7 @@ Game module `:game` : holds `build.gradle` dependencies for the game code & shou
 
 [IF=JME_DESKTOP]Desktop module `:desktop` : holds `build.gradle` for desktop dependencies & implements the `:game` module, this module can hold the desktop gui.
 [/IF=JME_DESKTOP]
-[IF=JME_ANDROID] Android module `:app` : holds `build.gradle` for the android dependencies & implements the `:game` module, this module can hold android dependent gui.
+[IF=JME_ANDROID]Android module `:app` : holds `build.gradle` for the android dependencies & implements the `:game` module, this module can hold android dependent gui.
 [/IF=JME_ANDROID]
 
 # Running Game : 
@@ -45,7 +45,7 @@ If you are using Android Studio launch and debug options will be available direc
 [/IF=JME_DESKTOP]
 ### Android : 
 ```gradle
-./gradlew :app:assemble
+    $./gradlew :app:assemble
 ```
 
 Note that if you are releasing your app on the android play store it must be signed with an appropriate key, see
@@ -63,11 +63,12 @@ References :
 => Gradle/Groovy Udacity course by google : https://github.com/udacity/ud867/blob/master/1.11-Exercise-ConfigureFileSystemTasks/solution.gradle
 
 [IF=JME_ANDROID]
-=> See JMonkeyEngine Android Examples : https://github.com/Scrappers-glitch/jme3-Simple-Examples <br/>
-https://github.com/Scrappers-glitch/DBTraining <br/>
-https://github.com/Scrappers-glitch/Superior-Extended-Engine/tree/master/demoApp <br/>
-[/IF=JME_ANDROID]
+=> See JMonkeyEngine Android Examples : https://github.com/Scrappers-glitch/jme3-Simple-Examples
 
+https://github.com/Scrappers-glitch/DBTraining
+
+https://github.com/Scrappers-glitch/Superior-Extended-Engine/tree/master/demoApp
+[/IF=JME_ANDROID]
 [IF=JME_DESKTOP]
 => See JMonkeyEngine Desktop Example : https://github.com/Scrappers-glitch/basic-gradle-template
 
