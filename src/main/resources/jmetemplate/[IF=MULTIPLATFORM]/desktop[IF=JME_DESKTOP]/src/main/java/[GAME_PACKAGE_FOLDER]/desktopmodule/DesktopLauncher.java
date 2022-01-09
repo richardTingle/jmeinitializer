@@ -1,10 +1,10 @@
 package [GAME_PACKAGE].desktopmodule;
 
-import [GAME_PACKAGE].Game;
+import [GAME_PACKAGE].game.[GAME_NAME];
 import com.jme3.system.AppSettings;
 
 /**
- * Used to launch a jme application in desktop environment using native GLFW.
+ * Used to launch a jme application in desktop environment
  *
  */
 public class DesktopLauncher {
