@@ -88,8 +88,8 @@ public class Merger {
         }
         //any "ifs" are removed from the path (they should have already been used to assess if the file should be included
         path = path.replaceAll("\\[IF=([^=]*)]", "");
-        path = path.replace("//", "/"); //if the if is the entirety of the folder than redundant folder is collapsed
-
+        path = path.replaceAll("//+", "/"); //if the if is the entirety of the folder then redundant folder is collapsed
+        path = path.replace(".jmetemplate", "");
         return path;
     }
 

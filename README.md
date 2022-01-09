@@ -29,6 +29,10 @@ See the folder jmetemplate, fundamentally that is what ends up in the zip, but:
   * E.g. [IF=JME_ANDROID]Android module :app : holds build.gradle for the android dependencies & implements the :game module, this module can hold android dependent gui.[/IF=JME_ANDROID]
   * These can be nested, and can be multiline
 
+Additionally, optionally, you can end any file .jmetemplate. This has no actual function, but it is stripped from the 
+output file name. Its purpose is to stop IDEs from trying to do error highlighting on known file types (e.g. .gradle files)
+where the IF and merge fields make the files look to the IDE as errored
+
 
 ### Who do I talk to? ###
 

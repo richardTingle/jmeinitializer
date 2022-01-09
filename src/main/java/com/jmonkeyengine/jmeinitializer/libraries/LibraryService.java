@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 @Service
 public class LibraryService {
 
-    private static final Library JME_DESKTOP = new Library("JME_DESKTOP", "JME Desktop", "org.jmonkeyengine","jme3-desktop", true, LibraryCategory.JME_PLATFORM, true, "Desktop Game development including Windows, Mac and Linux");
+    private static final Library JME_DESKTOP = new Library("JME_DESKTOP", "JME Desktop", "org.jmonkeyengine","jme3-desktop", true, LibraryCategory.JME_PLATFORM, true, "Desktop Game development including Windows and Linux");
 
     /**
      * These are the tool provided libraries, it allows for non standard things like regexes to be set, or
