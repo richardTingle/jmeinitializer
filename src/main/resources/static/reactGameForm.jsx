@@ -18,7 +18,8 @@ class ReactGameForm extends React.Component {
             availableLibraryData : null,
             //if the user has clicked download (but not updated the data) a message is displayed. This controls that
             hasDownloaded: false,
-            gradlePreview: null
+            gradlePreview: null,
+            validationMessage: null
         };
     }
 
@@ -44,20 +45,20 @@ class ReactGameForm extends React.Component {
     }
 
     handleSetGameName = (event) => {
-        this.setState({gameName: event.target.value, hasDownloaded:false});
+        this.setState({gameName: event.target.value, hasDownloaded:false, validationMessage:null});
     }
 
     handleSetPackage = (event) => {
-        this.setState({package: event.target.value, hasDownloaded:false});
+        this.setState({package: event.target.value, hasDownloaded:false, validationMessage:null});
     }
 
     handleTogglePlatformLibrary = (libraryKey) => {
         let currentlySelected = this.state.platformLibraries.includes(libraryKey)
         if (currentlySelected){
             let newFreeSelectLibraries = this.state.platformLibraries.filter( v => v !== libraryKey )
-            this.setState({platformLibraries: newFreeSelectLibraries, hasDownloaded:false });
+            this.setState({platformLibraries: newFreeSelectLibraries, hasDownloaded:false, validationMessage:null });
         }else{
-            this.setState({platformLibraries: [...this.state.platformLibraries, libraryKey], hasDownloaded:false});
+            this.setState({platformLibraries: [...this.state.platformLibraries, libraryKey], hasDownloaded:false, validationMessage:null});
         }
     }
 
@@ -65,18 +66,19 @@ class ReactGameForm extends React.Component {
         let currentlySelected = this.state.freeSelectLibraries.includes(libraryKey)
         if (currentlySelected){
             let newFreeSelectLibraries = this.state.freeSelectLibraries.filter( v => v !== libraryKey )
-            this.setState({freeSelectLibraries: newFreeSelectLibraries, hasDownloaded:false });
+            this.setState({freeSelectLibraries: newFreeSelectLibraries, hasDownloaded:false, validationMessage:null });
         }else{
-            this.setState({freeSelectLibraries: [...this.state.freeSelectLibraries, libraryKey], hasDownloaded:false});
+            this.setState({freeSelectLibraries: [...this.state.freeSelectLibraries, libraryKey], hasDownloaded:false, validationMessage:null});
         }
     }
 
     handleSubmit = (event) =>  {
-        console.log(this.state);
-        this.setState({ hasDownloaded:true });
         event.preventDefault(); //don't refresh the page
-        //doesn't "actually" change the page location because its a download link
-        location.href = "/jme-initializer/zip?" + this.formOptionsQueryString();
+        if (this.validate()) {
+            this.setState({hasDownloaded: true});
+            //doesn't "actually" change the page location because its a download link
+            location.href = "/jme-initializer/zip?" + this.formOptionsQueryString();
+        }
     }
 
     formOptionsQueryString = () => {
@@ -115,15 +117,35 @@ class ReactGameForm extends React.Component {
     }
 
     fetchGradlePreview = (event) => {
-        event.preventDefault(); //don't submit the form
 
-        fetch('/jme-initializer/gradle-preview?' + this.formOptionsQueryString())
-            .then(response => response.json())
-            .then((data) => {
-                console.log(data);
-                this.setState({gradlePreview:data});
-            })
-            .catch(console.log)
+        if (this.validate()) {
+            event.preventDefault(); //don't submit the form
+
+            fetch('/jme-initializer/gradle-preview?' + this.formOptionsQueryString())
+                .then(response => response.json())
+                .then((data) => {
+                    console.log(data);
+                    this.setState({gradlePreview: data});
+                })
+                .catch(console.log)
+        }
+    }
+
+    /**
+     * Validates the form, returns if its valid (and also updates the state to show a validation message if its invalid)
+     */
+    validate = () => {
+        if (this.state.platformLibraries.length === 0){
+            this.setState({ validationMessage:"You must select at least 1 platform" });
+            return false
+        }
+
+        if (this.state.gameName === ""){
+            this.setState({ validationMessage:"The game must have a name" });
+            return false
+        }
+
+        return true;
     }
 
     renderPlatformCheckboxes(){
@@ -302,8 +324,11 @@ class ReactGameForm extends React.Component {
 
             {this.state.hasDownloaded && <div className="alert alert-success" role="alert">
                 <p>A zip will now download. Unzip it and use it as a starter project in the IDE of your choice.</p>
-                <p>IntelliJ and Eclipse will support this project by default, Netbeans will support it with the Gradle plugin installed</p>
+                <p>IntelliJ, Android Studio and Eclipse will support this project by default, Netbeans will support it with the Gradle plugin installed</p>
             </div>}
+            {this.state.validationMessage && <div className="alert alert-danger" role="alert">
+                <p>{this.state.validationMessage}</p>
+            </div> }
             <div className="btn-group" role="group" aria-label="Basic example">
                 <button type="submit" className="btn btn-primary mr-2">Download a starter project</button>
                 <button className="btn btn-secondary mr-2" onClick={this.fetchGradlePreview}>Preview build.gradle file</button>
