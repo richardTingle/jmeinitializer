@@ -17,7 +17,6 @@ If you are using Android Studio launch and debug options will be available direc
 
 # Building Game :
 
-### Android : 
 ```gradle
 ./gradlew :app:assemble
 ```

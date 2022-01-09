@@ -15,7 +15,7 @@ class MergerTest {
     @Test
     void mergePath(){
         Merger merger = new Merger("MyGame", "my.excellent.company", List.of(), List.of(), "1", Map.of());
-        assertEquals("/src/main/java/my/excellent/company/MyGame.java", merger.mergePath("/src/main/java/[GAME_PACKAGE_FOLDER]/[GAME_NAME].java"));
+        assertEquals("src/main/java/my/excellent/company/MyGame.java", merger.mergePath("src/main/java/[GAME_PACKAGE_FOLDER]/[GAME_NAME].java"));
         assertEquals("path/something.java", merger.mergePath("path/something.java.jmetemplate"));
     }
 
@@ -105,13 +105,13 @@ class MergerTest {
 
         Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of());
 
-        assertTrue(merger.pathShouldBeAllowed("/common/or/garden/path"));
-        assertTrue(merger.pathShouldBeAllowed("/path/[IF=testLibraryA]/path"));
-        assertTrue(merger.pathShouldBeAllowed("/path/something[IF=testLibraryA]/path/[IF=testLibraryB]/path"));
-        assertFalse(merger.pathShouldBeAllowed("/path/something[IF=testLibraryA]/path/[IF=testLibraryC]/path"));
-        assertFalse(merger.pathShouldBeAllowed("/path/[IF=testLibraryC]/path"));
+        assertTrue(merger.pathShouldBeAllowed("common/or/garden/path"));
+        assertTrue(merger.pathShouldBeAllowed("path/[IF=testLibraryA]/path"));
+        assertTrue(merger.pathShouldBeAllowed("path/something[IF=testLibraryA]/path/[IF=testLibraryB]/path"));
+        assertFalse(merger.pathShouldBeAllowed("path/something[IF=testLibraryA]/path/[IF=testLibraryC]/path"));
+        assertFalse(merger.pathShouldBeAllowed("path/[IF=testLibraryC]/path"));
 
-        assertTrue(merger.pathShouldBeAllowed("/path/[IF=SINGLEPLATFORM]/path"));
+        assertTrue(merger.pathShouldBeAllowed("path/[IF=SINGLEPLATFORM]/path"));
 
         assertTrue(merger.pathShouldBeAllowed("[IF=testLibraryA][IF=testLibraryB]/src/main/java/[GAME_PACKAGE_FOLDER]/[GAME_NAME].java"));
 
@@ -124,11 +124,14 @@ class MergerTest {
 
         Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of());
 
-        assertEquals("/common/or/garden/path", merger.mergePath("/common/or/garden/path"));
-        assertEquals("/path/path", merger.mergePath("/path/[IF=testLibraryA]/path"));
-        assertEquals("/path/path", merger.mergePath("/path/[IF=testLibraryA]/[IF=testLibraryB]/path"));
-        assertEquals("/path/something/path/path", merger.mergePath("/path/something[IF=testLibraryA]/path/[IF=testLibraryB]/path"));
-        assertEquals("/path/path", merger.mergePath("/path/[IF=SINGLEPLATFORM]/path"));
+        assertEquals("common/or/garden/path", merger.mergePath("common/or/garden/path"));
+        assertEquals("path/path", merger.mergePath("path/[IF=testLibraryA]/path"));
+        assertEquals("path/path", merger.mergePath("path/[IF=testLibraryA]/[IF=testLibraryB]/path"));
+        assertEquals("path/something/path/path", merger.mergePath("/path/something[IF=testLibraryA]/path/[IF=testLibraryB]/path"));
+        assertEquals("path/path", merger.mergePath("path/[IF=SINGLEPLATFORM]/path"));
+        assertEquals("path/path", merger.mergePath("path/[IF=SINGLEPLATFORM][IF=JME_DESKTOP]/path"));
+        assertEquals("path1/path2", merger.mergePath("[IF=SINGLEPLATFORM][IF=JME_DESKTOP]/path1/path2"));
+
     }
 
 
