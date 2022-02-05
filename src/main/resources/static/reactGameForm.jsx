@@ -12,7 +12,7 @@ class ReactGameForm extends React.Component {
             freeSelectLibraries: [],
             //these are groups which are determined by the server (e.g. networking). This is a map of group key -> selected library
             groupSelectedLibraries: {},
-            //libary key of the libary that supports desktop, VR etc
+            //library key of the libary that supports desktop, VR etc
             platformLibraries: [],
             //this is the big bundle of data that comes down from the server to say what libraries are available, what the defaults are etc
             availableLibraryData : null,
@@ -148,6 +148,37 @@ class ReactGameForm extends React.Component {
         return true;
     }
 
+    /**
+     * Given a list of required platform keys (empty means no requirements) returns if at least one of those is
+     * selected
+     * @param requiredPlatformList
+     */
+    platformAvailable = (requiredPlatformList) => {
+        if (requiredPlatformList.length === 0){
+            return true;
+        }
+
+        const availableRequiredPlatforms = requiredPlatformList.filter(value => this.state.platformLibraries.includes(value));
+
+        return availableRequiredPlatforms.length > 0;
+    }
+
+    renderRequiredPlatformStatement(requiredPlatformList){
+
+        if (requiredPlatformList.length === 0){
+            return;
+        }
+
+        const platformStrings = [];
+        this.state.availableLibraryData.jmePlatforms.forEach(platform => {
+            if (requiredPlatformList.includes(platform.key)){
+                platformStrings.push(platform.libraryName);
+            }
+        });
+
+        return <p><small>{"This library is only applicable for platform(s): " + platformStrings.join(", ") }</small></p>
+    }
+
     renderPlatformCheckboxes(){
         if (this.state.availableLibraryData === null){
             return <div/>
@@ -179,7 +210,7 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.jmeGeneralLibraries.forEach(library => {
                 jmeLibraryChecks.push(<div className="form-check" key = {"libraryCheckDiv" + library.key}>
-                    <input className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <input disabled = {!this.platformAvailable(library.requiredPlatforms)} className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.platformAvailable(library.requiredPlatforms) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
                         <label className="form-check-label" htmlFor={"platformCheck" + library.key}>
                             <b>{library.libraryName}</b>
                             <p>{library.libraryDescription}</p>
@@ -191,7 +222,6 @@ class ReactGameForm extends React.Component {
     }
 
     renderExclusiveGroups(){
-
         if (this.state.availableLibraryData === null){
             return <div/>
         }else{
@@ -202,11 +232,12 @@ class ReactGameForm extends React.Component {
 
                 specialCategory.libraries.forEach(library => {
                     thisGroupRadios.push(<div className="form-check" key = {"platformRadioDiv" + library.key}>
-                        <input className="form-check-input" type="radio" name={specialCategory.category.key+"Radios"} id={specialCategory.category.key+"Radio" + library.key} value={library.key} checked = {this.isLibrarySelectedInGroup(specialCategory.category.key, library.key)} onChange={event => this.handleSetLibrarySelectedInGroup(specialCategory.category.key, library.key)} />
+                        <input disabled = {!this.platformAvailable(library.requiredPlatforms)} className="form-check-input" type="radio" name={specialCategory.category.key+"Radios"} id={specialCategory.category.key+"Radio" + library.key} value={library.key} checked = { this.platformAvailable(library.requiredPlatforms) && this.isLibrarySelectedInGroup(specialCategory.category.key, library.key)} onChange={event => this.handleSetLibrarySelectedInGroup(specialCategory.category.key, library.key)} />
                         <label className="form-check-label" htmlFor={specialCategory.category.key+"Radio" + library.key}>
                             <b>{library.libraryName}</b>
                             <p>{library.libraryDescription}</p>
                         </label>
+                        {this.renderRequiredPlatformStatement(library.requiredPlatforms)}
                     </div>)
                 })
 
@@ -236,11 +267,13 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.generalLibraries.forEach(library => {
                 libraryChecks.push(<div className="form-check" key = {"libraryDiv" + library.key}>
-                    <input className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <input disabled = {!this.platformAvailable(library.requiredPlatforms)} className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.platformAvailable(library.requiredPlatforms) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
                     <label className="form-check-label" htmlFor={"libraryCheck" + library.key}>
                         <b>{library.libraryName}</b>
                         <p>{library.libraryDescription}</p>
+                        {this.renderRequiredPlatformStatement(library.requiredPlatforms)}
                     </label>
+
                 </div>);
             });
             return libraryChecks;
