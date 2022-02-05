@@ -65,7 +65,7 @@ public class Merger {
         mergeData.put(MergeField.JME_DEPENDENCIES, formJmeRequiredLibrariesMergeField(librariesRequired));
         mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredLibrariesMergeField(librariesRequired, libraryVersions));
 
-        libraryKeysAndProfilesInUse = librariesRequired.stream().map(Library::key).collect(Collectors.toSet());
+        libraryKeysAndProfilesInUse = librariesRequired.stream().map(Library::getKey).collect(Collectors.toSet());
         libraryKeysAndProfilesInUse.addAll(additionalProfiles);
     }
 
@@ -138,22 +138,22 @@ public class Merger {
 
     protected static String formJmeRequiredLibrariesMergeField(List<Library> librariesRequired){
         return librariesRequired.stream()
-                .filter(Library::usesJmeVersion)
-                .filter(l -> l.category() != LibraryCategory.JME_PLATFORM) //platforms are hard coded into the templates to better support multimodule
+                .filter(Library::isUsesJmeVersion)
+                .filter(l -> l.getCategory() != LibraryCategory.JME_PLATFORM) //platforms are hard coded into the templates to better support multimodule
                 .flatMap(l ->
-                    l.artifacts().stream()
-                            .map(artifact -> "    implementation '" + l.groupId() + ":" + artifact.artifactId() + ":'+ jmonkeyengineVersion")
+                    l.getArtifacts().stream()
+                            .map(artifact -> "    implementation '" + artifact.groupId() + ":" + artifact.artifactId() + ":'+ jmonkeyengineVersion")
                 ).collect(Collectors.joining("\n"));
 
     }
 
     protected static String formNonJmeRequiredLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions){
         return librariesRequired.stream()
-                .filter(l -> !l.usesJmeVersion())
+                .filter(l -> !l.isUsesJmeVersion())
                 .flatMap(l ->
-                        l.artifacts().stream()
+                        l.getArtifacts().stream()
                                 .map(artifact -> {
-                                    String mavenCoordinate = l.groupId() + ":" + artifact.artifactId();
+                                    String mavenCoordinate = artifact.groupId() + ":" + artifact.artifactId();
                                     return "    implementation '" + mavenCoordinate + ":" + libraryVersions.getOrDefault(mavenCoordinate, artifact.fallbackVersion())  + "'";
                                 })
                 ).collect(Collectors.joining("\n"));

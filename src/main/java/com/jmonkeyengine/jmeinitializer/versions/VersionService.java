@@ -65,9 +65,8 @@ public class VersionService {
         fetchMostRecentStableVersion("org.jmonkeyengine", "jme3-core", ".*-stable").ifPresent(newVersion -> this.jmeVersion=newVersion);
 
         for(Library library : libraryService.nonJmeLibraries()) {
-            String group = library.groupId();
-            for (Artifact artifact : library.artifacts()) {
-                fetchMostRecentStableVersion(group, artifact.artifactId(), library.libraryVersionRegex()).ifPresent(newVersion -> versionCache.put(group + ":" + artifact.artifactId(), newVersion));
+            for (Artifact artifact : library.getArtifacts()) {
+                fetchMostRecentStableVersion(artifact.groupId(), artifact.artifactId(), library.getLibraryVersionRegex()).ifPresent(newVersion -> versionCache.put(artifact.groupId() + ":" + artifact.artifactId(), newVersion));
             }
         }
     }

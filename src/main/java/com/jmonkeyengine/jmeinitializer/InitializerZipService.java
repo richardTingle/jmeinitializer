@@ -134,7 +134,7 @@ public class InitializerZipService {
     private Collection<String> calculateAdditionalProfiles(Collection<Library> requestedLibraries){
         List<String> additionalProfiles = new ArrayList<>();
 
-        long numberOfPlatforms = requestedLibraries.stream().filter(l -> l.category() == LibraryCategory.JME_PLATFORM).count();
+        long numberOfPlatforms = requestedLibraries.stream().filter(l -> l.getCategory() == LibraryCategory.JME_PLATFORM).count();
 
         if (numberOfPlatforms > 1) {
             additionalProfiles.add("MULTIPLATFORM");

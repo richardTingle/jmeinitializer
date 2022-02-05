@@ -1,6 +1,8 @@
 package com.jmonkeyengine.jmeinitializer.libraries;
 
 public record Artifact(
+        String groupId,
+
         String artifactId,
         /*
          * Fallback versions for each of the artifacts declared. Can be null, in which case no fallback is possible.
@@ -10,7 +12,7 @@ public record Artifact(
         String fallbackVersion
 ) {
 
-    public Artifact (String artifactId) {
-        this(artifactId, "[MISSING_VERSION]");
+    public Artifact (String groupId, String artifactId) {
+        this(groupId, artifactId, "[MISSING_VERSION]");
     }
 }

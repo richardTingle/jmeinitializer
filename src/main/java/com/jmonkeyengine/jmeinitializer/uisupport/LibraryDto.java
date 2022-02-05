@@ -4,6 +4,9 @@ import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * This dto represents json sent to the front end
  */
@@ -22,7 +25,12 @@ public class LibraryDto {
      */
     boolean selectedByDefault;
 
+    /**
+     * If this library will only be available if one of these platforms is selected
+     */
+    Collection<String> requiredPlatforms;
+
     public LibraryDto (Library library) {
-        this(library.key(), library.displayName(), library.descriptionText(), library.defaultSelected());
+        this(library.getKey(), library.getDisplayName(), library.getDescriptionText(), library.isDefaultSelected(), library.getRequiredPlatforms());
     }
 }

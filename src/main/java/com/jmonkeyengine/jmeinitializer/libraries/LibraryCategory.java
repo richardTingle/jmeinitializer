@@ -27,7 +27,8 @@ public enum LibraryCategory {
 
     NETWORKING( "Networking", "A Networking library will help with multiplayer games",  true),
 
-    GENERAL("Other Libraries", "Libraries often found to be useful in JME games", false);
+    GENERAL("Other Libraries", "Libraries often found to be useful in JME games", false)
+    ;
 
     String displayName;
 
