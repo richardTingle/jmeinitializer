@@ -51,6 +51,21 @@ public enum MergeField {
     JME_DEPENDENCIES,
 
     /**
+     * Dependencies that are only used on the VR platform
+     */
+    VR_SPECIFIC_DEPENDENCIES,
+
+    /**
+     * Dependencies that are only used on the android platform
+     */
+    ANDROID_SPECIFIC_DEPENDENCIES,
+
+    /**
+     * Dependencies that are only used on the android platform
+     */
+    DESKTOP_SPECIFIC_DEPENDENCIES,
+
+    /**
      * This is everything thats not under the jmonkeyengineVersion tag.
      * This is expected to be a multiline, indented merge field (I.e. each line needs 4 spaces at the front) and refer
      * to the versions explicitly

@@ -22,15 +22,21 @@ import java.util.stream.Stream;
 @Service
 public class LibraryService {
 
-    private static final Library JME_DESKTOP = Library.builder("JME_DESKTOP",  "JME Desktop",  LibraryCategory.JME_PLATFORM, "Desktop Game development including Windows and Linux")
+    public static final Library JME_DESKTOP = Library.builder("JME_DESKTOP",  "JME Desktop",  LibraryCategory.JME_PLATFORM, "Desktop Game development including Windows and Linux")
             .defaultSelected(true)
             .usesJmeVersion(true)
             .artifact(new Artifact( "org.jmonkeyengine", "jme3-desktop"))
             .build();
 
-    private static final Library JME_VR = Library.builder("JME_VR","JME VR", LibraryCategory.JME_PLATFORM, "Virtual reality support")
+    public static final Library JME_VR = Library.builder("JME_VR","JME VR", LibraryCategory.JME_PLATFORM, "Virtual reality support")
             .usesJmeVersion(true)
             .artifact(new Artifact("org.jmonkeyengine","jme3-vr"))
+            .build();
+
+
+    public static final Library JME_ANDROID =Library.builder("JME_ANDROID","JME Android", LibraryCategory.JME_PLATFORM, "Android Game development")
+            .usesJmeVersion(true)
+            .artifact(new Artifact("org.jmonkeyengine","jme3-android"))
             .build();
 
     /**
@@ -41,6 +47,8 @@ public class LibraryService {
      */
     private final Collection<Library> toolProvidedLibraries = List.of(
             JME_DESKTOP,
+            JME_ANDROID,
+            JME_VR,
             Library.builder("JME_EFFECTS","JME Effects", LibraryCategory.JME_GENERAL, "A JME library for effects, like explosions, smoke etc")
                     .usesJmeVersion(true)
                     .artifact(new Artifact("org.jmonkeyengine","jme3-effects"))
@@ -61,17 +69,10 @@ public class LibraryService {
                     .artifact(new Artifact("org.jmonkeyengine","jme3-niftygui"))
                     .build(),
 
-            Library.builder("JME_ANDROID","JME Android", LibraryCategory.JME_PLATFORM, "Android Game development")
-                    .usesJmeVersion(true)
-                    .artifact(new Artifact("org.jmonkeyengine","jme3-android"))
-                    .build(),
-
             Library.builder("JME_JBULLET","JBullet", LibraryCategory.PHYSICS, "A Java port of the popular C++ bullet physics library")
                     .usesJmeVersion(true)
                     .artifact(new Artifact("org.jmonkeyengine","jme3-jbullet"))
                     .build(),
-
-            JME_VR,
 
             Library.builder("MINIE","Minie",LibraryCategory.PHYSICS, "An alternative binding to the C++ bullet library, produced by a member of the JMonkey community")
                     .artifact(new Artifact("com.github.stephengold", "Minie"))

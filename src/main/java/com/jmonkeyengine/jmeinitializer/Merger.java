@@ -2,10 +2,10 @@ package com.jmonkeyengine.jmeinitializer;
 
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryCategory;
+import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import org.apache.commons.text.CaseUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,7 +63,10 @@ public class Merger {
         mergeData.put(MergeField.GAME_PACKAGE_FOLDER, convertPackageToFolder(mergeData.get(MergeField.GAME_PACKAGE)));
         mergeData.put(MergeField.JME_VERSION, jmeVersion);
         mergeData.put(MergeField.JME_DEPENDENCIES, formJmeRequiredLibrariesMergeField(librariesRequired));
-        mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredLibrariesMergeField(librariesRequired, libraryVersions));
+        mergeData.put(MergeField.VR_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_VR));
+        mergeData.put(MergeField.ANDROID_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_ANDROID));
+        mergeData.put(MergeField.DESKTOP_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_DESKTOP));
+        mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredAnyPlatformLibrariesMergeField(librariesRequired, libraryVersions));
 
         libraryKeysAndProfilesInUse = librariesRequired.stream().map(Library::getKey).collect(Collectors.toSet());
         libraryKeysAndProfilesInUse.addAll(additionalProfiles);
@@ -147,9 +150,23 @@ public class Merger {
 
     }
 
-    protected static String formNonJmeRequiredLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions){
+    protected static String formNonJmeRequiredAnyPlatformLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions){
         return librariesRequired.stream()
                 .filter(l -> !l.isUsesJmeVersion())
+                .filter(l -> l.getRequiredPlatforms().isEmpty())
+                .flatMap(l ->
+                        l.getArtifacts().stream()
+                                .map(artifact -> {
+                                    String mavenCoordinate = artifact.groupId() + ":" + artifact.artifactId();
+                                    return "    implementation '" + mavenCoordinate + ":" + libraryVersions.getOrDefault(mavenCoordinate, artifact.fallbackVersion())  + "'";
+                                })
+                ).collect(Collectors.joining("\n"));
+    }
+
+    protected static String formPlatformSpecificLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions, Library platform){
+        return librariesRequired.stream()
+                .filter(l -> !l.isUsesJmeVersion())
+                .filter(l -> l.getRequiredPlatforms().contains(platform.getKey()))
                 .flatMap(l ->
                         l.getArtifacts().stream()
                                 .map(artifact -> {

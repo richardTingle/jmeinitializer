@@ -50,7 +50,7 @@ public class InitializerZipService {
     }
 
     public Map<String, String> produceGradleFilePreview(String gameName, String packageName, List<String> requiredLibraryKeys ){
-        List<Library> requiredLibraries = parseLibraryKeys(requiredLibraryKeys);
+        List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
         Merger merger = new Merger(gameName, packageName, requiredLibraries,  calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
 
         Resource buildGradleResource = ResourcePatternUtils.getResourcePatternResolver(null).getResource("classpath:jmetemplate/build.gradle");
@@ -72,7 +72,7 @@ public class InitializerZipService {
 
     public ByteArrayOutputStream produceZipInMemory(String gameName, String packageName, List<String> requiredLibraryKeys ){
 
-        List<Library> requiredLibraries = parseLibraryKeys(requiredLibraryKeys);
+        List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
 
         Merger merger = new Merger(gameName, packageName, requiredLibraries, calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
 
@@ -100,6 +100,24 @@ public class InitializerZipService {
         return requiredLibraryKeys
                 .stream()
                 .flatMap(lk -> libraryService.getLibraryFromKey(lk).stream())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Given a raw list of libraries eliminates any who's required platform requirements aren't met
+     * @param unfilteredList
+     * @return
+     */
+    private List<Library> eliminateLibrariesOnUnsupportedPlatforms(List<Library> unfilteredList){
+        return unfilteredList.stream()
+                .filter(l -> {
+                    if (l.getRequiredPlatforms().isEmpty()){
+                        return true;
+                    }else{
+                        return unfilteredList.stream().anyMatch(matching -> l.getRequiredPlatforms().contains(matching.getKey()));
+                    }
+
+                })
                 .collect(Collectors.toList());
     }
 

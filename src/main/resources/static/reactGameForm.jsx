@@ -101,6 +101,7 @@ class ReactGameForm extends React.Component {
                 fullRequiredLibrarys.push(library);
             }
         }
+
         return fullRequiredLibrarys.join(",");
     }
 
@@ -319,7 +320,7 @@ class ReactGameForm extends React.Component {
     render() {
         return <form onSubmit={this.handleSubmit}>
             <div className="form-group">
-                <label htmlFor="gameName"><b>Game Name</b></label>
+                <label htmlFor="gameName"><b>Application Name</b></label>
                 <input className="form-control" value={this.state.gameName} onChange={this.handleSetGameName} id="gameName" aria-describedby="gameNameHelp" placeholder="e.g. Asteroids" required/>
                 <small id="gameNameHelp" className="form-text">This will be the name of your project. Try to keep to english letters as it will also be used in your java source</small>
             </div>
@@ -332,7 +333,7 @@ class ReactGameForm extends React.Component {
             <h2>
                 Platform
             </h2>
-            <p>JMonkeyEngine can target many platforms, select the platform your game will target</p>
+            <p>JMonkeyEngine can target many platforms, select the platform your application will target</p>
             {this.renderPlatformCheckboxes()}
 
             <br/> <br/>
@@ -348,7 +349,7 @@ class ReactGameForm extends React.Component {
             {this.renderExclusiveGroups()}
 
             <h2>Other</h2>
-            <p>Libraries often found to be useful in JME games</p>
+            <p>Libraries often found to be useful in JME applications</p>
             {this.renderOtherLibraries()}
 
             <br/>

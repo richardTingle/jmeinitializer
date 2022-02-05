@@ -34,6 +34,7 @@ dependencies {
 [JME_DEPENDENCIES]
     runtimeOnly 'org.jmonkeyengine:jme3-lwjgl3:' + jmonkeyengineVersion
 
+[DESKTOP_SPECIFIC_DEPENDENCIES]
 [OTHER_DEPENDENCIES]
 }
 
