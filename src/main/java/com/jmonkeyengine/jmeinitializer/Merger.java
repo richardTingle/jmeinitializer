@@ -68,6 +68,8 @@ public class Merger {
         mergeData.put(MergeField.DESKTOP_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_DESKTOP));
         mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredAnyPlatformLibrariesMergeField(librariesRequired, libraryVersions));
 
+        mergeData.put(MergeField.ALL_NON_JME_DEPENDENCIES, mergeData.get(MergeField.VR_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.ANDROID_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.DESKTOP_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.OTHER_DEPENDENCIES));
+
         libraryKeysAndProfilesInUse = librariesRequired.stream().map(Library::getKey).collect(Collectors.toSet());
         libraryKeysAndProfilesInUse.addAll(additionalProfiles);
     }

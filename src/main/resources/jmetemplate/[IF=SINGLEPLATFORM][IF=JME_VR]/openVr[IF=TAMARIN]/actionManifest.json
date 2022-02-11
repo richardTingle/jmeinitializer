@@ -1,0 +1,90 @@
+{
+  "default_bindings": [
+    {
+      "controller_type": "oculus_touch",
+      "binding_url": "oculusTouchDefaults.json"
+    },
+    {
+      "controller_type": "vive_controller",
+      "binding_url": "viveDefaults.json"
+    },
+    {
+      "controller_type": "vive_cosmos_controller",
+      "binding_url": "viveCosmosDefaults.json"
+    },
+    {
+      "controller_type": "knuckles",
+      "binding_url": "knucklesDefaults.json"
+    },
+    {
+      "controller_type": "holographic_controller",
+      "binding_url": "holographicDefaults.json"
+    }
+  ],
+  "actions": [
+    {
+      "name": "/actions/main/in/grip",
+      "requirement": "mandatory",
+      "type": "vector1"
+    },
+    {
+      "name": "/actions/main/out/haptic",
+      "type": "vibration",
+      "requirement": "optional"
+    },
+    {
+      "name": "/actions/main/in/trigger",
+      "type": "vector1",
+      "requirement": "mandatory"
+    },
+    {
+      "name" : "/actions/main/in/HandSkeletonLeft",
+      "skeleton" : "/skeleton/hand/left",
+      "type" : "skeleton"
+    },
+    {
+      "name" : "/actions/main/in/HandPoseLeft",
+      "type" : "pose"
+    },
+    {
+      "name" : "/actions/main/in/HandSkeletonRight",
+      "skeleton" : "/skeleton/hand/right",
+      "type" : "skeleton"
+    },
+    {
+      "name" : "/actions/main/in/HandPoseRight",
+      "type" : "pose"
+    },
+    {
+      "name" : "/actions/main/in/Teleport",
+      "requirement" : "mandatory",
+      "type" : "boolean"
+    },
+    {
+      "name" : "/actions/main/in/turnLeft",
+      "type" : "boolean"
+    },
+    {
+      "name" : "/actions/main/in/turnRight",
+      "type" : "boolean"
+    },
+    {
+      "name": "/actions/main/in/walk",
+      "type": "vector2",
+      "requirement": "mandatory"
+    }
+  ],
+  "action_sets": [
+    {
+      "name": "/actions/main",
+      "usage": "leftright"
+    }
+  ],
+  "localization" : [
+    {
+      "language_tag": "en_us",
+      "/actions/main" : "My Game Actions",
+      "/actions/main/in/turnLeft" : "Turn left"
+    }
+  ]
+}

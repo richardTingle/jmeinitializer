@@ -20,8 +20,6 @@ dependencies {
     implementation "org.jmonkeyengine:jme3-effects:" + jmonkeyengineVersion
     implementation "org.jmonkeyengine:jme3-lwjgl3:" + jmonkeyengineVersion
     implementation "org.jmonkeyengine:jme3-desktop:" + jmonkeyengineVersion
-
-    [DESKTOP_SPECIFIC_DEPENDENCIES]
 }
 task copyJars(type: Copy) {
     from (sourceSets.main.runtimeClasspath){

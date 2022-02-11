@@ -1,0 +1,111 @@
+{
+  "action_manifest_version" : 0,
+  "bindings": {
+    "/actions/main": {
+      "haptics" : [
+        {
+          "output" : "/actions/main/out/haptic",
+          "path" : "/user/hand/left/output/haptic"
+        },
+        {
+          "output" : "/actions/main/out/haptic",
+          "path" : "/user/hand/right/output/haptic"
+        }
+      ],
+      "poses" : [
+        {
+          "output" : "/actions/main/in/HandPoseLeft",
+          "path" : "/user/hand/left/pose/raw"
+        },
+        {
+          "output" : "/actions/main/in/HandPoseRight",
+          "path" : "/user/hand/right/pose/raw"
+        }
+      ],
+      "skeleton": [
+        {
+          "output" : "/actions/main/in/HandSkeletonLeft",
+          "path" : "/user/hand/left/input/skeleton/left"
+        },
+        {
+          "output" : "/actions/main/in/HandSkeletonRight",
+          "path" : "/user/hand/right/input/skeleton/right"
+        }
+      ],
+      "sources" : [
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/main/in/grip"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/grip"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/main/in/grip"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/grip"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/main/in/trigger"
+            }
+          },
+          "mode" : "trigger",
+          "path" : "/user/hand/right/input/trigger"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/main/in/trigger"
+            }
+          },
+          "mode" : "trigger",
+          "path" : "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs" : {
+            "east" : {
+              "output" : "/actions/main/in/turnRight"
+            },
+            "north" : {
+              "output" : "/actions/main/in/teleport"
+            },
+            "west" : {
+              "output" : "/actions/main/in/turnLeft"
+            }
+          },
+          "mode" : "dpad",
+          "parameters" : {
+            "deadzone_pct" : "75",
+            "overlap_pct" : "0",
+            "sticky" : "true",
+            "sub_mode" : "touch"
+          },
+          "path" : "/user/hand/left/input/trackpad"
+        },
+        {
+          "inputs" : {
+            "position" : {
+              "output" : "/actions/main/in/walk"
+            }
+          },
+          "mode" : "joystick",
+          "path" : "/user/hand/right/input/trackpad"
+        }
+      ]
+    }
+  },
+  "category" : "steamvr_input",
+  "controller_type" : "vive_controller",
+  "description" : "Bindings for the vive controller",
+  "name" : "[GAME_NAME_FULL] bindings for a vive controller",
+  "options" : {},
+  "simulated_actions" : []
+}

@@ -73,7 +73,12 @@ public enum MergeField {
      *     implementation 'com.github.stephengold:Minie:4.4.0
      *     com.simsilica:lemur:1.15.0
      */
-    OTHER_DEPENDENCIES;
+    OTHER_DEPENDENCIES,
+
+    /**
+     * This is VR_SPECIFIC_DEPENDENCIES + ANDROID_SPECIFIC_DEPENDENCIES + DESKTOP_SPECIFIC_DEPENDENCIES + OTHER_DEPENDENCIES
+     */
+    ALL_NON_JME_DEPENDENCIES;
 
     /**
      * What should be searched for in strings to be replaced by this merge field's data
