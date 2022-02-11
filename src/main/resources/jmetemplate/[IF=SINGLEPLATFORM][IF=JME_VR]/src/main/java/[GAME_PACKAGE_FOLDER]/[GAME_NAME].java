@@ -1,4 +1,4 @@
-package example;
+package [GAME_PACKAGE];
 
 import com.jme3.app.LostFocusBehavior;
 import com.jme3.app.SimpleApplication;
@@ -17,7 +17,7 @@ import com.onemillionworlds.tamarin.vrhands.VRHandsAppState;
 
 import java.io.File;
 
-public class Main extends SimpleApplication{
+public class [GAME_NAME] extends SimpleApplication{
 
     BoundHand boundHandLeft;
     BoundHand boundHandRight;
@@ -30,7 +30,7 @@ public class Main extends SimpleApplication{
         if (env.isInitialized()){
             VRAppState vrAppState = new VRAppState(settings, env);
 
-            Main app = new Main(vrAppState);
+            [GAME_NAME] app = new [GAME_NAME](vrAppState);
             app.setLostFocusBehavior(LostFocusBehavior.Disabled);
             app.setSettings(settings);
             app.setShowSettings(false);
@@ -38,7 +38,7 @@ public class Main extends SimpleApplication{
         }
     }
 
-    public Main(AppState... appStates) {
+    public [GAME_NAME](AppState... appStates) {
         super(appStates);
     }
 
