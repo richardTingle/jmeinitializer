@@ -9,4 +9,5 @@ dependencyResolutionManagement {
 rootProject.name = "[GAME_NAME]"
 [IF=JME_DESKTOP]include ':app'[/IF=JME_DESKTOP]
 [IF=JME_ANDROID]include ':desktop'[/IF=JME_ANDROID]
+[IF=JME_VR]include ':vrdesktop'[/IF=JME_VR]
 include ':game'
