@@ -17,6 +17,8 @@ class MergerTest {
         Merger merger = new Merger("MyGame", "my.excellent.company", List.of(), List.of(), "1", Map.of());
         assertEquals("src/main/java/my/excellent/company/MyGame.java", merger.mergePath("src/main/java/[GAME_PACKAGE_FOLDER]/[GAME_NAME].java"));
         assertEquals("path/something.java", merger.mergePath("path/something.java.jmetemplate"));
+        assertEquals(".gitignore",  merger.mergePath("[DOT]gitignore"));
+
     }
 
     @Test
@@ -38,11 +40,11 @@ class MergerTest {
 
     @Test
     void mergeText_ifStatements(){
-        Library testLibraryA = new Library("testLibraryA", "A test library", "groupId", "artifactId", false, LibraryCategory.GENERAL, false, "description");
-        Library testLibraryB = new Library("testLibraryB", "B test library", "groupId", "artifactId", false, LibraryCategory.GENERAL, false, "description");
+        Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
+
+        Library testLibraryB =  Library.builder("testLibraryB", "B test library",  LibraryCategory.GENERAL, "description").build();
 
         Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of());
-
 
         String testString2 = """
                                  Bob
@@ -100,8 +102,8 @@ class MergerTest {
 
     @Test
     void pathShouldBeAllowed(){
-        Library testLibraryA = new Library("testLibraryA", "A test library", "groupId", "artifactId", false, LibraryCategory.GENERAL, false, "description");
-        Library testLibraryB = new Library("testLibraryB", "B test library", "groupId", "artifactId", false, LibraryCategory.GENERAL, false, "description");
+        Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
+        Library testLibraryB = Library.builder("testLibraryB", "B test library",  LibraryCategory.GENERAL, "description").build();
 
         Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of());
 
@@ -119,8 +121,8 @@ class MergerTest {
 
     @Test
     void mergePath_librariesAndProfiles(){
-        Library testLibraryA = new Library("testLibraryA", "A test library", "groupId", "artifactId", false, LibraryCategory.GENERAL, false, "description");
-        Library testLibraryB = new Library("testLibraryB", "B test library", "groupId", "artifactId", false, LibraryCategory.GENERAL, false, "description");
+        Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
+        Library testLibraryB = Library.builder("testLibraryB", "B test library",  LibraryCategory.GENERAL, "description").build();
 
         Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of());
 

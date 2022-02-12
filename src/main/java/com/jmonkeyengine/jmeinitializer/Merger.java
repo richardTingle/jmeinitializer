@@ -97,6 +97,7 @@ public class Merger {
         path = path.replaceAll("//+", "/"); //if the if is the entirety of the folder then redundant folder is collapsed
         path = path.replace(".jmetemplate", "");
         path = path.replaceAll("^/", ""); //empty conditional folders at the start of the path can cause a preceding / which makes the zips "all weird". This removes that
+        path = path.replace("[DOT]", ".");
         return path;
     }
 
