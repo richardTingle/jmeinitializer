@@ -373,5 +373,7 @@ class ReactGameForm extends React.Component {
     }
 }
 
-const domContainer = document.querySelector('#react_game_form');
-ReactDOM.render(e(ReactGameForm), domContainer);
+$(document).ready(function () {
+    const domContainer = document.querySelector('#react_game_form');
+    ReactDOM.render(e(ReactGameForm), domContainer);
+})

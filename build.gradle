@@ -2,6 +2,8 @@ plugins {
 	id 'org.springframework.boot' version '2.6.6'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+	id 'idea'
+	id "com.github.node-gradle.node" version "3.1.1"
 }
 
 group = 'com.jmonkeyengine'
@@ -12,6 +14,10 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+}
+
+node {
+	download = true
 }
 
 repositories {
@@ -35,3 +41,16 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
+
+task buildReactApp(type: NodeTask, dependsOn: 'npmInstall') {
+	script = project.file('node_modules/webpack/bin/webpack.js')
+	args = [
+			'--mode', 'development',
+			'--entry', './src/main/resources/react/reactgameForm.jsx',
+			'-o', './src/main/resources/static/js/dist/react-app.js'
+	]
+}
+
+processResources.dependsOn 'buildReactApp'
+clean.delete << file('node_modules')
+clean.delete << file('src/main/resources/static/js/dist')
