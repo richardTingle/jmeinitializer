@@ -52,7 +52,7 @@ task buildReactApp(type: NodeTask, dependsOn: 'npmInstall') {
 	args = [
 			'--mode', 'development',
 			'--entry', './src/main/resources/react/reactgameForm.jsx',
-			'-o', './src/main/resources/static/js/dist/react-app.js'
+			'-o', './src/main/resources/static/js/dist/'
 	]
 }
 
