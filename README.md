@@ -22,9 +22,21 @@ There is a general approach of merge fields which allow both file path segments 
 Run the gradle task bootjar, that will produce a jar under build\libs\. Rename the jar jmeinitializer.jar then put it 
 whereever you want it. Then run:
 
-java -jar -Dspring.profiles.active=prod jmeinitializer.jar
+`java -jar -Dspring.profiles.active=prod jmeinitializer.jar`
 
 The -Dspring.profiles.active=prod changes the post it boots on to 80.
+
+### Running as a docker image
+
+A docker image can be create by (with docker installed) running
+
+`docker build -t jmeInitialiser .`
+
+(Note the final `.`, it is not a typo, it means use the dockerfile in the current directory)
+
+The image can then be run (forwarding the images internal port 80 to the host machines port 80) by running the following
+
+`docker run -p 80:80 jmeinitializer`
 
 ### How does templating work
 

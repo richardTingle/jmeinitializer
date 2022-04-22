@@ -21,6 +21,11 @@ dependencyCheck {
 	failBuildOnCVSS=5 //significant vulnerabilities will prevent a build being completed
 }
 
+bootJar {
+	//this config is basically to get it to stop putting "-0.0.0-SNAPSHOT" on the end of the jar name
+	archiveFileName = "${archiveBaseName.get()}.${archiveExtension.get()}"
+}
+
 node {
 	download = true
 }
@@ -51,7 +56,7 @@ task buildReactApp(type: NodeTask, dependsOn: 'npmInstall') {
 	script = project.file('node_modules/webpack/bin/webpack.js')
 	args = [
 			'--mode', 'development',
-			'--entry', './src/main/resources/react/reactgameForm.jsx',
+			'--entry', './src/main/resources/react/reactGameForm.jsx',
 			'-o', './src/main/resources/static/js/dist/'
 	]
 }
