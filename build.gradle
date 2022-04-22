@@ -4,6 +4,7 @@ plugins {
 	id 'java'
 	id 'idea'
 	id "com.github.node-gradle.node" version "3.1.1"
+	id "org.owasp.dependencycheck" version "7.0.4.1" //for security scanning of dependencies
 }
 
 group = 'com.jmonkeyengine'
@@ -14,6 +15,10 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+}
+
+dependencyCheck {
+	failBuildOnCVSS=5 //significant vulnerabilities will prevent a build being completed
 }
 
 node {
@@ -27,8 +32,8 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.0'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.1'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
 	implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
 	implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
 	compileOnly 'org.projectlombok:lombok'
@@ -54,3 +59,5 @@ task buildReactApp(type: NodeTask, dependsOn: 'npmInstall') {
 processResources.dependsOn 'buildReactApp'
 clean.delete << file('node_modules')
 clean.delete << file('src/main/resources/static/js/dist')
+
+bootJar.dependsOn 'dependencyCheckAnalyze' // <-- This step is quite slow, for experimental builds you may wish to temporarily comment it out
