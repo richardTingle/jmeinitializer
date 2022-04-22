@@ -14,6 +14,7 @@ COPY package-lock.json /app_build
 COPY webpack.config.js /app_build
 
 RUN cd /app_build &&\
+    chmod +x gradlew&&\
     ./gradlew bootjar
 
 RUN  chown 1000:1000 /app_build/build/libs/
