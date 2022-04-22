@@ -18,7 +18,7 @@ configurations {
 }
 
 dependencyCheck {
-	failBuildOnCVSS=5 //significant vulnerabilities will prevent a build being completed
+	failBuildOnCVSS=5
 }
 
 bootJar {
@@ -64,5 +64,3 @@ task buildReactApp(type: NodeTask, dependsOn: 'npmInstall') {
 processResources.dependsOn 'buildReactApp'
 clean.delete << file('node_modules')
 clean.delete << file('src/main/resources/static/js/dist')
-
-bootJar.dependsOn 'dependencyCheckAnalyze' // <-- This step is quite slow, for experimental builds you may wish to temporarily comment it out

@@ -36,7 +36,11 @@ A docker image can be create by (with docker installed) running
 
 The image can then be run (forwarding the images internal port 80 to the host machines port 80) by running the following
 
-`docker run -p 80:80 jmeinitializer`
+`docker run -p 80:80 jmeInitializer`
+
+### Check for vulnerabilities
+
+To check for vulnerabilities in the libraries this application uses (which should then be upgraded) run the gradle task dependencyCheckAnalyze
 
 ### How does templating work
 
