@@ -17,6 +17,16 @@
         <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"  crossorigin="true"></script>
         <script src="/js/dist/main.js"></script>
         <title>JMonkey Initializer</title>
+        <script>
+            if(parent){
+                setInterval(()=>{
+                    parent.postMessage(JSON.stringify({
+                        name:"jme-initializer-resize",
+                        height:document.body.scrollHeight
+                    }),"*");  
+                },1000);
+            }
+        </script>
     </head>
     <body style="padding-bottom: 50px;">
         <div class="jumbotron text-center">
