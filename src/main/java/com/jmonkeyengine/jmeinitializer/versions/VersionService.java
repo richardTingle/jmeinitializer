@@ -37,7 +37,7 @@ public class VersionService {
      */
     String versionSearchUrl = "https://search.maven.org/solrsearch/select?q=g:\"[GROUP]\"+AND+a:\"[ARTIFACT]\"&core=gav&rows=200&wt=json";
 
-    RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
 
     /**
      * Periodically the application will scan for the most recent version of a library and caches it here. Then
@@ -58,7 +58,6 @@ public class VersionService {
         this.libraryService = libraryService;
     }
 
-    @Scheduled(fixedDelay = 24, timeUnit = TimeUnit.HOURS)
     public void fetchNewVersions(){
         log.info("fetching new library versions");
 
@@ -70,7 +69,6 @@ public class VersionService {
             }
         }
     }
-
 
     /**
      * Will make an api call to attempt to get the most recent version of a library. If the api call fails Optional.empty will
