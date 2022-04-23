@@ -1,0 +1,117 @@
+[
+  {
+    "key": "JME_DESKTOP",
+    "displayName": "JME Desktop",
+    "category" : "JME_PLATFORM",
+    "descriptionText" : "Desktop Game development including Windows and Linux",
+    "defaultSelected" : true,
+    "usesJmeVersion" : true,
+    "artifacts" : [ { "groupId" : "org.jmonkeyengine", "artifactId" : "jme3-desktop" } ]
+  },
+  {
+    "key": "JME_VR",
+    "displayName": "JME VR",
+    "category" : "JME_PLATFORM",
+    "descriptionText" : "Virtual reality support",
+    "defaultSelected" : false,
+    "usesJmeVersion" : true,
+    "artifacts" : [ { "groupId" : "org.jmonkeyengine", "artifactId" : "jme3-vr" } ]
+  },
+  {
+    "key": "JME_ANDROID",
+    "displayName": "JME Android",
+    "category" : "JME_PLATFORM",
+    "descriptionText" : "Android Game development",
+    "defaultSelected" : false,
+    "usesJmeVersion" : true,
+    "artifacts" : [ { "groupId" : "org.jmonkeyengine", "artifactId" : "jme3-android" } ]
+  },
+  {
+  "key": "JME_EFFECTS",
+  "displayName": "JME Effects",
+  "category" : "JME_GENERAL",
+  "descriptionText" : "A JME library for effects, like explosions, smoke etc",
+  "defaultSelected" : false,
+  "usesJmeVersion" : true,
+  "artifacts" : [ { "groupId" : "org.jmonkeyengine", "artifactId" : "jme3-effects" } ]
+  },
+  {
+    "key": "JME_TERRAIN",
+    "displayName": "JME Terrain",
+    "category" : "JME_GENERAL",
+    "descriptionText" : "A JME library for terrain",
+    "defaultSelected" : false,
+    "usesJmeVersion" : true,
+    "artifacts" : [ { "groupId" : "org.jmonkeyengine", "artifactId" : "jme3-terrain" } ]
+  },
+  {
+    "key": "JME_NETWORKING",
+    "displayName": "JME Networking",
+    "category" : "NETWORKING",
+    "descriptionText" : "A JME library to support multiplayer games' network communication",
+    "defaultSelected" : false,
+    "usesJmeVersion" : true,
+    "artifacts" : [ { "groupId" : "org.jmonkeyengine", "artifactId" : "jme3-networking" } ]
+  },
+  {
+    "key": "JME_NIFTY",
+    "displayName": "Nifty Gui",
+    "category" : "GUI",
+    "descriptionText" : "Nifty GUI, a Gui library. No longer actively supported by JME but still available",
+    "defaultSelected" : false,
+    "usesJmeVersion" : true,
+    "artifacts" : [ { "groupId" : "org.jmonkeyengine", "artifactId" : "jme3-niftygui" } ]
+  },
+  {
+    "key": "JME_JBULLET",
+    "displayName": "JBullet",
+    "category" : "PHYSICS",
+    "descriptionText" : "A Java port of the popular C++ bullet physics library",
+    "defaultSelected" : false,
+    "usesJmeVersion" : true,
+    "artifacts" : [ { "groupId" : "org.jmonkeyengine", "artifactId" : "jme3-jbullet" } ]
+  },
+  {
+    "key": "MINIE",
+    "displayName": "Minie",
+    "category" : "PHYSICS",
+    "descriptionText" : "An alternative binding to the C++ bullet library, produced by a member of the JMonkey community",
+    "defaultSelected" : false,
+    "usesJmeVersion" : false,
+    "artifacts" : [ { "groupId" : "com.github.stephengold", "artifactId" : "Minie" } ]
+  },
+  {
+    "key": "LEMUR",
+    "displayName": "Lemur",
+    "category" : "GUI",
+    "descriptionText" : "Lemur is GUI toolkit for making user interfaces in jMonkeyEngine applications. It supports standard 2D UIs as well as fully 3D UIs. The modular design allows an application to use all or some of it as needed or even to build a completely new custom GUI library on top.",
+    "defaultSelected" : false,
+    "usesJmeVersion" : false,
+    "artifacts" : [
+      { "groupId" : "com.simsilica", "artifactId" : "lemur", "fallBackVersion": "1.15.0" },
+      { "groupId" : "com.simsilica", "artifactId" : "lemur-proto", "fallBackVersion": "1.12.0" }
+    ]
+  },
+  {
+    "key": "LOG4J2",
+    "displayName": "Log4j2",
+    "category" : "GENERAL",
+    "descriptionText" : "A popular java logging library, useful to produce text logs of whats going on in your application",
+    "defaultSelected" : false,
+    "usesJmeVersion" : false,
+    "artifacts" : [
+      { "groupId" : "org.apache.logging.log4j", "artifactId" : "log4j-core" },
+      { "groupId" : "org.apache.logging.log4j", "artifactId" : "log4j-api" }
+    ]
+  },
+  {
+    "key": "TAMARIN",
+    "displayName": "Tamarin",
+    "category" : "GENERAL",
+    "descriptionText" : "A virtual reality support library, providing VR hands & action based openVr",
+    "defaultSelected" : true,
+    "usesJmeVersion" : false,
+    "artifacts" : [ { "groupId" : "com.onemillionworlds", "artifactId" : "tamarin-core" } ],
+    "requiredPlatforms": ["JME_VR"]
+  }
+]
