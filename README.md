@@ -24,6 +24,10 @@ whereever you want it. Then run:
 
 `java -jar -Dspring.profiles.active=prod jmeinitializer.jar`
 
+To override the fetch url pass the following -D argument
+
+`-Dlibraries.fetchUrl=https://example.com/libraries.json`
+
 ### Running as a docker image
 
 A docker image can be create by (with docker installed) running
