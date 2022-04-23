@@ -1,13 +1,20 @@
 package com.jmonkeyengine.jmeinitializer.libraries;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.Value;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
+@Data
 @Builder
-@Value
+@NoArgsConstructor
+@AllArgsConstructor
 public class Library {
 
     /*
@@ -19,7 +26,7 @@ public class Library {
     @Singular
     Collection<Artifact> artifacts;
 
-    boolean usesJmeVersion;
+    boolean usesJmeVersion = false;
     LibraryCategory category;
     boolean defaultSelected;
     String descriptionText;
@@ -28,7 +35,7 @@ public class Library {
      * When searching for library versions the application uses this regex to determine if it's a "release" version
      * (And not a beta, release candidate etc)
      */
-    String libraryVersionRegex;
+    String libraryVersionRegex = "[\\.\\d]*";
 
     /**
      * If a library requires a particular platform (e.g. Tamarin requires VR) then this will prevent it being selected
@@ -37,8 +44,20 @@ public class Library {
      * Only the keys are listed here
      */
     @Singular()
-    Collection<String> requiredPlatforms;
+    Collection<String> requiredPlatforms = List.of();
 
+    @Override
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        Library library = (Library) o;
+        return key.equals(library.key);
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(key);
+    }
     public static Library.LibraryBuilder builder(String key, String displayName, LibraryCategory category, String descriptionText ){
         Library.LibraryBuilder builder = new Library.LibraryBuilder();
         builder.key(key)

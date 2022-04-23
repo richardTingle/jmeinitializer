@@ -166,10 +166,10 @@ public class Merger {
                 ).collect(Collectors.joining("\n"));
     }
 
-    protected static String formPlatformSpecificLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions, Library platform){
+    protected static String formPlatformSpecificLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions, String platform){
         return librariesRequired.stream()
                 .filter(l -> !l.isUsesJmeVersion())
-                .filter(l -> l.getRequiredPlatforms().contains(platform.getKey()))
+                .filter(l -> l.getRequiredPlatforms().contains(platform))
                 .flatMap(l ->
                         l.getArtifacts().stream()
                                 .map(artifact -> {
