@@ -1,2 +1,2 @@
 libraries:
-  fetchUrl: https://raw.githubusercontent.com/richardTingle/jmeinitializer/master/libraries.json
+  fetchUrl: https://raw.githubusercontent.com/jMonkeyEngine/jme-initializer/master/libraries.json
