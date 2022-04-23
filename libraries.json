@@ -88,8 +88,8 @@
     "defaultSelected" : false,
     "usesJmeVersion" : false,
     "artifacts" : [
-      { "groupId" : "com.simsilica", "artifactId" : "lemur", "fallBackVersion": "1.15.0" },
-      { "groupId" : "com.simsilica", "artifactId" : "lemur-proto", "fallBackVersion": "1.12.0" }
+      { "groupId" : "com.simsilica", "artifactId" : "lemur", "fallbackVersion": "1.15.0" },
+      { "groupId" : "com.simsilica", "artifactId" : "lemur-proto", "fallbackVersion": "1.12.0" }
     ]
   },
   {
