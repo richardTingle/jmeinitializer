@@ -1,5 +1,6 @@
 package com.jmonkeyengine.jmeinitializer;
 
+import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import com.jmonkeyengine.jmeinitializer.uisupport.UiLibraryDataDto;
 import org.springframework.core.io.ByteArrayResource;
@@ -37,6 +38,14 @@ public class InitializerRestController {
     @GetMapping("/jme-initializer/libraries")
     public UiLibraryDataDto getDataForUi(){
         return libraryService.getUiLibraryDataDto();
+    }
+
+    @GetMapping("/jme-initializer/documentation/librariesJsonSchema")
+    public ResponseEntity<String>  librariesJsonSchema(){
+        String schema = Library.getLibraryJsonSchema();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(schema);
     }
 
     @ResponseBody

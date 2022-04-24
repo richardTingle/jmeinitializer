@@ -1,10 +1,16 @@
 package com.jmonkeyengine.jmeinitializer.libraries;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
+import lombok.SneakyThrows;
 import lombok.Value;
 
 import java.util.Collection;
@@ -20,10 +26,17 @@ public class Library {
     /*
      * Used to uniquely represent the library in the UI and elsewhere
      */
+    @JsonProperty(required = true)
+    @JsonPropertyDescription("A key for the library, most obviously used in [IF=???] conditional merge fields in templates but used to identify the library wherever a machine cares about that")
     String key;
+
+    @JsonProperty(required = true)
+    @JsonPropertyDescription("A human readable short name for the library")
     String displayName;
 
     @Singular
+    @JsonProperty(required = true)
+    @JsonPropertyDescription("The actual maven artifacts that this library implies (usually just one but some libraries have multiple artifacts)")
     Collection<Artifact> artifacts;
 
     /**
@@ -32,11 +45,21 @@ public class Library {
      * E.g. jcenter()
      */
     @Singular
+    @JsonPropertyDescription("Optional. Can pass additional maven repositories e.g. jcenter() if this library cannot be found on mavenCentral (which is provided by default)")
     Collection<String> additionalMavenRepos = List.of();
 
+    @JsonPropertyDescription("True if this is a JMonkey library and so uses the unified JMonkeyEngine version. Default: false")
     boolean usesJmeVersion = false;
+
+    @JsonPropertyDescription("Used to divide the libraries up in the UI. JME_PLATFORM is a special category that can control if other libraries are available")
+    @JsonProperty(required = true)
     LibraryCategory category;
-    boolean defaultSelected;
+
+    @JsonPropertyDescription("If this library is presented pre ticked in the UI. Default: false")
+    boolean defaultSelected = false;
+
+    @JsonPropertyDescription("A longer piece of text (e.g. a sentence or two) describing the library")
+    @JsonProperty(required = true)
     String descriptionText;
 
     /**
@@ -46,6 +69,7 @@ public class Library {
      * Only the keys are listed here
      */
     @Singular()
+    @JsonPropertyDescription("If this library should only be presented as an option if a certain platform has been selected (e.g. only VR libraries if the VR platform has been selected). If empty the library will be available for all platforms")
     Collection<String> requiredPlatforms = List.of();
 
     @Override
@@ -68,6 +92,14 @@ public class Library {
                 .descriptionText(descriptionText)
                 .category(category);
         return builder;
+    }
+
+    @SneakyThrows
+    public static String getLibraryJsonSchema(){
+        JsonSchemaGenerator schemaGen = new JsonSchemaGenerator(new ObjectMapper());
+        JsonSchema schema = schemaGen.generateSchema(Library[].class);
+
+        return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(schema);
     }
 
 }
