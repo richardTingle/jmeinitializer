@@ -194,7 +194,7 @@ class MergerTest {
         String testString = """
                             buildscript {
                                 repositories {
-                            [MAVEN_REPOS]
+                                    [MAVEN_REPOS]
                                 }
                             }
                             """;

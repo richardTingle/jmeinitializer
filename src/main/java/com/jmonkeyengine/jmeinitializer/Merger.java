@@ -3,6 +3,7 @@ package com.jmonkeyengine.jmeinitializer;
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryCategory;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.CaseUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -108,7 +109,29 @@ public class Merger {
         String fileContentsAsString = new String(fileContents, StandardCharsets.UTF_8);
 
         for(Map.Entry<MergeField, String> merges : mergeData.entrySet()){
-            fileContentsAsString = fileContentsAsString.replace(merges.getKey().getMergeFieldInText(), merges.getValue());
+            String mergeKey = merges.getKey().getMergeFieldInText();
+            fileContentsAsString = fileContentsAsString.lines()
+                    .map( line -> {
+                        if (line.contains(mergeKey)){
+                            if (StringUtils.countMatches(line, mergeKey) == 1 ){
+                                //try to match the indentation of the merge field (for multiline merge fields)
+                                int indexation = line.indexOf(mergeKey);
+                                String baseMergeData = merges.getValue();
+                                String indentationString = " ".repeat(indexation);
+                                String indentedMergeData = baseMergeData.lines().map(l -> indentationString + l ).collect(Collectors.joining("\n"));
+                                return line
+                                        .replace(indentationString+mergeKey, indentedMergeData)
+                                        .replace(mergeKey, baseMergeData) //this is a catch-all in case the merge field wasn't indented but prefixed by normal text
+                                        ;
+                            }else{
+                                //to complicated, hopefully just a single line merge field
+                                return line.replace(mergeKey, merges.getValue());
+                            }
+                        }else{
+                            return line;
+                        }
+                    }).collect(Collectors.joining("\n"));
+
         }
 
         /*
@@ -138,6 +161,9 @@ public class Merger {
             //then get rid of anything thats on a line with allowed text
             fileContentsAsString = fileContentsAsString.replace("_eliminated_", "");
         }
+
+        //always end with a new character because that will make git changes better in the future (plus the test want that)
+        fileContentsAsString = fileContentsAsString+"\n";
 
         return fileContentsAsString.getBytes(StandardCharsets.UTF_8);
     }
@@ -174,7 +200,6 @@ public class Merger {
         librariesRequired.forEach(l -> mavenRepos.addAll(l.getAdditionalMavenRepos()));
 
         return mavenRepos.stream()
-                .map(mr -> "        " + mr)
                 .sorted() //sorting them makes testing this easier
                 .collect(Collectors.joining("\n"));
     }
