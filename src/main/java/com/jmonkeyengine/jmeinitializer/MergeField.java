@@ -78,7 +78,15 @@ public enum MergeField {
     /**
      * This is VR_SPECIFIC_DEPENDENCIES + ANDROID_SPECIFIC_DEPENDENCIES + DESKTOP_SPECIFIC_DEPENDENCIES + OTHER_DEPENDENCIES
      */
-    ALL_NON_JME_DEPENDENCIES;
+    ALL_NON_JME_DEPENDENCIES,
+
+    /**
+     * Maven repos required by the libraries. E.g. jcenter()
+     *
+     * This is a deduped list of all the libraries required by all the libraries
+     */
+    MAVEN_REPOS
+    ;
 
     /**
      * What should be searched for in strings to be replaced by this merge field's data

@@ -67,8 +67,8 @@ public class Merger {
         mergeData.put(MergeField.ANDROID_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_ANDROID));
         mergeData.put(MergeField.DESKTOP_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_DESKTOP));
         mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredAnyPlatformLibrariesMergeField(librariesRequired, libraryVersions));
-
         mergeData.put(MergeField.ALL_NON_JME_DEPENDENCIES, mergeData.get(MergeField.VR_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.ANDROID_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.DESKTOP_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.OTHER_DEPENDENCIES));
+        mergeData.put(MergeField.MAVEN_REPOS, formMavenRepos(librariesRequired));
 
         libraryKeysAndProfilesInUse = librariesRequired.stream().map(Library::getKey).collect(Collectors.toSet());
         libraryKeysAndProfilesInUse.addAll(additionalProfiles);
@@ -164,6 +164,19 @@ public class Merger {
                                     return "    implementation '" + mavenCoordinate + ":" + artifact.getPinVersionOpt().orElse(libraryVersions.getOrDefault(mavenCoordinate, artifact.getFallbackVersion()))  + "'";
                                 })
                 ).collect(Collectors.joining("\n"));
+    }
+
+    protected static String formMavenRepos(List<Library> librariesRequired){
+        Set<String> mavenRepos = new HashSet<>();
+        mavenRepos.add("mavenCentral()");
+        mavenRepos.add("mavenLocal()");
+
+        librariesRequired.forEach(l -> mavenRepos.addAll(l.getAdditionalMavenRepos()));
+
+        return mavenRepos.stream()
+                .map(mr -> "        " + mr)
+                .sorted() //sorting them makes testing this easier
+                .collect(Collectors.joining("\n"));
     }
 
     protected static String formPlatformSpecificLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions, String platform){

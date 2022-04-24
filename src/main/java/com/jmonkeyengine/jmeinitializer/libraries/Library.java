@@ -27,8 +27,9 @@ public class Library {
     Collection<Artifact> artifacts;
 
     /**
-     * Maven central is always available but additional repos may be provided. These end up in 
-     * all of the templates extra repos section for simplicity
+     * Maven central is always available but additional repos may be provided.
+     *
+     * E.g. jcenter()
      */
     @Singular
     Collection<String> additionalMavenRepos = List.of();

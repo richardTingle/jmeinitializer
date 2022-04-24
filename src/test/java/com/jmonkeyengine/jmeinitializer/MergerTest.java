@@ -187,6 +187,31 @@ class MergerTest {
 
         Merger merger = new Merger("", "", List.of(testLibraryA), List.of("SINGLEPLATFORM"), "1", Map.of("group:artA", "1.2.4", "group:artB", "1.2.4"));
         assertEquals(expectedString.trim(), new String(merger.mergeFileContents(testString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8).trim());
+    }
 
+    @Test
+    void additionalRepositoriesAddedCorrectly() {
+        String testString = """
+                            buildscript {
+                                repositories {
+                            [MAVEN_REPOS]
+                                }
+                            }
+                            """;
+        String expectedString = """
+                            buildscript {
+                                repositories {
+                                    jcentre()
+                                    mavenCentral()
+                                    mavenLocal()
+                                }
+                            }
+                            """;
+
+        Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
+        testLibraryA.setAdditionalMavenRepos(List.of("jcentre()"));
+
+        Merger merger = new Merger("", "", List.of(testLibraryA), List.of("SINGLEPLATFORM"), "1", Map.of());
+        assertEquals(expectedString, new String(merger.mergeFileContents(testString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
     }
 }
