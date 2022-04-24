@@ -19,7 +19,7 @@ if (!hasProperty('mainClass')) {
 jar.manifest.attributes('Main-Class': mainClassName)
 
 repositories {
-[MAVEN_REPOS]
+    [MAVEN_REPOS]
 }
 
 dependencies {

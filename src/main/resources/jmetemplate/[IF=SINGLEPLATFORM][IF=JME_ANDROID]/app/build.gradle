@@ -47,9 +47,9 @@ dependencies {
     implementation 'org.jmonkeyengine:jme3-android:'+jmonkeyengineVersion
     implementation 'org.jmonkeyengine:jme3-android-native:'+jmonkeyengineVersion
     implementation 'org.jmonkeyengine:jme3-core:'+jmonkeyengineVersion
-[JME_DEPENDENCIES]
+    [JME_DEPENDENCIES]
 
-[ALL_NON_JME_DEPENDENCIES]
+    [ALL_NON_JME_DEPENDENCIES]
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

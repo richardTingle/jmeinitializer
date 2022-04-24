@@ -14,6 +14,6 @@ dependencies {
     runtimeOnly 'org.jmonkeyengine:jme3-jogg:' + jmonkeyengineVersion
     runtimeOnly 'org.jmonkeyengine:jme3-plugins:' + jmonkeyengineVersion
 
-[JME_DEPENDENCIES]
-[ALL_NON_JME_DEPENDENCIES]
+    [JME_DEPENDENCIES]
+    [ALL_NON_JME_DEPENDENCIES]
 }
