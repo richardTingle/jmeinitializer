@@ -148,7 +148,7 @@ public class Merger {
                 .filter(l -> l.getCategory() != LibraryCategory.JME_PLATFORM) //platforms are hard coded into the templates to better support multimodule
                 .flatMap(l ->
                     l.getArtifacts().stream()
-                            .map(artifact -> "    implementation '" + artifact.groupId() + ":" + artifact.artifactId() + ":'+ jmonkeyengineVersion")
+                            .map(artifact -> "    implementation '" + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":'"+ artifact.getPinVersionOpt().map(pv -> "'" + pv + "'").orElse( "jmonkeyengineVersion") )
                 ).collect(Collectors.joining("\n"));
 
     }
@@ -160,8 +160,8 @@ public class Merger {
                 .flatMap(l ->
                         l.getArtifacts().stream()
                                 .map(artifact -> {
-                                    String mavenCoordinate = artifact.groupId() + ":" + artifact.artifactId();
-                                    return "    implementation '" + mavenCoordinate + ":" + libraryVersions.getOrDefault(mavenCoordinate, artifact.fallbackVersion())  + "'";
+                                    String mavenCoordinate = artifact.getGroupId() + ":" + artifact.getArtifactId();
+                                    return "    implementation '" + mavenCoordinate + ":" + artifact.getPinVersionOpt().orElse(libraryVersions.getOrDefault(mavenCoordinate, artifact.getFallbackVersion()))  + "'";
                                 })
                 ).collect(Collectors.joining("\n"));
     }
@@ -173,8 +173,8 @@ public class Merger {
                 .flatMap(l ->
                         l.getArtifacts().stream()
                                 .map(artifact -> {
-                                    String mavenCoordinate = artifact.groupId() + ":" + artifact.artifactId();
-                                    return "    implementation '" + mavenCoordinate + ":" + libraryVersions.getOrDefault(mavenCoordinate, artifact.fallbackVersion())  + "'";
+                                    String mavenCoordinate = artifact.getGroupId() + ":" + artifact.getArtifactId();
+                                    return "    implementation '" + mavenCoordinate + ":" + artifact.getPinVersionOpt().orElse(libraryVersions.getOrDefault(mavenCoordinate, artifact.getFallbackVersion()))  + "'";
                                 })
                 ).collect(Collectors.joining("\n"));
     }

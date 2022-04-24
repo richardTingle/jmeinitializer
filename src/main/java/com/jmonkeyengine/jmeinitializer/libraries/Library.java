@@ -26,16 +26,17 @@ public class Library {
     @Singular
     Collection<Artifact> artifacts;
 
+    /**
+     * Maven central is always available but additional repos may be provided. These end up in 
+     * all of the templates extra repos section for simplicity
+     */
+    @Singular
+    Collection<String> additionalMavenRepos = List.of();
+
     boolean usesJmeVersion = false;
     LibraryCategory category;
     boolean defaultSelected;
     String descriptionText;
-
-    /*
-     * When searching for library versions the application uses this regex to determine if it's a "release" version
-     * (And not a beta, release candidate etc)
-     */
-    String libraryVersionRegex = "[\\.\\d]*";
 
     /**
      * If a library requires a particular platform (e.g. Tamarin requires VR) then this will prevent it being selected
@@ -58,13 +59,13 @@ public class Library {
     public int hashCode(){
         return Objects.hash(key);
     }
+
     public static Library.LibraryBuilder builder(String key, String displayName, LibraryCategory category, String descriptionText ){
         Library.LibraryBuilder builder = new Library.LibraryBuilder();
         builder.key(key)
                 .displayName(displayName)
                 .descriptionText(descriptionText)
-                .category(category)
-                .libraryVersionRegex("[\\.\\d]*");
+                .category(category);
         return builder;
     }
 
