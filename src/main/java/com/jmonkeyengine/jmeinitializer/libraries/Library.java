@@ -22,6 +22,7 @@ import java.util.Objects;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "The structure of json as expected to be supplied to the initializer by JMonkey store to inform it of available libraries ")
 public class Library {
 
     /*

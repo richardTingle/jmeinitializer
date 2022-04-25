@@ -53,8 +53,6 @@ public class InitializerZipService {
         List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
         Merger merger = new Merger(gameName, packageName, requiredLibraries,  calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
 
-        Resource buildGradleResource = ResourcePatternUtils.getResourcePatternResolver(null).getResource("classpath:jmetemplate/build.gradle");
-
         Map<String, String> gradleFiles = new HashMap<>();
 
         //find and merge all the build.gradle files (there may be more than one in a multimodule project
