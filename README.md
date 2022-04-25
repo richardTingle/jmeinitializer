@@ -63,6 +63,10 @@ Additionally, optionally, you can end any file .jmetemplate. This has no actual 
 output file name. Its purpose is to stop IDEs from trying to do error highlighting on known file types (e.g. gradle files)
 where the IF and merge fields make the files look to the IDE as errored
 
+### API documentation ###
+
+Go to [DOMAIN]/swagger-ui.html for the api documentation. E.g. https://start.jmonkeyengine.org/swagger-ui.html
+
 ### Who do I talk to? ###
 
 * Original creator: richtea

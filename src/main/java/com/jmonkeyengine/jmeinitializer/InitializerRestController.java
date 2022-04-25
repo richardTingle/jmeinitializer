@@ -40,14 +40,6 @@ public class InitializerRestController {
         return libraryService.getUiLibraryDataDto();
     }
 
-    @GetMapping("/jme-initializer/documentation/librariesJsonSchema")
-    public ResponseEntity<String>  librariesJsonSchema(){
-        String schema = Library.getLibraryJsonSchema();
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(schema);
-    }
-
     @ResponseBody
     @GetMapping("/jme-initializer/zip")
     public ResponseEntity<Resource> serveFile(@RequestParam String gameName,@RequestParam String packageName, @RequestParam String libraryList) throws IOException {
