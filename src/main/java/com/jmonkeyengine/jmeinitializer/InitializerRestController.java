@@ -51,9 +51,9 @@ public class InitializerRestController {
     @ResponseBody
     @GetMapping("/jme-initializer/zip")
     public ResponseEntity<Resource> buildStarterZip(
-            @Parameter(description=GAME_NAME_DOC_STRING) @RequestParam String gameName,
-            @Parameter(description=GAME_DESCRIPTION_DOC_STRING) @RequestParam String packageName,
-            @Parameter(description=REQUIRED_LIBRARIES_DOC_STRING) @RequestParam String libraryList)
+            @Parameter(description=GAME_NAME_DOC_STRING, example = "MyGame") @RequestParam String gameName,
+            @Parameter(description=GAME_DESCRIPTION_DOC_STRING, example = "com.example") @RequestParam String packageName,
+            @Parameter(description=REQUIRED_LIBRARIES_DOC_STRING, example = "JME_DESKTOP,LEMUR,LOG4J2") @RequestParam String libraryList)
             throws IOException {
 
         try(ByteArrayOutputStream byteArrayOutputStream = initializerZipService.produceZipInMemory( gameName, packageName, Arrays.asList(libraryList.split(",")) )){
@@ -70,13 +70,13 @@ public class InitializerRestController {
         }
     }
 
-    @Operation(summary = "Build Starter's build.gradle files", description = "Given details about the game/application will return a map of the names of the build.gradle files (including paths if appropriate) to their contents.\n\n Is intended to give end users a preview of libraries/structure they have requested before they get the full zip")
+    @Operation(summary = "Build starter project's build.gradle files", description = "Given details about the game/application will return a map of the names of the build.gradle files (including paths if appropriate) to their contents.\n\n Is intended to give end users a preview of libraries/structure they have requested before they get the full zip")
     @ResponseBody
     @GetMapping("/jme-initializer/gradle-preview")
     public ResponseEntity<Map<String, String>> previewGradleFile(
-            @Parameter(description=GAME_NAME_DOC_STRING) @RequestParam String gameName,
-            @Parameter(description=GAME_DESCRIPTION_DOC_STRING) @RequestParam String packageName,
-            @Parameter(description=REQUIRED_LIBRARIES_DOC_STRING) @RequestParam String libraryList) throws IOException {
+            @Parameter(description=GAME_NAME_DOC_STRING, example = "MyGame") @RequestParam String gameName,
+            @Parameter(description=GAME_DESCRIPTION_DOC_STRING, example = "com.example") @RequestParam String packageName,
+            @Parameter(description=REQUIRED_LIBRARIES_DOC_STRING, example = "JME_DESKTOP,LEMUR,LOG4J2") @RequestParam String libraryList) throws IOException {
         Map<String, String> gradleFile = initializerZipService.produceGradleFilePreview(gameName, packageName, Arrays.asList(libraryList.split(",")));
 
         return ResponseEntity.ok().body(gradleFile);
