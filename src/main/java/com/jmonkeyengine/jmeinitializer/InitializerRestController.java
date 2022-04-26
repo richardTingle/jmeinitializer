@@ -5,6 +5,10 @@ import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import com.jmonkeyengine.jmeinitializer.uisupport.UiLibraryDataDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
@@ -48,6 +52,10 @@ public class InitializerRestController {
     }
 
     @Operation(summary = "Build Starter zip", description = "Given details about the game/application will return a zip file containing a starter project")
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "A zip of a new gradle project",
+                    content = { @Content(mediaType = "application/octet-stream") })
+    })
     @ResponseBody
     @GetMapping("/jme-initializer/zip")
     public ResponseEntity<Resource> buildStarterZip(
@@ -70,7 +78,12 @@ public class InitializerRestController {
         }
     }
 
-    @Operation(summary = "Build starter project's build.gradle files", description = "Given details about the game/application will return a map of the names of the build.gradle files (including paths if appropriate) to their contents.\n\n Is intended to give end users a preview of libraries/structure they have requested before they get the full zip")
+    @Operation( summary = "Build starter project's build.gradle files", description = "Given details about the game/application will return a map of the names of the build.gradle files (including paths if appropriate) to their contents.\n\n Is intended to give end users a preview of libraries/structure they have requested before they get the full zip")
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "A map of gradle file names to their contents",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{\"build.gradle\":\"string\", \"desktop/build.gradle\":\"string\"}")) })
+    })
     @ResponseBody
     @GetMapping("/jme-initializer/gradle-preview")
     public ResponseEntity<Map<String, String>> previewGradleFile(
