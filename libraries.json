@@ -108,7 +108,7 @@
     "descriptionText" : "A virtual reality support library, providing VR hands & action based openVr",
     "defaultSelected" : true,
     "usesJmeVersion" : false,
-    "artifacts" : [ { "groupId" : "com.onemillionworlds", "artifactId" : "tamarin-core" } ],
+    "artifacts" : [ { "groupId" : "com.onemillionworlds", "artifactId" : "tamarin" } ],
     "requiredPlatforms": ["JME_VR"]
   }
 ]
