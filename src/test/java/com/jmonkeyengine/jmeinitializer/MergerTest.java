@@ -166,7 +166,7 @@ class MergerTest {
     @Test
     void artifactsAddedCorrectly () {
         String testString = """
-                            [ALL_NON_JME_DEPENDENCIES]
+                                [ALL_NON_JME_DEPENDENCIES]
                             """;
 
         String expectedString = """
