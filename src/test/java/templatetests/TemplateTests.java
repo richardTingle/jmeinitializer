@@ -97,6 +97,10 @@ public class TemplateTests{
             File outputFile = new File(folder, templateEntry.getKey());
             outputFile.getParentFile().mkdirs();
             Files.write(outputFile.toPath(), templateEntry.getValue());
+            if (outputFile.toString().endsWith("gradlew")){
+                outputFile.setExecutable(true); //only needed for linux
+            }
+
         }
 
         log.info("Begin gradle task");

@@ -39,7 +39,7 @@ public class InitializerZipService {
      * Most file types are treated as text and scanned for merge fields, but for binary files thats "not a great idea"
      * those file types that shouldn't be scanned are listed here and they are included in the bundle as is
      */
-    private static Set<String> fileExtensionsToTreatAsBlobs = Set.of(".jar");
+    private final static Set<String> fileExtensionsToTreatAsBlobs = Set.of(".jar");
 
     private final VersionService versionService;
 
@@ -85,6 +85,7 @@ public class InitializerZipService {
                 ZipEntry entry = new ZipEntry(templateFile.getKey());
                 zipOutputStream.putNextEntry(entry);
                 zipOutputStream.write(templateFile.getValue());
+
                 zipOutputStream.closeEntry();
             }
         }catch(IOException ioe) {
