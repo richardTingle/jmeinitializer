@@ -68,6 +68,9 @@ Gradle task `templateTest` will check that all the templates at least compile wi
 user options. These tests are not run as part of the build because they rely on getting
 the most recent versions of external libraries. So they may pass today but not tomorrow
 
+To test the templates with android an installed android sdk is also required (another good reason 
+for this not to be plugged into the build)
+
 ### API documentation ###
 
 Go to [DOMAIN]/swagger-ui.html for the api documentation. E.g. https://start.jmonkeyengine.org/swagger-ui.html
