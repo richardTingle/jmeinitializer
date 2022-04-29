@@ -174,7 +174,7 @@ public class Merger {
                 .filter(l -> l.getCategory() != LibraryCategory.JME_PLATFORM) //platforms are hard coded into the templates to better support multimodule
                 .flatMap(l ->
                     l.getArtifacts().stream()
-                            .map(artifact -> "implementation '" + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":'"+ artifact.getPinVersionOpt().map(pv -> "'" + pv + "'").orElse( "jmonkeyengineVersion") )
+                            .map(artifact -> "implementation '" + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":' + " + artifact.getPinVersionOpt().map(pv -> "'" + pv + "'").orElse( "jmonkeyengineVersion") )
                 ).collect(Collectors.joining("\n"));
 
     }
