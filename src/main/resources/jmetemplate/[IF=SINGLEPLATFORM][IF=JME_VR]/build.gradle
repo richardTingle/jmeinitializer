@@ -31,10 +31,10 @@ dependencies {
     runtimeOnly 'org.jmonkeyengine:jme3-plugins:' + jmonkeyengineVersion
     implementation 'org.jmonkeyengine:jme3-vr:' + jmonkeyengineVersion
 
-[JME_DEPENDENCIES]
+    [JME_DEPENDENCIES]
     runtimeOnly 'org.jmonkeyengine:jme3-lwjgl3:' + jmonkeyengineVersion
 
-[ALL_NON_JME_DEPENDENCIES]
+    [ALL_NON_JME_DEPENDENCIES]
 }
 
 // cleanup tasks
