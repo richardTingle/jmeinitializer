@@ -70,28 +70,49 @@ public class InitializerZipService {
 
     public ByteArrayOutputStream produceZipInMemory(String gameName, String packageName, List<String> requiredLibraryKeys ){
 
-        List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
-
-        Merger merger = new Merger(gameName, packageName, requiredLibraries, calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
+        Map<String,byte[]> baseTemplate = produceTemplate(gameName, packageName, requiredLibraryKeys);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try(ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
-            for( Map.Entry<String,byte[]> templateFile : getRawTemplatePaths().entrySet()){
-                if (merger.pathShouldBeAllowed(templateFile.getKey())) {
-                    ZipEntry entry = new ZipEntry(merger.mergePath(templateFile.getKey())); 
-                    zipOutputStream.putNextEntry(entry);
-                    if (fileExtensionsToTreatAsBlobs.stream().anyMatch(fe -> templateFile.getKey().contains(fe))) {
-                        zipOutputStream.write(templateFile.getValue());
-                    } else {
-                        zipOutputStream.write(merger.mergeFileContents(templateFile.getValue()));
-                    }
-                    zipOutputStream.closeEntry();
-                }
+            for( Map.Entry<String,byte[]> templateFile : baseTemplate.entrySet()){
+                ZipEntry entry = new ZipEntry(templateFile.getKey());
+                zipOutputStream.putNextEntry(entry);
+                zipOutputStream.write(templateFile.getValue());
+                zipOutputStream.closeEntry();
             }
         }catch(IOException ioe) {
             throw new RuntimeException("Exception while forming zip", ioe);
         }
         return byteArrayOutputStream;
+    }
+
+    /**
+     * @param gameName the game name
+     * @param packageName the package used by the game classes
+     * @param requiredLibraryKeys the libraries required by the game
+     * @return a map of paths to the file contents that should be created at that path
+     */
+    public Map<String,byte[]> produceTemplate(String gameName, String packageName, List<String> requiredLibraryKeys ){
+
+        List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
+
+        Merger merger = new Merger(gameName, packageName, requiredLibraries, calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
+
+        Map<String,byte[]> templateFiles = new HashMap<>();
+
+        for( Map.Entry<String,byte[]> templateFile : getRawTemplatePaths().entrySet()){
+            if (merger.pathShouldBeAllowed(templateFile.getKey())) {
+                String mergedPath = merger.mergePath(templateFile.getKey());
+                byte[] fileContents;
+                if (fileExtensionsToTreatAsBlobs.stream().anyMatch(fe -> templateFile.getKey().contains(fe))) {
+                    fileContents =templateFile.getValue();
+                } else {
+                    fileContents = merger.mergeFileContents(templateFile.getValue());
+                }
+                templateFiles.put(mergedPath, fileContents);
+            }
+        }
+        return templateFiles;
     }
 
     private List<Library> parseLibraryKeys(List<String> requiredLibraryKeys){

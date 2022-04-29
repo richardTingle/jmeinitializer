@@ -66,6 +66,18 @@ task buildReactApp(type: NodeTask, dependsOn: 'npmInstall') {
 	]
 }
 
+test {
+	useJUnitPlatform {
+		excludeTags 'TemplateTests'
+	}
+}
+
+task templateTest(type: Test)  {
+	useJUnitPlatform {
+		includeTags 'TemplateTests'
+	}
+}
+
 processResources.dependsOn 'buildReactApp'
 clean.delete << file('node_modules')
 clean.delete << file('src/main/resources/static/js/dist')
