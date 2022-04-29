@@ -26,10 +26,15 @@
                     }),"*");  
                 },1000);
             }
+            if(window.self!=window.top){
+                window.addEventListener("load",()=>{
+                    document.querySelector("#head").style.display="none";
+                });
+            }
         </script>
     </head>
     <body style="padding-bottom: 50px;">
-        <div class="jumbotron text-center">
+        <div id="head" class="jumbotron text-center">
             <h1>JMonkey Initializer</h1>
             <p>Get creating games fast!</p>
         </div>
