@@ -4,6 +4,7 @@ import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryCategory;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import com.jmonkeyengine.jmeinitializer.versions.VersionService;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
@@ -43,6 +44,12 @@ public class InitializerZipService {
     private final VersionService versionService;
 
     private final LibraryService libraryService;
+
+    /**
+     * If true, then if libaries are requested that are inappropriate (or not available) an exception is thrown
+     */
+    @Setter
+    private boolean strictValidate = false;
 
     public InitializerZipService (VersionService versionService, LibraryService libraryService) {
         this.versionService = versionService;
@@ -128,7 +135,7 @@ public class InitializerZipService {
      * @return
      */
     private List<Library> eliminateLibrariesOnUnsupportedPlatforms(List<Library> unfilteredList){
-        return unfilteredList.stream()
+        List<Library> filtered =  unfilteredList.stream()
                 .filter(l -> {
                     if (l.getRequiredPlatforms().isEmpty()){
                         return true;
@@ -138,6 +145,12 @@ public class InitializerZipService {
 
                 })
                 .collect(Collectors.toList());
+
+        if ( strictValidate && filtered.size() != unfilteredList.size()){
+            throw new RuntimeException("Illegal library requested and strictValidate is on");
+        }
+
+        return filtered;
     }
 
     /**

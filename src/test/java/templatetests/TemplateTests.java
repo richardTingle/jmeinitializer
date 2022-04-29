@@ -44,7 +44,7 @@ public class TemplateTests{
         VersionService versionService = new VersionService(libraryService);
         versionService.fetchNewVersions();
         initializerZipService = new InitializerZipService(versionService, libraryService);
-
+        initializerZipService.setStrictValidate(true);
         tempFolder = new File(System.getProperty("java.io.tmpdir"), "jmeinitialiser");
         if (tempFolder.exists()){
             FileUtils.deleteDirectory(tempFolder);
@@ -53,7 +53,32 @@ public class TemplateTests{
 
     @AfterAll
     public static void closeDown() throws IOException{
-        //FileUtils.deleteDirectory(tempFolder);
+        FileUtils.deleteDirectory(tempFolder);
+    }
+
+    @Test
+    public void testMultiProjectTemplate_withTamarin() throws Exception{
+        testTemplate("VrTamarinTest", "com.example", "JME_DESKTOP", "JME_ANDROID", "JME_EFFECTS", "JME_VR", "LEMUR", "TAMARIN" );
+    }
+
+    @Test
+    public void testMultiProjectTemplate_withoutTamarin() throws Exception{
+        testTemplate("VrTamarinTest", "com.example", "JME_DESKTOP", "JME_ANDROID", "JME_EFFECTS", "JME_VR", "LEMUR" );
+    }
+
+    @Test
+    public void testDesktopTemplate() throws Exception{
+        testTemplate("VrTamarinTest", "com.example", "JME_DESKTOP", "JME_EFFECTS", "LEMUR" );
+    }
+
+    @Test
+    public void testAndroidTemplate() throws Exception{
+        testTemplate("VrTamarinTest", "com.example", "JME_ANDROID", "JME_EFFECTS", "LEMUR" );
+    }
+
+    @Test
+    public void testVrTemplate_withoutTamarin() throws Exception{
+        testTemplate("VrTamarinTest", "com.example", "JME_VR", "JME_EFFECTS", "LEMUR" );
     }
 
     @Test
