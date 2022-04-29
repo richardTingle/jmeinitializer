@@ -63,6 +63,11 @@ Additionally, optionally, you can end any file .jmetemplate. This has no actual 
 output file name. Its purpose is to stop IDEs from trying to do error highlighting on known file types (e.g. gradle files)
 where the IF and merge fields make the files look to the IDE as errored
 
+### Testing templates ###
+Gradle task `templateTest` will check that all the templates at least compile with sensible 
+user options. These tests are not run as part of the build because they rely on getting
+the most recent versions of external libraries. So they may pass today but not tomorrow
+
 ### API documentation ###
 
 Go to [DOMAIN]/swagger-ui.html for the api documentation. E.g. https://start.jmonkeyengine.org/swagger-ui.html

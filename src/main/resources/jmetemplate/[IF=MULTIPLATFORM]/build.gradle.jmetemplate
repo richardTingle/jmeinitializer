@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
+        [IF=JME_ANDROID]google()[/IF=JME_ANDROID]
         [MAVEN_REPOS]
     }
     dependencies {

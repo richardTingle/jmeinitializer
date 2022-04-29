@@ -21,9 +21,6 @@ import java.io.File;
 
 public class [GAME_NAME] extends SimpleApplication{
 
-    BoundHand boundHandLeft;
-    BoundHand boundHandRight;
-
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
         settings.put(VRConstants.SETTING_VRAPI, VRConstants.SETTING_VRAPI_OPENVR_LWJGL_VALUE);

@@ -58,27 +58,27 @@ public class TemplateTests{
 
     @Test
     public void testMultiProjectTemplate_withTamarin() throws Exception{
-        testTemplate("VrTamarinTest", "com.example", "JME_DESKTOP", "JME_ANDROID", "JME_EFFECTS", "JME_VR", "LEMUR", "TAMARIN" );
+        testTemplate("MultiTamarinTest", "com.example", "JME_DESKTOP", "JME_ANDROID", "JME_EFFECTS", "JME_VR", "MINIE", "TAMARIN" );
     }
 
     @Test
     public void testMultiProjectTemplate_withoutTamarin() throws Exception{
-        testTemplate("VrTamarinTest", "com.example", "JME_DESKTOP", "JME_ANDROID", "JME_EFFECTS", "JME_VR", "LEMUR" );
+        testTemplate("MultiNoTamarinTest", "com.example", "JME_DESKTOP", "JME_ANDROID", "JME_EFFECTS", "JME_VR", "MINIE" );
     }
 
     @Test
     public void testDesktopTemplate() throws Exception{
-        testTemplate("VrTamarinTest", "com.example", "JME_DESKTOP", "JME_EFFECTS", "LEMUR" );
+        testTemplate("DesktopTest", "com.example", "JME_DESKTOP", "JME_EFFECTS", "LEMUR" );
     }
 
     @Test
     public void testAndroidTemplate() throws Exception{
-        testTemplate("VrTamarinTest", "com.example", "JME_ANDROID", "JME_EFFECTS", "LEMUR" );
+        testTemplate("AndroidTest", "com.example", "JME_ANDROID", "JME_EFFECTS", "MINIE" );
     }
 
     @Test
     public void testVrTemplate_withoutTamarin() throws Exception{
-        testTemplate("VrTamarinTest", "com.example", "JME_VR", "JME_EFFECTS", "LEMUR" );
+        testTemplate("VrNoTamarinTest", "com.example", "JME_VR", "JME_EFFECTS", "LEMUR" );
     }
 
     @Test
@@ -104,12 +104,18 @@ public class TemplateTests{
         Runtime runtime = Runtime.getRuntime();
 
         String command = System.getProperty("os.name").toLowerCase().contains("windows") ? "gradlew.bat build" : "./gradlew build";
+
         Process process = runtime.exec( command , null , folder);
         BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
         while ((line = input.readLine()) != null) {
             System.out.println(line);
         }
+        BufferedReader errorInput = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        while ((line = errorInput.readLine()) != null) {
+            System.out.println(line);
+        }
+
         int returnValue = process.waitFor();
         if (returnValue != 0){
             fail("Gradle compile failed, see logs");
