@@ -65,7 +65,7 @@ public class VersionService {
 
         for(Library library : libraryService.nonJmeLibraries()) {
             for (Artifact artifact : library.getArtifacts()) {
-                fetchMostRecentStableVersion(artifact.groupId(), artifact.artifactId(), library.getLibraryVersionRegex()).ifPresent(newVersion -> versionCache.put(artifact.groupId() + ":" + artifact.artifactId(), newVersion));
+                fetchMostRecentStableVersion(artifact.getGroupId(), artifact.getArtifactId(), artifact.getLibraryVersionRegex()).ifPresent(newVersion -> versionCache.put(artifact.getGroupId() + ":" + artifact.getArtifactId(), newVersion));
             }
         }
     }

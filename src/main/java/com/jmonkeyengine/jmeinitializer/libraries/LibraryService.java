@@ -56,9 +56,8 @@ public class LibraryService {
      */
     private final String fetchUrl;
 
-    public LibraryService (@Value("${libraries.fetchUrl}") String fetchUrl) {
+    public LibraryService ( @Value("${libraries.fetchUrl}" ) String fetchUrl) {
         this.fetchUrl=fetchUrl;
-
     }
 
     public void fetchNewLibraries(){
@@ -66,33 +65,36 @@ public class LibraryService {
         ResponseEntity<String> apiResponse = restTemplate.getForEntity(fetchUrl, String.class);
 
         if ( apiResponse.getStatusCode().is2xxSuccessful() ){
-            Map<String, Library> newAvailableLibraries = new HashMap<>();
-
-            ObjectMapper mapper = new ObjectMapper();
-            try{
-                Library[] libraries = mapper.readValue(apiResponse.getBody(), Library[].class);
-                for( Library library : libraries){
-                    newAvailableLibraries.put(library.getKey(), library);
-                }
-            } catch(JsonProcessingException e){
-                log.warn("Json received, could not parse:" + apiResponse.getBody());
-                throw new RuntimeException("Could not pass libraries json", e);
-            }
-
-            Multimap<LibraryCategory, Library> newAvailableLibraryByCategory = ArrayListMultimap.create();
-            newAvailableLibraries.values().forEach(l -> newAvailableLibraryByCategory.put(l.getCategory(), l));
-            List<Library> newNonJmeLibraries = newAvailableLibraryByCategory.values().stream().filter(l -> !l.isUsesJmeVersion()).collect(Collectors.toList());
-            List<Library> newJmeLibraries = newAvailableLibraryByCategory.values().stream().filter(Library::isUsesJmeVersion).collect(Collectors.toList());
-
-            //I don't think it matters if stale data is briefly presented, but do the swap over quickly nonetheless
-            currentAvailableLibraries = newAvailableLibraries;
-            currentAvailableLibraryByCategory = newAvailableLibraryByCategory;
-            nonJmeLibraries = newNonJmeLibraries;
-            jmeLibraries = newJmeLibraries;
-            createUiLibraryDataDto();
+            updateLibrariesBasedOnJson(apiResponse.getBody());
         }else{
             log.warn("Failed to fetch libraries, received " + apiResponse);
         }
+    }
+
+    public void updateLibrariesBasedOnJson( String jsonString ){
+        Map<String, Library> newAvailableLibraries = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            Library[] libraries = mapper.readValue(jsonString, Library[].class);
+            for( Library library : libraries){
+                newAvailableLibraries.put(library.getKey(), library);
+            }
+        } catch(JsonProcessingException e){
+            log.warn("Json received, could not parse:" + jsonString);
+            throw new RuntimeException("Could not pass libraries json", e);
+        }
+
+        Multimap<LibraryCategory, Library> newAvailableLibraryByCategory = ArrayListMultimap.create();
+        newAvailableLibraries.values().forEach(l -> newAvailableLibraryByCategory.put(l.getCategory(), l));
+        List<Library> newNonJmeLibraries = newAvailableLibraryByCategory.values().stream().filter(l -> !l.isUsesJmeVersion()).collect(Collectors.toList());
+        List<Library> newJmeLibraries = newAvailableLibraryByCategory.values().stream().filter(Library::isUsesJmeVersion).collect(Collectors.toList());
+
+        //I don't think it matters if stale data is briefly presented, but do the swap over quickly nonetheless
+        currentAvailableLibraries = newAvailableLibraries;
+        currentAvailableLibraryByCategory = newAvailableLibraryByCategory;
+        nonJmeLibraries = newNonJmeLibraries;
+        jmeLibraries = newJmeLibraries;
+        createUiLibraryDataDto();
     }
 
     private void createUiLibraryDataDto(){

@@ -10,17 +10,16 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
+[IF=TAMARIN]
 import com.onemillionworlds.tamarin.compatibility.ActionBasedOpenVrState;
 import com.onemillionworlds.tamarin.vrhands.BoundHand;
-import com.onemillionworlds.tamarin.vrhands.HandSide;
+import com.onemillionworlds.tamarin.vrhands.HandSpec;
 import com.onemillionworlds.tamarin.vrhands.VRHandsAppState;
+[/IF=TAMARIN]
 
 import java.io.File;
 
 public class [GAME_NAME] extends SimpleApplication{
-
-    BoundHand boundHandLeft;
-    BoundHand boundHandRight;
 
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
@@ -49,7 +48,7 @@ public class [GAME_NAME] extends SimpleApplication{
         getStateManager().attach(actionBasedOpenVrState);
         actionBasedOpenVrState.registerActionManifest(new File("openVr/actionManifest.json").getAbsolutePath(), "/actions/main" );
 
-        initialiseHands();
+        getStateManager().attach(new VRHandsAppState(handSpec()));
 
         if(actionBasedOpenVrState.getAnalogActionState( "/actions/main/in/trigger").x>0.5f){
             System.out.println("trigger");
@@ -72,27 +71,23 @@ public class [GAME_NAME] extends SimpleApplication{
 
     }
 
-    private void initialiseHands(){
-        VRHandsAppState vrHandsAppState = new VRHandsAppState(assetManager, getStateManager().getState(ActionBasedOpenVrState.class));
-        getStateManager().attach(vrHandsAppState);
-
-        Spatial handLeft =assetManager.loadModel("Tamarin/Models/basicHands_left.j3o");
-        boundHandLeft = vrHandsAppState.bindHandModel("/actions/main/in/HandPoseLeft", "/actions/main/in/HandSkeletonLeft", handLeft, HandSide.LEFT);
-
-        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setTexture("ColorMap", assetManager.loadTexture("Tamarin/Textures/basicHands_left_referenceTexture.png"));
-
-        boundHandLeft.setMaterial(mat);
-        boundHandLeft.setGrabAction("/actions/main/in/grip", rootNode);
-
-        Spatial rightHand =assetManager.loadModel("Tamarin/Models/basicHands_right.j3o");
-
-        boundHandRight= vrHandsAppState.bindHandModel("/actions/main/in/HandPoseRight", "/actions/main/in/HandSkeletonRight", rightHand, HandSide.RIGHT);
-        boundHandRight.setGrabAction("/actions/main/in/grip", rootNode);
-
-        Material matRight = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        matRight.setTexture("ColorMap", assetManager.loadTexture("Tamarin/Textures/basicHands_right_referenceTexture.png"));
-        boundHandRight.setMaterial(matRight);
+    /**
+     * The hand spec describes the openVr actions that are bound to the hand graphics, as well as a grab action.
+     * The hand model could also be changed here but the tamarin default is being used here
+     */
+    private HandSpec handSpec(){
+        return HandSpec.builder(
+                "/actions/main/in/HandPoseLeft",
+                "/actions/main/in/HandSkeletonLeft",
+                "/actions/main/in/HandPoseRight",
+                "/actions/main/in/HandSkeletonRight")
+            .postBindLeft(leftHand -> {
+                leftHand.setGrabAction("/actions/main/in/grip", rootNode);
+            })
+            .postBindRight(rightHand -> {
+                rightHand.setGrabAction("/actions/main/in/grip", rootNode);
+            }).build();
     }
+
 [/IF=TAMARIN]
 }

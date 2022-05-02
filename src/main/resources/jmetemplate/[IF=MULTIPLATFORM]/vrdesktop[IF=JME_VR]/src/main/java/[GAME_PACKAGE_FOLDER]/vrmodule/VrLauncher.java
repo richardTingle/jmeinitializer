@@ -1,8 +1,11 @@
 package [GAME_PACKAGE].vrmodule;
 
 import [GAME_PACKAGE].game.[GAME_NAME];
+import com.jme3.app.LostFocusBehavior;
+import com.jme3.app.VRAppState;
+import com.jme3.app.VRConstants;
+import com.jme3.app.VREnvironment;
 import com.jme3.system.AppSettings;
-
 /**
  * Used to launch a jme application in desktop VR environment
  *

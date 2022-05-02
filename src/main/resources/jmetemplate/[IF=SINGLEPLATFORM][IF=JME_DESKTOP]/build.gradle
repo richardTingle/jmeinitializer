@@ -19,8 +19,7 @@ if (!hasProperty('mainClass')) {
 jar.manifest.attributes('Main-Class': mainClassName)
 
 repositories {
-    mavenCentral()
-    jcenter() //jcentre is likely to stop working soon, but for now it is required for certain dependencies
+    [MAVEN_REPOS]
 }
 
 dependencies {
@@ -31,10 +30,10 @@ dependencies {
     runtimeOnly 'org.jmonkeyengine:jme3-jogg:' + jmonkeyengineVersion
     runtimeOnly 'org.jmonkeyengine:jme3-plugins:' + jmonkeyengineVersion
 
-[JME_DEPENDENCIES]
+    [JME_DEPENDENCIES]
     runtimeOnly 'org.jmonkeyengine:jme3-lwjgl3:' + jmonkeyengineVersion
 
-[ALL_NON_JME_DEPENDENCIES]
+    [ALL_NON_JME_DEPENDENCIES]
 }
 
 // cleanup tasks

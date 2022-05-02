@@ -1,10 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
-        google()
-        mavenCentral()
-        jcenter()
-        maven { url 'https://jitpack.io' }
+        [IF=JME_ANDROID]google()[/IF=JME_ANDROID]
+        [MAVEN_REPOS]
     }
     dependencies {
         [IF=JME_ANDROID]classpath "com.android.tools.build:gradle:7.0.4"[/IF=JME_ANDROID]

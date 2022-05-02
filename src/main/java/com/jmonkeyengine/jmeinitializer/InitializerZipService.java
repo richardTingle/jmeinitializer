@@ -4,6 +4,7 @@ import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryCategory;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import com.jmonkeyengine.jmeinitializer.versions.VersionService;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
@@ -38,11 +39,17 @@ public class InitializerZipService {
      * Most file types are treated as text and scanned for merge fields, but for binary files thats "not a great idea"
      * those file types that shouldn't be scanned are listed here and they are included in the bundle as is
      */
-    private static Set<String> fileExtensionsToTreatAsBlobs = Set.of(".jar");
+    private final static Set<String> fileExtensionsToTreatAsBlobs = Set.of(".jar");
 
     private final VersionService versionService;
 
     private final LibraryService libraryService;
+
+    /**
+     * If true, then if libaries are requested that are inappropriate (or not available) an exception is thrown
+     */
+    @Setter
+    private boolean strictValidate = false;
 
     public InitializerZipService (VersionService versionService, LibraryService libraryService) {
         this.versionService = versionService;
@@ -52,8 +59,6 @@ public class InitializerZipService {
     public Map<String, String> produceGradleFilePreview(String gameName, String packageName, List<String> requiredLibraryKeys ){
         List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
         Merger merger = new Merger(gameName, packageName, requiredLibraries,  calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
-
-        Resource buildGradleResource = ResourcePatternUtils.getResourcePatternResolver(null).getResource("classpath:jmetemplate/build.gradle");
 
         Map<String, String> gradleFiles = new HashMap<>();
 
@@ -72,28 +77,50 @@ public class InitializerZipService {
 
     public ByteArrayOutputStream produceZipInMemory(String gameName, String packageName, List<String> requiredLibraryKeys ){
 
-        List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
-
-        Merger merger = new Merger(gameName, packageName, requiredLibraries, calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
+        Map<String,byte[]> baseTemplate = produceTemplate(gameName, packageName, requiredLibraryKeys);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try(ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
-            for( Map.Entry<String,byte[]> templateFile : getRawTemplatePaths().entrySet()){
-                if (merger.pathShouldBeAllowed(templateFile.getKey())) {
-                    ZipEntry entry = new ZipEntry(merger.mergePath(templateFile.getKey())); 
-                    zipOutputStream.putNextEntry(entry);
-                    if (fileExtensionsToTreatAsBlobs.stream().anyMatch(fe -> templateFile.getKey().contains(fe))) {
-                        zipOutputStream.write(templateFile.getValue());
-                    } else {
-                        zipOutputStream.write(merger.mergeFileContents(templateFile.getValue()));
-                    }
-                    zipOutputStream.closeEntry();
-                }
+            for( Map.Entry<String,byte[]> templateFile : baseTemplate.entrySet()){
+                ZipEntry entry = new ZipEntry(templateFile.getKey());
+                zipOutputStream.putNextEntry(entry);
+                zipOutputStream.write(templateFile.getValue());
+
+                zipOutputStream.closeEntry();
             }
         }catch(IOException ioe) {
             throw new RuntimeException("Exception while forming zip", ioe);
         }
         return byteArrayOutputStream;
+    }
+
+    /**
+     * @param gameName the game name
+     * @param packageName the package used by the game classes
+     * @param requiredLibraryKeys the libraries required by the game
+     * @return a map of paths to the file contents that should be created at that path
+     */
+    public Map<String,byte[]> produceTemplate(String gameName, String packageName, List<String> requiredLibraryKeys ){
+
+        List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
+
+        Merger merger = new Merger(gameName, packageName, requiredLibraries, calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
+
+        Map<String,byte[]> templateFiles = new HashMap<>();
+
+        for( Map.Entry<String,byte[]> templateFile : getRawTemplatePaths().entrySet()){
+            if (merger.pathShouldBeAllowed(templateFile.getKey())) {
+                String mergedPath = merger.mergePath(templateFile.getKey());
+                byte[] fileContents;
+                if (fileExtensionsToTreatAsBlobs.stream().anyMatch(fe -> templateFile.getKey().contains(fe))) {
+                    fileContents =templateFile.getValue();
+                } else {
+                    fileContents = merger.mergeFileContents(templateFile.getValue());
+                }
+                templateFiles.put(mergedPath, fileContents);
+            }
+        }
+        return templateFiles;
     }
 
     private List<Library> parseLibraryKeys(List<String> requiredLibraryKeys){
@@ -109,7 +136,7 @@ public class InitializerZipService {
      * @return
      */
     private List<Library> eliminateLibrariesOnUnsupportedPlatforms(List<Library> unfilteredList){
-        return unfilteredList.stream()
+        List<Library> filtered =  unfilteredList.stream()
                 .filter(l -> {
                     if (l.getRequiredPlatforms().isEmpty()){
                         return true;
@@ -119,6 +146,12 @@ public class InitializerZipService {
 
                 })
                 .collect(Collectors.toList());
+
+        if ( strictValidate && filtered.size() != unfilteredList.size()){
+            throw new RuntimeException("Illegal library requested and strictValidate is on");
+        }
+
+        return filtered;
     }
 
     /**

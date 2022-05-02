@@ -5,7 +5,7 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
-
+import com.jme3.app.state.AppState;
 
 /**
  * The JMonkeyEngine game entry, you should only do initializations for your game here, game logic is handled by
@@ -14,6 +14,13 @@ import com.jme3.scene.shape.Box;
  *
  */
 public class [GAME_NAME] extends SimpleApplication {
+
+    public [GAME_NAME]() {
+    }
+
+    public [GAME_NAME](AppState... initialStates) {
+        super(initialStates);
+    }
 
     @Override
     public void simpleInitApp() {

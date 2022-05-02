@@ -333,7 +333,7 @@ class ReactGameForm extends React.Component {
             <h2>
                 Platform
             </h2>
-            <p>JMonkeyEngine can target many platforms, select the platform your application will target</p>
+            <p>JMonkeyEngine can target many platforms, select the platform(s) your application will target</p>
             {this.renderPlatformCheckboxes()}
 
             <br/> <br/>

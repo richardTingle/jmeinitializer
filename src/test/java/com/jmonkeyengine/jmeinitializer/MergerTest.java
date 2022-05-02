@@ -1,5 +1,6 @@
 package com.jmonkeyengine.jmeinitializer;
 
+import com.jmonkeyengine.jmeinitializer.libraries.Artifact;
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryCategory;
 import org.junit.jupiter.api.Test;
@@ -160,5 +161,57 @@ class MergerTest {
         assertEquals("LowerCaseSentence", Merger.sanitiseToJavaClass("lower case sentence"));
         assertEquals("Lowercaseword", Merger.sanitiseToJavaClass("lowercaseword"));
         assertEquals("SentenceWithExcessiveSpace", Merger.sanitiseToJavaClass("  Sentence  with   excessive space  "));
+    }
+
+    @Test
+    void artifactsAddedCorrectly () {
+        String testString = """
+                                [ALL_NON_JME_DEPENDENCIES]
+                            """;
+
+        String expectedString = """
+                                    implementation 'group:artA:1.2.3'
+                                    implementation 'group:artB:1.2.4'
+                                """;
+
+        Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
+        Artifact artifactA = new Artifact();
+        artifactA.setGroupId("group");
+        artifactA.setArtifactId("artA");
+        artifactA.setPinVersion("1.2.3");
+        Artifact artifactB = new Artifact();
+        artifactB.setGroupId("group");
+        artifactB.setArtifactId("artB");
+        artifactB.setFallbackVersion("1.2.3");
+        testLibraryA.setArtifacts(List.of(artifactA, artifactB));
+
+        Merger merger = new Merger("", "", List.of(testLibraryA), List.of("SINGLEPLATFORM"), "1", Map.of("group:artA", "1.2.4", "group:artB", "1.2.4"));
+        assertEquals(expectedString.trim(), new String(merger.mergeFileContents(testString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8).trim());
+    }
+
+    @Test
+    void additionalRepositoriesAddedCorrectly() {
+        String testString = """
+                            buildscript {
+                                repositories {
+                                    [MAVEN_REPOS]
+                                }
+                            }
+                            """;
+        String expectedString = """
+                            buildscript {
+                                repositories {
+                                    jcentre()
+                                    mavenCentral()
+                                    mavenLocal()
+                                }
+                            }
+                            """;
+
+        Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
+        testLibraryA.setAdditionalMavenRepos(List.of("jcentre()"));
+
+        Merger merger = new Merger("", "", List.of(testLibraryA), List.of("SINGLEPLATFORM"), "1", Map.of());
+        assertEquals(expectedString, new String(merger.mergeFileContents(testString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
     }
 }

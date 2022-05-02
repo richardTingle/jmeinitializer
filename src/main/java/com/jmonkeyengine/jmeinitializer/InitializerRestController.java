@@ -1,7 +1,14 @@
 package com.jmonkeyengine.jmeinitializer;
 
+import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import com.jmonkeyengine.jmeinitializer.uisupport.UiLibraryDataDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
@@ -26,6 +33,10 @@ import java.util.Map;
 @RestController
 public class InitializerRestController {
 
+    private static final String GAME_NAME_DOC_STRING = "The name of the game, will be sanitised to something like MyExcellentGame. Caller is not required to sanitise";
+    private static final String GAME_DESCRIPTION_DOC_STRING = "The proposed package for the games source, e.g. com.example. Can be blank. Caller is not required to sanitise";
+    private static final String REQUIRED_LIBRARIES_DOC_STRING = "A comma delimited list of the library keys for the libraries the user requests. E.g. `JME_DESKTOP,LEMUR,LOG4J2`";
+
     private final InitializerZipService initializerZipService;
     private final LibraryService libraryService;
 
@@ -34,14 +45,24 @@ public class InitializerRestController {
         this.libraryService = libraryService;
     }
 
+    @Operation( summary = "The available library description json", description = "Returns a json packet that includes data on all the libraries that the initializer has to offer. \n\nIntended to be used by a UI application to display the options available to the user")
     @GetMapping("/jme-initializer/libraries")
     public UiLibraryDataDto getDataForUi(){
         return libraryService.getUiLibraryDataDto();
     }
 
+    @Operation(summary = "Build Starter zip", description = "Given details about the game/application will return a zip file containing a starter project")
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "A zip of a new gradle project",
+                    content = { @Content(mediaType = "application/octet-stream") })
+    })
     @ResponseBody
     @GetMapping("/jme-initializer/zip")
-    public ResponseEntity<Resource> serveFile(@RequestParam String gameName,@RequestParam String packageName, @RequestParam String libraryList) throws IOException {
+    public ResponseEntity<Resource> buildStarterZip(
+            @Parameter(description=GAME_NAME_DOC_STRING, example = "MyGame") @RequestParam String gameName,
+            @Parameter(description=GAME_DESCRIPTION_DOC_STRING, example = "com.example") @RequestParam String packageName,
+            @Parameter(description=REQUIRED_LIBRARIES_DOC_STRING, example = "JME_DESKTOP,LEMUR,LOG4J2") @RequestParam String libraryList)
+            throws IOException {
 
         try(ByteArrayOutputStream byteArrayOutputStream = initializerZipService.produceZipInMemory( gameName, packageName, Arrays.asList(libraryList.split(",")) )){
 
@@ -57,9 +78,18 @@ public class InitializerRestController {
         }
     }
 
+    @Operation( summary = "Build starter project's build.gradle files", description = "Given details about the game/application will return a map of the names of the build.gradle files (including paths if appropriate) to their contents.\n\n Is intended to give end users a preview of libraries/structure they have requested before they get the full zip")
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "A map of gradle file names to their contents",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{\"build.gradle\":\"string\", \"desktop/build.gradle\":\"string\"}")) })
+    })
     @ResponseBody
     @GetMapping("/jme-initializer/gradle-preview")
-    public ResponseEntity<Map<String, String>> previewGradleFile(@RequestParam String gameName,@RequestParam String packageName, @RequestParam String libraryList) throws IOException {
+    public ResponseEntity<Map<String, String>> previewGradleFile(
+            @Parameter(description=GAME_NAME_DOC_STRING, example = "MyGame") @RequestParam String gameName,
+            @Parameter(description=GAME_DESCRIPTION_DOC_STRING, example = "com.example") @RequestParam String packageName,
+            @Parameter(description=REQUIRED_LIBRARIES_DOC_STRING, example = "JME_DESKTOP,LEMUR,LOG4J2") @RequestParam String libraryList) throws IOException {
         Map<String, String> gradleFile = initializerZipService.produceGradleFilePreview(gameName, packageName, Arrays.asList(libraryList.split(",")));
 
         return ResponseEntity.ok().body(gradleFile);
