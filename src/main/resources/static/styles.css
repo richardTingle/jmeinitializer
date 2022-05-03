@@ -71,3 +71,19 @@
 .jumbotron {
     background: none!important;
 }
+
+
+body.embedded .noEmbed{
+    display:none;   
+}
+
+body.embedded{
+    background:transparent;
+}
+
+body.embedded > .container{
+    max-width:100%;
+    min-width:100%;
+    padding:0;
+    margin:0;
+}
