@@ -78,7 +78,7 @@ body.embedded .noEmbed{
 }
 
 body.embedded{
-    background:transparent;
+    background: transparent !important;;
 }
 
 body.embedded > .container{
