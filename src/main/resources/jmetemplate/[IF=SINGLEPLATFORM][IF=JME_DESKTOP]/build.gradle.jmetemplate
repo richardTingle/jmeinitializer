@@ -52,6 +52,39 @@ distZip {
     includeEmptyDirs(false)
 }
 
+[IF=WINDOWS]
+task downloadWindowsJre(type: Download) {
+    src windowsJreUrl
+    dest new File(buildDir, '/jres/windowsJre.zip')
+    overwrite false
+}
+
+task downloadAndUnzipWindowsJre(dependsOn: downloadWindowsJre, type: Copy) {
+    from zipTree(downloadWindowsJre.dest)
+    into "${buildDir}/jres/"
+    includeEmptyDirs(false)
+    filesMatching("**") {
+        it.path = it.path.replaceAll("^[a-zA-Z0-9.+-]*[/\\\\]", "windowsJre/jre/") //rename the top level to something standard so the rest of the script will be easier
+    }
+}
+
+task buildWindowsDistribution(dependsOn: [distZip, downloadAndUnzipWindowsJre], type: Copy)
+{
+    group 'distribution'
+    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].bat"), zipTree(distZip.archiveFile), "${buildDir}/jres/windowsJre"
+    into new File(buildDir, 'distributions/[GAME_NAME]-windowsDistribution')
+    includeEmptyDirs false
+    exclude 'bin/**' //we are adding our own run scripts, exclude the ones coming from distZip
+}
+
+task zipWindowsDistribution( dependsOn:buildWindowsDistribution, type: Zip) {
+    group 'distribution'
+    archiveFileName = "[GAME_NAME]-windows.zip"
+    destinationDirectory = file("$buildDir/distributions")
+    from "$buildDir/distributions/[GAME_NAME]-windows"
+}
+[/IF=WINDOWS]
+
 // cleanup tasks
 clean.dependsOn('cleanDLLs', 'cleanDyLibs', 'cleanLogs', 'cleanSOs')
 task cleanDLLs(type: Delete) {
