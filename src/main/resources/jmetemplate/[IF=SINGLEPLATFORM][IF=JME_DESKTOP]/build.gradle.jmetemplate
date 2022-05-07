@@ -12,6 +12,13 @@ java {
 
 ext.jmonkeyengineVersion = '[JME_VERSION]'
 
+[IF=WINDOWS]
+//See https://api.adoptium.net/v3/assets/feature_releases/11/ga?image_type=jre for jre urls
+def windowsJreUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.15%2B10/OpenJDK11U-jre_x64_windows_hotspot_11.0.15_10.zip"
+[/IF=WINDOWS]
+[IF=LINUX]def linuxJreUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.15%2B10/OpenJDK11U-jre_x64_linux_hotspot_11.0.15_10.tar.gz"[/IF=LINUX]
+[IF=MACOS]def macJreUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.15%2B10/OpenJDK11U-jre_x64_mac_hotspot_11.0.15_10.tar.gz"[/IF=MACOS]
+
 mainClassName = '[GAME_PACKAGE].[GAME_NAME]'
 if (!hasProperty('mainClass')) {
     ext.mainClass = mainClassName
@@ -34,6 +41,15 @@ dependencies {
     runtimeOnly 'org.jmonkeyengine:jme3-lwjgl3:' + jmonkeyengineVersion
 
     [ALL_NON_JME_DEPENDENCIES]
+}
+
+distZip {
+    //having a degenerate folder within the dist zip complicates generating the other zips
+    eachFile { file ->
+        String path = file.relativePath
+        file.setPath(path.substring(path.indexOf("/") + 1, path.length()))
+    }
+    includeEmptyDirs(false)
 }
 
 // cleanup tasks
