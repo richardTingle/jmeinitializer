@@ -133,7 +133,7 @@ public class Merger {
             if (fragmentContent == null){
                 throw new RuntimeException("Missing fragment " + fragmentFile);
             }
-            fileContentsAsString = matcher.replaceFirst(fragmentContent);
+            fileContentsAsString = fileContentsAsString.replace(matcher.group(0), fragmentContent);
             matcher = fragmentPattern.matcher(fileContentsAsString);
         }
 

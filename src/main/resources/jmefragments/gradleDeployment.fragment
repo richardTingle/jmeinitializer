@@ -1,0 +1,71 @@
+[IF=WINDOWS]
+//See https://api.adoptium.net/v3/assets/feature_releases/11/ga?image_type=jre for jre urls
+def windowsJreUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.15%2B10/OpenJDK11U-jre_x64_windows_hotspot_11.0.15_10.zip"
+[/IF=WINDOWS]
+[IF=LINUX]def linuxJreUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.15%2B10/OpenJDK11U-jre_x64_linux_hotspot_11.0.15_10.tar.gz"[/IF=LINUX]
+[IF=MACOS]def macJreUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.15%2B10/OpenJDK11U-jre_x64_mac_hotspot_11.0.15_10.tar.gz"[/IF=MACOS]
+
+[IF=WINDOWS]
+task downloadWindowsJre(type: Download) {
+    src windowsJreUrl
+    dest new File(buildDir, '/jres/windowsJre.zip')
+    overwrite false
+}
+
+task downloadAndUnzipWindowsJre(dependsOn: downloadWindowsJre, type: Copy) {
+    from zipTree(downloadWindowsJre.dest)
+    into "${buildDir}/jres/"
+    includeEmptyDirs(false)
+    filesMatching("**") {
+        it.path = it.path.replaceAll("^[a-zA-Z0-9.+-]*[/\\\\]", "windowsJre/jre/") //rename the top level to something standard so the rest of the script will be easier
+    }
+}
+
+task buildWindowsDistribution(dependsOn: [distZip, downloadAndUnzipWindowsJre], type: Copy)
+{
+    group 'distribution'
+    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].bat"), zipTree(distZip.archiveFile), "${buildDir}/jres/windowsJre"
+    into new File(buildDir, 'distributions/[GAME_NAME]-windows')
+    includeEmptyDirs false
+    exclude 'bin/**' //we are adding our own run scripts, exclude the ones coming from distZip
+}
+
+task zipWindowsDistribution( dependsOn:buildWindowsDistribution, type: Zip) {
+    group 'distribution'
+    archiveFileName = "[GAME_NAME]-windows.zip"
+    destinationDirectory = file("$buildDir/distributions")
+    from "$buildDir/distributions/[GAME_NAME]-windows"
+}
+[/IF=WINDOWS]
+[IF=LINUX]
+task downloadLinuxJre(type: Download) {
+    src linuxJreUrl
+    dest new File(buildDir, '/jres/linuxJre.zip')
+    overwrite false
+}
+
+task downloadAndUnzipLinuxJre(dependsOn: downloadLinuxJre, type: Copy) {
+    from zipTree(downloadLinuxJre.dest)
+    into "${buildDir}/jres/"
+    includeEmptyDirs(false)
+    filesMatching("**") {
+        it.path = it.path.replaceAll("^[a-zA-Z0-9.+-]*[/\\\\]", "linuxJre/jre/") //rename the top level to something standard so the rest of the script will be easier
+    }
+}
+
+task buildLinuxDistribution(dependsOn: [distZip, downloadAndUnzipLinuxJre], type: Copy)
+{
+    group 'distribution'
+    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].sh"), zipTree(distZip.archiveFile), "${buildDir}/jres/linuxJre"
+    into new File(buildDir, 'distributions/[GAME_NAME]-linux')
+    includeEmptyDirs false
+    exclude 'bin/**' //we are adding our own run scripts, exclude the ones coming from distZip
+}
+
+task zipLinuxDistribution( dependsOn:buildLinuxDistribution, type: Zip) {
+    group 'distribution'
+    archiveFileName = "[GAME_NAME]-linux.zip"
+    destinationDirectory = file("$buildDir/distributions")
+    from "$buildDir/distributions/[GAME_NAME]-linux"
+}
+[/IF=LINUX]
