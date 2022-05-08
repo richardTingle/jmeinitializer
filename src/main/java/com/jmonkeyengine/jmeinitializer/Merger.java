@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -31,11 +32,20 @@ import java.util.stream.Collectors;
  * [IF=LIBRARY]
  *
  * In which case the file is only included if that library is active
+ *
+ * or
+ *
+ * [FRAGMENT=gradleDeployment.fragment]
+ *
+ * in which case that fragment (aka bit of text) is substituted into the template
  */
 public class Merger {
 
     //the "anything but = is to avoid double ifs merging
     private Pattern mergeIfConditionPattern = Pattern.compile("\\[IF=([^\\]]*)]");
+
+    private Pattern fragmentPattern = Pattern.compile("\\[FRAGMENT=([a-zA-Z0-9./]*)]");
+
     /**
      * After the allowed ifs have been processed this is used to eliminate forbidden ifs
      */
@@ -45,14 +55,18 @@ public class Merger {
 
     Set<String> libraryKeysAndProfilesInUse;
 
+    Function<String, String> fragmentSupplier;
+
     /**
      * Given the information provided by the user will evaluate merge fields in files and paths.
      *
      * libraryVersions is a map of a string of the form groupId:artifactId -> version
      *
      * additionalProfiles are things that can be used in [IF=] conditions in addition to libraries (things like MULTIPLATFORM)
+     *
+     * fragmentSupplier supplies other file's contents to add into the merged template
      */
-    public Merger(String gameName, String gamePackage, List<Library> librariesRequired, Collection<String> additionalProfiles, String jmeVersion, Map<String,String> libraryVersions){
+    public Merger(String gameName, String gamePackage, List<Library> librariesRequired, Collection<String> additionalProfiles, String jmeVersion, Map<String,String> libraryVersions, Function<String, String> fragmentSupplier){
         mergeData.put(MergeField.GAME_NAME_FULL, gameName);
         mergeData.put(MergeField.GAME_NAME, sanitiseToJavaClass(gameName));
 
@@ -73,6 +87,8 @@ public class Merger {
 
         libraryKeysAndProfilesInUse = librariesRequired.stream().map(Library::getKey).collect(Collectors.toSet());
         libraryKeysAndProfilesInUse.addAll(additionalProfiles);
+
+        this.fragmentSupplier = fragmentSupplier;
     }
 
     public boolean pathShouldBeAllowed(String pathTemplate){
@@ -107,6 +123,19 @@ public class Merger {
      */
     public byte[] mergeFileContents(byte[] fileContents){
         String fileContentsAsString = new String(fileContents, StandardCharsets.UTF_8);
+
+        //first add any fragments (as the fragments may themselves have merges or ifs in this
+        Matcher matcher = fragmentPattern.matcher(fileContentsAsString);
+        while(matcher.find()){
+            String fragmentFile = matcher.group(1);
+            String fragmentContent = fragmentSupplier.apply(fragmentFile);
+
+            if (fragmentContent == null){
+                throw new RuntimeException("Missing fragment " + fragmentFile);
+            }
+            fileContentsAsString = matcher.replaceFirst(fragmentContent);
+            matcher = fragmentPattern.matcher(fileContentsAsString);
+        }
 
         for(Map.Entry<MergeField, String> merges : mergeData.entrySet()){
             String mergeKey = merges.getKey().getMergeFieldInText();
@@ -156,7 +185,7 @@ public class Merger {
                 String regex = "\\[IF=" + remainingIf + "]((?!IF=).)*\\[/IF=" + remainingIf + "]";
                 fileContentsAsString = Pattern.compile(regex, Pattern.DOTALL).matcher(fileContentsAsString).replaceAll("_eliminated_");
             }
-            //kill including the new line after the closure, if thats the only thing on the lin
+            //kill including the new line after the closure, if thats the only thing on the line
             fileContentsAsString = fileContentsAsString.replaceAll("\\R *_eliminated_ *\\R", "\n");
             //then get rid of anything thats on a line with allowed text
             fileContentsAsString = fileContentsAsString.replace("_eliminated_", "");

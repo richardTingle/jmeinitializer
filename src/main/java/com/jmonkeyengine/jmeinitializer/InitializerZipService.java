@@ -58,7 +58,7 @@ public class InitializerZipService {
 
     public Map<String, String> produceGradleFilePreview(String gameName, String packageName, List<String> requiredLibraryKeys ){
         List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
-        Merger merger = new Merger(gameName, packageName, requiredLibraries,  calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
+        Merger merger = new Merger(gameName, packageName, requiredLibraries,  calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache(), new FragmentFetcher() );
 
         Map<String, String> gradleFiles = new HashMap<>();
 
@@ -104,7 +104,7 @@ public class InitializerZipService {
 
         List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
 
-        Merger merger = new Merger(gameName, packageName, requiredLibraries, calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache() );
+        Merger merger = new Merger(gameName, packageName, requiredLibraries, calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache(), new FragmentFetcher() );
 
         Map<String,byte[]> templateFiles = new HashMap<>();
 

@@ -8,14 +8,17 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class MergerTest {
 
+    private Function<String,String> noOpFragmentSupplier = name -> null;
+
     @Test
     void mergePath(){
-        Merger merger = new Merger("MyGame", "my.excellent.company", List.of(), List.of(), "1", Map.of());
+        Merger merger = new Merger("MyGame", "my.excellent.company", List.of(), List.of(), "1", Map.of(), noOpFragmentSupplier);
         assertEquals("src/main/java/my/excellent/company/MyGame.java", merger.mergePath("src/main/java/[GAME_PACKAGE_FOLDER]/[GAME_NAME].java"));
         assertEquals("path/something.java", merger.mergePath("path/something.java.jmetemplate"));
         assertEquals(".gitignore",  merger.mergePath("[DOT]gitignore"));
@@ -24,7 +27,7 @@ class MergerTest {
 
     @Test
     void mergeText(){
-        Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(), List.of(), "1", Map.of());
+        Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(), List.of(), "1", Map.of(), noOpFragmentSupplier);
 
         String testString = """
                 This is a test string for [GAME_NAME_FULL]. Open [GAME_NAME].java to start work.
@@ -45,7 +48,7 @@ class MergerTest {
 
         Library testLibraryB =  Library.builder("testLibraryB", "B test library",  LibraryCategory.GENERAL, "description").build();
 
-        Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of());
+        Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of(), noOpFragmentSupplier);
 
         String testString2 = """
                                  Bob
@@ -106,7 +109,7 @@ class MergerTest {
         Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
         Library testLibraryB = Library.builder("testLibraryB", "B test library",  LibraryCategory.GENERAL, "description").build();
 
-        Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of());
+        Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of(), noOpFragmentSupplier);
 
         assertTrue(merger.pathShouldBeAllowed("common/or/garden/path"));
         assertTrue(merger.pathShouldBeAllowed("path/[IF=testLibraryA]/path"));
@@ -125,7 +128,7 @@ class MergerTest {
         Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
         Library testLibraryB = Library.builder("testLibraryB", "B test library",  LibraryCategory.GENERAL, "description").build();
 
-        Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of());
+        Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of(), noOpFragmentSupplier);
 
         assertEquals("common/or/garden/path", merger.mergePath("common/or/garden/path"));
         assertEquals("path/path", merger.mergePath("path/[IF=testLibraryA]/path"));
@@ -185,7 +188,7 @@ class MergerTest {
         artifactB.setFallbackVersion("1.2.3");
         testLibraryA.setArtifacts(List.of(artifactA, artifactB));
 
-        Merger merger = new Merger("", "", List.of(testLibraryA), List.of("SINGLEPLATFORM"), "1", Map.of("group:artA", "1.2.4", "group:artB", "1.2.4"));
+        Merger merger = new Merger("", "", List.of(testLibraryA), List.of("SINGLEPLATFORM"), "1", Map.of("group:artA", "1.2.4", "group:artB", "1.2.4"), noOpFragmentSupplier);
         assertEquals(expectedString.trim(), new String(merger.mergeFileContents(testString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8).trim());
     }
 
@@ -211,7 +214,41 @@ class MergerTest {
         Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
         testLibraryA.setAdditionalMavenRepos(List.of("jcentre()"));
 
-        Merger merger = new Merger("", "", List.of(testLibraryA), List.of("SINGLEPLATFORM"), "1", Map.of());
+        Merger merger = new Merger("", "", List.of(testLibraryA), List.of("SINGLEPLATFORM"), "1", Map.of(), noOpFragmentSupplier);
+        assertEquals(expectedString, new String(merger.mergeFileContents(testString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+    }
+
+
+    @Test
+    void fragmentsMergedCorrectly() {
+        Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
+
+        Function<String,String> fragmentSupplier = name -> {
+            if (name.equals("fragA.fragment")){
+                return """
+                       [IF=testLibraryA]If works[/IF=testLibraryA]
+                        """;
+            }else if(name.equals("fragB.fragment")){
+                return """
+                       [GAME_NAME_FULL]
+                        """;
+            }else{
+                return null;
+            }
+        };
+
+        String testString = """
+                            [FRAGMENT=fragA.fragment]
+                            boo
+                            [FRAGMENT=fragB.fragment]
+                            """;
+        String expectedString = """
+                            If works
+                            
+                            boo
+                            MyGame
+                            """;
+        Merger merger = new Merger("MyGame", "", List.of(testLibraryA), List.of("SINGLEPLATFORM"), "1", Map.of(), fragmentSupplier);
         assertEquals(expectedString, new String(merger.mergeFileContents(testString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
     }
 }
