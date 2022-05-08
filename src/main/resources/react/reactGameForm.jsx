@@ -14,6 +14,8 @@ class ReactGameForm extends React.Component {
             groupSelectedLibraries: {},
             //library key of the libary that supports desktop, VR etc
             platformLibraries: [],
+            //WINDOWS, LINUX etc
+            deploymentOptions:[],
             //this is the big bundle of data that comes down from the server to say what libraries are available, what the defaults are etc
             availableLibraryData : null,
             //if the user has clicked download (but not updated the data) a message is displayed. This controls that
@@ -59,6 +61,16 @@ class ReactGameForm extends React.Component {
             this.setState({platformLibraries: newFreeSelectLibraries, hasDownloaded:false, validationMessage:null });
         }else{
             this.setState({platformLibraries: [...this.state.platformLibraries, libraryKey], hasDownloaded:false, validationMessage:null});
+        }
+    }
+
+    handleToggleDeploymentOption = (deploymentOption) => {
+        let currentlySelected = this.state.deploymentOptions.includes(deploymentOption)
+        if (currentlySelected){
+            let newDeploymentOptions = this.state.deploymentOptions.filter( v => v !== libraryKey )
+            this.setState({deploymentOptions: newDeploymentOptions, hasDownloaded:false, validationMessage:null });
+        }else{
+            this.setState({deploymentOptions: [...this.state.deploymentOptions, libraryKey], hasDownloaded:false, validationMessage:null});
         }
     }
 
@@ -203,6 +215,40 @@ class ReactGameForm extends React.Component {
         }
     }
 
+    renderDeploymentOptionsCheckboxes(){
+        if (this.state.availableLibraryData === null){
+            return <div/>
+        }else {
+            const deploymentOptionsCheckboxes = [];
+            //go through the selected platform. If a deployment option is relevant to that platform offer it
+            this.state.availableLibraryData.deploymentOptions.forEach(deploymentOption => {
+
+                let includeOption = deploymentOption.applicablePlatforms.filter(value => this.state.platformLibraries.includes(value)).length>0;
+                if (includeOption){
+                    deploymentOptionsCheckboxes.push(<div className="form-check" key={"deploymentCheckboxDiv" + deploymentOption.key}>
+                        <input className="form-check-input" type="checkbox" name="platformRadios"
+                               id={"platformRadio" + deploymentOption.key} value={deploymentOption.key}
+                               checked={this.state.deploymentOptions.includes(deploymentOption.key)}
+                               onChange={event => this.handleToggleDeploymentOption(deploymentOption.key)}/>
+                        <label className="form-check-label" htmlFor={"platformRadio" + deploymentOption.key}>
+                            <b>{deploymentOption.name}</b>
+                        </label>
+                    </div>);
+                }
+            });
+            if (deploymentOptionsCheckboxes.length > 0) {
+                return <div><h2>Deployment</h2>
+                    <p>Deployment options will provide platform specific deployments, and may also restrict available libraries</p>
+                    <div onChange={this.handleSetPlatform}>
+                        {deploymentOptionsCheckboxes}
+                    </div>
+                </div>;
+            }else{
+                return <div/>;
+            }
+        }
+    }
+
     renderFreeFormJmeLibraries(){
         if (this.state.availableLibraryData === null){
             return <div/>
@@ -330,12 +376,14 @@ class ReactGameForm extends React.Component {
                 <small id="gameNameHelp" className="form-text">A package name keeps your classes unique. If you have a website it's traditionally the website backwards (all lower case). So myamazinggame.co.uk would become uk.co.myamazinggame. If you don't have a website choose something like that, or just leave it blank</small>
             </div>
 
-            <h2>
-                Platform
-            </h2>
-            <p>JMonkeyEngine can target many platforms, select the platform(s) your application will target</p>
-            {this.renderPlatformCheckboxes()}
-
+            <div className="form-group">
+                <h2>
+                    Platform
+                </h2>
+                <p>JMonkeyEngine can target many platforms, select the platform(s) your application will target</p>
+                {this.renderPlatformCheckboxes()}
+            </div>
+            {this.renderDeploymentOptionsCheckboxes()}
             <br/> <br/>
             <div className="alert alert-secondary" role="alert">
                 Don't worry if you're not sure about libraries, you can always add more later

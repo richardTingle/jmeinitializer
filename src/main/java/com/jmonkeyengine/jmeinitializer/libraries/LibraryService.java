@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.jmonkeyengine.jmeinitializer.dto.MavenVersionApiResponseDto;
+import com.jmonkeyengine.jmeinitializer.deployment.DeploymentOption;
+import com.jmonkeyengine.jmeinitializer.dto.DeploymentOptionDto;
 import com.jmonkeyengine.jmeinitializer.uisupport.CategoryAndLibrariesDto;
 import com.jmonkeyengine.jmeinitializer.uisupport.CategoryDto;
 import com.jmonkeyengine.jmeinitializer.uisupport.LibraryDto;
@@ -13,7 +14,6 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -110,6 +109,7 @@ public class LibraryService {
 
         uiLibraryDataDto = new UiLibraryDataDto(
                 librariesOfCategory(LibraryCategory.JME_PLATFORM).stream().map(LibraryDto::new).collect(Collectors.toList()),
+                DeploymentOptionDto.wrapAsDto(DeploymentOption.values()),
                 librariesOfCategory(LibraryCategory.JME_GENERAL).stream().map(LibraryDto::new).collect(Collectors.toList()),
                 specialCategories,
                 librariesOfCategory(LibraryCategory.GENERAL).stream().map(LibraryDto::new).collect(Collectors.toList()),

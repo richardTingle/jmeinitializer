@@ -1,15 +1,12 @@
 package com.jmonkeyengine.jmeinitializer.uisupport;
 
-import com.jmonkeyengine.jmeinitializer.libraries.LibraryCategory;
+import com.jmonkeyengine.jmeinitializer.deployment.DeploymentOption;
+import com.jmonkeyengine.jmeinitializer.dto.DeploymentOptionDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This is all the information the front end will need to render its options in a single packet.
@@ -23,6 +20,9 @@ public class UiLibraryDataDto {
 
     @Schema(description = "The libraries that represent platforms JME applications can run with, e.g. desktop")
     List<LibraryDto> jmePlatforms;
+
+    @Schema(description = "The sub platform deployment targets e.g. windows. Typically used to include build scripts but can also be used to restrict libraries")
+    List<DeploymentOptionDto> deploymentOptions;
 
     @Schema(description = "The libraries that JME provides that don't fit into another category")
     List<LibraryDto> jmeGeneralLibraries;
