@@ -71,8 +71,12 @@ public class Library {
      * Only the keys are listed here
      */
     @Singular()
-    @Schema( example = "[\"JME_DESKTOP\"]", description = "If this library should only be presented as an option if a certain platform has been selected (e.g. only VR libraries if the VR platform has been selected). If empty the library will be available for all platforms", defaultValue = "No required platform")
+    @Schema( example = "[\"JME_DESKTOP\"]", description = "If this library should only be presented as an option if a certain platform has been selected (e.g. only VR libraries if the VR platform has been selected). If empty the library will be available for all platforms. If any ONE of the required platforms is present the library is available. Note; this is platforms and deployment options", defaultValue = "No required platform")
     Collection<String> requiredPlatforms = List.of();
+
+    @Singular()
+    @Schema( example = "[\"JME_ANDROID\"]", description = "If a platform is selected this library will not be allowed to be selected. If any ONE of the required platforms is present the library is unavailable. Note; this is platforms and deployment options", defaultValue = "No incompatible platform")
+    Collection<String> incompatiblePlatforms = List.of();
 
     @Override
     public boolean equals(Object o){

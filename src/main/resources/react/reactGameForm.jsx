@@ -176,6 +176,10 @@ class ReactGameForm extends React.Component {
         return availableRequiredPlatforms.length > 0;
     }
 
+    allPlatformsAndDeployments(){
+
+    }
+
     renderRequiredPlatformStatement(requiredPlatformList){
 
         if (requiredPlatformList.length === 0){

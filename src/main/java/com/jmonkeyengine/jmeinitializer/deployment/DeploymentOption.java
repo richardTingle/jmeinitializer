@@ -10,10 +10,10 @@ import java.util.List;
 public enum DeploymentOption{
     WINDOWS("Windows", LibraryService.JME_DESKTOP, LibraryService.JME_VR),
     LINUX("Linux", LibraryService.JME_DESKTOP, LibraryService.JME_VR),
-    MACOS("MacOs", LibraryService.JME_DESKTOP);
+    MACOS("MacOs", LibraryService.JME_DESKTOP, LibraryService.JME_VR);
 
     /**
-     * The human readable name
+     * The human-readable name
      */
     String optionName;
 
