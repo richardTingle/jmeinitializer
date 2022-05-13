@@ -51,34 +51,40 @@ public enum MergeField {
     JME_DEPENDENCIES,
 
     /**
-     * Dependencies that are only used on the VR platform
+     * Dependencies that are only used on the VR platform and are only placed in the VR module (in multimodule)
+     *
+     * (Libraries that are only included in projects that include VR but are nonetheless put in the main game
+     * dependencies in multiproject applications WILL NOT be in here)
      */
-    VR_SPECIFIC_DEPENDENCIES,
+    VR_SPECIALISED_DEPENDENCIES,
 
     /**
-     * Dependencies that are only used on the android platform
+     * Dependencies that are only used on the android platform and are only placed in the android module (in multimodule)
+     *
+     * (Libraries that are only included in projects that include android but are nonetheless put in the main game
+     * dependencies in multiproject applications WILL NOT be in here)
      */
-    ANDROID_SPECIFIC_DEPENDENCIES,
+    ANDROID_SPECIALISED_DEPENDENCIES,
 
     /**
-     * Dependencies that are only used on the android platform
+     * Dependencies that are only used on the desktop platform and are only placed in the desktop module (in multimodule)
+     *
+     * (Libraries that are only included in projects that include desktop but are nonetheless put in the main game
+     * dependencies in multiproject applications WILL NOT be in here)
      */
-    DESKTOP_SPECIFIC_DEPENDENCIES,
+    DESKTOP_SPECIALISED_DEPENDENCIES,
 
     /**
-     * This is everything thats not under the jmonkeyengineVersion tag.
-     * This is expected to be a multiline, indented merge field (I.e. each line needs 4 spaces at the front) and refer
-     * to the versions explicitly
-     * E.g.:
-     *     implementation 'com.github.stephengold:Minie:4.4.0
-     *     com.simsilica:lemur:1.15.0
-     */
-    OTHER_DEPENDENCIES,
-
-    /**
-     * This is VR_SPECIFIC_DEPENDENCIES + ANDROID_SPECIFIC_DEPENDENCIES + DESKTOP_SPECIFIC_DEPENDENCIES + OTHER_DEPENDENCIES
+     * This is everything that is not a jmonkey version library (it will include specialised libraries and probably
+     * should not be used on multi module projects
      */
     ALL_NON_JME_DEPENDENCIES,
+
+    /**
+     * This is all non jmonkey libraries that are not specialised. I.e. in multimodule projects they go in the
+     * game module (not for example the android module).
+     */
+    ALL_NON_JME_NON_SPECIALISED_DEPENDENCIES,
 
     /**
      * Maven repos required by the libraries. E.g. jcenter()

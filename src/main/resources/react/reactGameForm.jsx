@@ -164,36 +164,57 @@ class ReactGameForm extends React.Component {
     /**
      * Given a list of required platform keys (empty means no requirements) returns if at least one of those is
      * selected
-     * @param requiredPlatformList
+     * @param library
      */
-    platformAvailable = (requiredPlatformList) => {
+    libraryCurrentlySupported = (library) => {
+
+        let requiredPlatformList = library.requiredPlatforms;
+        let incompatiblePlatformList = library.incompatiblePlatformsAndDeployments;
         if (requiredPlatformList.length === 0){
             return true;
         }
 
-        const availableRequiredPlatforms = requiredPlatformList.filter(value => this.state.platformLibraries.includes(value));
-
-        return availableRequiredPlatforms.length > 0;
+        let platformsAndDeployments = this.allSelectedPlatformsAndDeployments();
+        const availableRequiredPlatforms = requiredPlatformList.filter(value => platformsAndDeployments.includes(value));
+        const forbiddenPlatforms = incompatiblePlatformList.filter(value => platformsAndDeployments.includes(value));
+        return (requiredPlatformList.length === 0 || availableRequiredPlatforms.length > 0) && forbiddenPlatforms.length > 0;
     }
 
-    allPlatformsAndDeployments(){
-
+    allSelectedPlatformsAndDeployments(){
+        return this.state.platformLibraries.concat(this.state.deploymentOptions);
     }
 
-    renderRequiredPlatformStatement(requiredPlatformList){
+    renderRequiredPlatformStatement(library){
 
-        if (requiredPlatformList.length === 0){
+        if (this.libraryCurrentlySupported(library)){
             return;
         }
 
-        const platformStrings = [];
+        let requiredPlatformList = library.requiredPlatforms;
+        let incompatiblePlatformList = library.incompatiblePlatformsAndDeployments;
+
+        const requiredPlatformStrings = [];
         this.state.availableLibraryData.jmePlatforms.forEach(platform => {
             if (requiredPlatformList.includes(platform.key)){
-                platformStrings.push(platform.libraryName);
+                requiredPlatformStrings.push(platform.libraryName);
+            }
+        });
+        const incompatiblePlatformStrings = [];
+        this.state.availableLibraryData.jmePlatforms.forEach(platform => {
+            if (incompatiblePlatformList.includes(platform.key)){
+                incompatiblePlatformStrings.push(platform.libraryName);
             }
         });
 
-        return <p><small>{"This library is only applicable for platform(s): " + platformStrings.join(", ") }</small></p>
+        let statement = [];
+        if (requiredPlatformStrings.length>0){
+            statement.push(<p key = {"requires_" + library.key}><small>{"This library is only applicable for platform(s): " + requiredPlatformStrings.join(", ") }</small></p>)
+        }
+        if (incompatiblePlatformStrings.length>0) {
+            statement.push(<p key={"incompatible_" + library.key}> <small>{"This library can't be used with platform(s): " + incompatiblePlatformStrings.join(", ")}</small></p>)
+        }
+
+        return statement;
     }
 
     renderPlatformCheckboxes(){
@@ -261,7 +282,7 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.jmeGeneralLibraries.forEach(library => {
                 jmeLibraryChecks.push(<div className="form-check" key = {"libraryCheckDiv" + library.key}>
-                    <input disabled = {!this.platformAvailable(library.requiredPlatforms)} className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.platformAvailable(library.requiredPlatforms) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.libraryCurrentlySupported(library) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
                         <label className="form-check-label" htmlFor={"platformCheck" + library.key}>
                             <b>{library.libraryName}</b>
                             <p>{library.libraryDescription}</p>
@@ -283,12 +304,12 @@ class ReactGameForm extends React.Component {
 
                 specialCategory.libraries.forEach(library => {
                     thisGroupRadios.push(<div className="form-check" key = {"platformRadioDiv" + library.key}>
-                        <input disabled = {!this.platformAvailable(library.requiredPlatforms)} className="form-check-input" type="radio" name={specialCategory.category.key+"Radios"} id={specialCategory.category.key+"Radio" + library.key} value={library.key} checked = { this.platformAvailable(library.requiredPlatforms) && this.isLibrarySelectedInGroup(specialCategory.category.key, library.key)} onChange={event => this.handleSetLibrarySelectedInGroup(specialCategory.category.key, library.key)} />
+                        <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="radio" name={specialCategory.category.key+"Radios"} id={specialCategory.category.key+"Radio" + library.key} value={library.key} checked = { this.libraryCurrentlySupported(library) && this.isLibrarySelectedInGroup(specialCategory.category.key, library.key)} onChange={event => this.handleSetLibrarySelectedInGroup(specialCategory.category.key, library.key)} />
                         <label className="form-check-label" htmlFor={specialCategory.category.key+"Radio" + library.key}>
                             <b>{library.libraryName}</b>
                             <p>{library.libraryDescription}</p>
                         </label>
-                        {this.renderRequiredPlatformStatement(library.requiredPlatforms)}
+                        {this.renderRequiredPlatformStatement(library)}
                     </div>)
                 })
 
@@ -318,11 +339,11 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.generalLibraries.forEach(library => {
                 libraryChecks.push(<div className="form-check" key = {"libraryDiv" + library.key}>
-                    <input disabled = {!this.platformAvailable(library.requiredPlatforms)} className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.platformAvailable(library.requiredPlatforms) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.libraryCurrentlySupported(library) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
                     <label className="form-check-label" htmlFor={"libraryCheck" + library.key}>
                         <b>{library.libraryName}</b>
                         <p>{library.libraryDescription}</p>
-                        {this.renderRequiredPlatformStatement(library.requiredPlatforms)}
+                        {this.renderRequiredPlatformStatement(library)}
                     </label>
 
                 </div>);

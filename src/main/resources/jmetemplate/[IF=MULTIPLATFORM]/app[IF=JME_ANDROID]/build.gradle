@@ -42,4 +42,5 @@ dependencies {
     implementation project(path: ':game')
     implementation "org.jmonkeyengine:jme3-core:" + jmonkeyengineVersion
     implementation "org.jmonkeyengine:jme3-android-native:" + jmonkeyengineVersion
+    [ANDROID_SPECIALISED_DEPENDENCIES]
 }

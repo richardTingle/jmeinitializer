@@ -56,9 +56,6 @@ class MergerTest {
                              Sam
                              """;
 
-        String out = testString2.replaceAll("^ *Bob\\R", "Bob");
-
-
         String testString = """
                 [IF=testLibraryA][IF=testLibraryB]A test library and B test library[/IF=testLibraryB][/IF=testLibraryA]
                 
@@ -250,5 +247,19 @@ class MergerTest {
                             """;
         Merger merger = new Merger("MyGame", "", List.of(testLibraryA), List.of("SINGLEPLATFORM"), "1", Map.of(), fragmentSupplier);
         assertEquals(expectedString, new String(merger.mergeFileContents(testString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void testEliminateEmptyLines(){
+        String testString = """
+                            test
+                            
+                            test""";
+
+        String expectedString = """
+                            test
+                            test""";
+
+        assertEquals(expectedString, Merger.eliminateEmptyLines(testString));
     }
 }

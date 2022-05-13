@@ -78,11 +78,11 @@ public class Merger {
         mergeData.put(MergeField.GAME_PACKAGE_FOLDER, convertPackageToFolder(mergeData.get(MergeField.GAME_PACKAGE)));
         mergeData.put(MergeField.JME_VERSION, jmeVersion);
         mergeData.put(MergeField.JME_DEPENDENCIES, formJmeRequiredLibrariesMergeField(librariesRequired));
-        mergeData.put(MergeField.VR_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_VR));
-        mergeData.put(MergeField.ANDROID_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_ANDROID));
-        mergeData.put(MergeField.DESKTOP_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_DESKTOP));
-        mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredAnyPlatformLibrariesMergeField(librariesRequired, libraryVersions));
-        mergeData.put(MergeField.ALL_NON_JME_DEPENDENCIES, mergeData.get(MergeField.VR_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.ANDROID_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.DESKTOP_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.OTHER_DEPENDENCIES));
+        mergeData.put(MergeField.VR_SPECIALISED_DEPENDENCIES, formPlatformSpecialisedLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_VR));
+        mergeData.put(MergeField.ANDROID_SPECIALISED_DEPENDENCIES, formPlatformSpecialisedLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_ANDROID));
+        mergeData.put(MergeField.DESKTOP_SPECIALISED_DEPENDENCIES, formPlatformSpecialisedLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_DESKTOP));
+        mergeData.put(MergeField.ALL_NON_JME_NON_SPECIALISED_DEPENDENCIES, formNonJmeNonSpecialised(librariesRequired, libraryVersions));
+        mergeData.put(MergeField.ALL_NON_JME_DEPENDENCIES, eliminateEmptyLines(mergeData.get(MergeField.VR_SPECIALISED_DEPENDENCIES)+"\n"+mergeData.get(MergeField.ANDROID_SPECIALISED_DEPENDENCIES)+"\n"+mergeData.get(MergeField.DESKTOP_SPECIALISED_DEPENDENCIES)+"\n"+mergeData.get(MergeField.ALL_NON_JME_NON_SPECIALISED_DEPENDENCIES)));
         mergeData.put(MergeField.MAVEN_REPOS, formMavenRepos(librariesRequired));
 
         libraryKeysAndProfilesInUse = librariesRequired.stream().map(Library::getKey).collect(Collectors.toSet());
@@ -208,10 +208,10 @@ public class Merger {
 
     }
 
-    protected static String formNonJmeRequiredAnyPlatformLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions){
+    protected static String formNonJmeNonSpecialised(List<Library> librariesRequired, Map<String,String> libraryVersions){
         return librariesRequired.stream()
                 .filter(l -> !l.isUsesJmeVersion())
-                .filter(l -> l.getRequiredPlatforms().isEmpty())
+                .filter(l -> l.getSpecialisedToPlatforms().isEmpty())
                 .flatMap(l ->
                         l.getArtifacts().stream()
                                 .map(artifact -> {
@@ -233,10 +233,10 @@ public class Merger {
                 .collect(Collectors.joining("\n"));
     }
 
-    protected static String formPlatformSpecificLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions, String platform){
+    protected static String formPlatformSpecialisedLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions, String platform){
         return librariesRequired.stream()
                 .filter(l -> !l.isUsesJmeVersion())
-                .filter(l -> l.getRequiredPlatforms().contains(platform))
+                .filter(l -> l.getSpecialisedToPlatforms().contains(platform))
                 .flatMap(l ->
                         l.getArtifacts().stream()
                                 .map(artifact -> {
@@ -279,6 +279,10 @@ public class Merger {
             proposedName = CaseUtils.toCamelCase(proposedName, true, ' ', '_');
         }
         return proposedName;
+    }
+
+    public static String eliminateEmptyLines(String input){
+        return input.lines().filter(l -> !l.isBlank()).collect(Collectors.joining("\n"));
     }
 
 }

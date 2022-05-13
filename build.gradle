@@ -45,7 +45,7 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 
 	implementation 'com.fasterxml.jackson.module:jackson-module-jsonSchema:2.13.2'
-
+	implementation 'org.apache.commons:commons-collections4:4.4'
 
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
