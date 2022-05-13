@@ -1,2 +1,4 @@
 server:
   port: 8080
+libraries:
+  fetchUrl: https://raw.githubusercontent.com/jMonkeyEngine/jme-initializer/master/libraries.json

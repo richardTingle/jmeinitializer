@@ -1,2 +1,2 @@
 libraries:
-  fetchUrl: https://raw.githubusercontent.com/jMonkeyEngine/jme-initializer/master/libraries.json
+  fetchUrl: ~ # using a fetch url on null triggers the application to instead fetch it from its own source directory (good for local development

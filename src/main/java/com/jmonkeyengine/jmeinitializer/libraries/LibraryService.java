@@ -17,6 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,18 +59,28 @@ public class LibraryService {
      */
     private final String fetchUrl;
 
-    public LibraryService ( @Value("${libraries.fetchUrl}" ) String fetchUrl) {
+    public LibraryService ( @Value("${libraries.fetchUrl}" ) String fetchUrl) throws MalformedURLException{
         this.fetchUrl=fetchUrl;
     }
 
     public void fetchNewLibraries(){
         log.info("fetching new libraries");
-        ResponseEntity<String> apiResponse = restTemplate.getForEntity(fetchUrl, String.class);
-
-        if ( apiResponse.getStatusCode().is2xxSuccessful() ){
-            updateLibrariesBasedOnJson(apiResponse.getBody());
+        if (fetchUrl.equals("")){
+            //this is for developer use, fetch from local file system
+            File internalLocation = new File(System.getProperty("user.dir"), "libraries.json");
+            try{
+                updateLibrariesBasedOnJson(Files.readString(internalLocation.toPath()));
+            } catch(IOException e){
+                throw new RuntimeException(e);
+            }
         }else{
-            log.warn("Failed to fetch libraries, received " + apiResponse);
+            ResponseEntity<String> apiResponse = restTemplate.getForEntity(fetchUrl, String.class);
+
+            if(apiResponse.getStatusCode().is2xxSuccessful()){
+                updateLibrariesBasedOnJson(apiResponse.getBody());
+            } else{
+                log.warn("Failed to fetch libraries, received " + apiResponse);
+            }
         }
     }
 
