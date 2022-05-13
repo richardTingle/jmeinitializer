@@ -60,7 +60,7 @@ class MergerTest {
                 [IF=testLibraryA][IF=testLibraryB]A test library and B test library[/IF=testLibraryB][/IF=testLibraryA]
                 
                 [IF=testLibraryA]A test library
-                multiline[/IF=testLibraryB]
+                multiline[/IF=testLibraryA]
                 
                 [IF=nonExistent]This should not show[/IF=nonExistent]
                 
@@ -100,6 +100,29 @@ class MergerTest {
         assertEquals(expectedString, new String(merger.mergeFileContents(testString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
     }
 
+    @Test
+    void mergeText_ifStatementsWithOrs(){
+        Library testLibraryA = Library.builder("testLibraryA", "A test library",  LibraryCategory.GENERAL, "description").build();
+
+        Library testLibraryB =  Library.builder("testLibraryB", "B test library",  LibraryCategory.GENERAL, "description").build();
+
+        Merger merger = new Merger("My Game!!", "my.excellent.company", List.of(testLibraryA, testLibraryB), List.of("SINGLEPLATFORM"), "1", Map.of(), noOpFragmentSupplier);
+
+        String testString =
+            """
+                [IF=testLibraryA|nonExistent]This should show A[/IF=testLibraryA|nonExistent]
+                [IF=testLibraryA|testLibraryB]This should show B[/IF=testLibraryA|testLibraryB]
+                [IF=nonExistentA|nonExistentB]This should not show[/IF=nonExistentA|nonExistentB]
+                Normal text
+            """;
+        String expectedString =
+            """
+                This should show A
+                This should show B
+                Normal text
+            """;
+        assertEquals(expectedString, new String(merger.mergeFileContents(testString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+    }
 
     @Test
     void pathShouldBeAllowed(){

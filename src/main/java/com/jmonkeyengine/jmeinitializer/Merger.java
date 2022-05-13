@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.CaseUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -172,17 +173,39 @@ public class Merger {
             fileContentsAsString = fileContentsAsString.replace("[/IF=" + validProfile + "]", "");
         }
 
-        //I suspect a single really advanced regex could do the below in one go, but its a painful double "not this" so I've gone for this probably less efficient approach
-        Set<String> remainingIfs = new HashSet<>();
-        Matcher remainingIfsMatcher = mergeIfConditionPattern.matcher(fileContentsAsString);
-        while(remainingIfsMatcher.find()){
-            remainingIfs.add(remainingIfsMatcher.group(1));
+        fileContentsAsString = processIfStatements(fileContentsAsString);
+
+        //always end with a new character because that will make git changes better in the future (plus the test want that)
+        fileContentsAsString = fileContentsAsString+"\n";
+
+        return fileContentsAsString.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private String processIfStatements(String fileContentsAsString){
+        Set<String> foundIfConditions = new HashSet<>();
+        Matcher ifMatcher = mergeIfConditionPattern.matcher(fileContentsAsString);
+        while(ifMatcher.find()){
+            foundIfConditions.add(ifMatcher.group(1));
         }
 
-        for(int i=0;i<2;i++){
-            for(String remainingIf : remainingIfs){
+        Set<String> failingIfConditions = new HashSet<>();
+        for(String foundIfCondition : foundIfConditions){
+            boolean ifConditionPasses = libraryConditionStringPasses(foundIfCondition);
+            if(ifConditionPasses){
+                fileContentsAsString = fileContentsAsString.replace("[IF=" + foundIfCondition + "]", "");
+                fileContentsAsString = fileContentsAsString.replace("[/IF=" + foundIfCondition + "]", "");
+            }else{
+                failingIfConditions.add(foundIfCondition);
+            }
+        }
+
+        //eliminate any remaining ifs and their contents
+        //I suspect a single really advanced regex could do the below in one go, but its a painful double "not this" so I've gone for this probably less efficient approach
+
+        for(int i = 0; i < 2; i++){
+            for(String remainingIf : failingIfConditions){
                 //this 2 step process of first eliminating down to a _eliminated_ string and then removing that is to get any whitespace eliminated nicely
-                String regex = "\\[IF=" + remainingIf + "]((?!IF=).)*\\[/IF=" + remainingIf + "]";
+                String regex = "\\[IF=" + Pattern.quote(remainingIf) + "]((?!IF=).)*\\[/IF=" + Pattern.quote(remainingIf) + "]";
                 fileContentsAsString = Pattern.compile(regex, Pattern.DOTALL).matcher(fileContentsAsString).replaceAll("_eliminated_");
             }
             //kill including the new line after the closure, if thats the only thing on the line
@@ -190,11 +213,17 @@ public class Merger {
             //then get rid of anything thats on a line with allowed text
             fileContentsAsString = fileContentsAsString.replace("_eliminated_", "");
         }
+        return fileContentsAsString;
+    }
 
-        //always end with a new character because that will make git changes better in the future (plus the test want that)
-        fileContentsAsString = fileContentsAsString+"\n";
-
-        return fileContentsAsString.getBytes(StandardCharsets.UTF_8);
+    private boolean libraryConditionStringPasses(String condition){
+        String[] libraries = condition.split("\\|");
+        for(String library: libraries){
+            if (libraryKeysAndProfilesInUse.contains(library)){
+                return true;
+            }
+        }
+        return false;
     }
 
     protected static String formJmeRequiredLibrariesMergeField(List<Library> librariesRequired){
