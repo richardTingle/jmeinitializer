@@ -123,11 +123,7 @@ class ReactGameForm extends React.Component {
 
     getRequiredDeploymentOptionsAsCommaSeperatedList = () => {
         let fullRequiredDeploymentOptions= []
-        console.log("Form: " + this.state.deploymentOptions);
         for(const deploymentOption of this.state.availableLibraryData.deploymentOptions ){
-            console.log("Test" + deploymentOption);
-            console.log("A" + this.state.deploymentOptions.includes(deploymentOption.key));
-            console.log("B" + this.deploymentOptionShouldBeAvailable(deploymentOption));
             if (this.state.deploymentOptions.includes(deploymentOption.key) && this.deploymentOptionShouldBeAvailable(deploymentOption)){
                 console.log("Pass" + deploymentOption);
                 fullRequiredDeploymentOptions.push(deploymentOption.key);
@@ -189,14 +185,14 @@ class ReactGameForm extends React.Component {
 
         let requiredPlatformList = library.requiredPlatforms;
         let incompatiblePlatformList = library.incompatiblePlatformsAndDeployments;
-        if (requiredPlatformList.length === 0){
+        if (requiredPlatformList.length === 0 && incompatiblePlatformList.length === 0){
             return true;
         }
 
         let platformsAndDeployments = this.allSelectedPlatformsAndDeployments();
         const availableRequiredPlatforms = requiredPlatformList.filter(value => platformsAndDeployments.includes(value));
         const forbiddenPlatforms = incompatiblePlatformList.filter(value => platformsAndDeployments.includes(value));
-        return (requiredPlatformList.length === 0 || availableRequiredPlatforms.length > 0) && forbiddenPlatforms.length > 0;
+        return (requiredPlatformList.length === 0 || availableRequiredPlatforms.length > 0) && forbiddenPlatforms.length === 0;
     }
 
     allSelectedPlatformsAndDeployments(){
@@ -222,6 +218,11 @@ class ReactGameForm extends React.Component {
         this.state.availableLibraryData.jmePlatforms.forEach(platform => {
             if (incompatiblePlatformList.includes(platform.key)){
                 incompatiblePlatformStrings.push(platform.libraryName);
+            }
+        });
+        this.state.availableLibraryData.deploymentOptions.forEach(deploymentOption => {
+            if (incompatiblePlatformList.includes(deploymentOption.key)){
+                incompatiblePlatformStrings.push(deploymentOption.name);
             }
         });
 
