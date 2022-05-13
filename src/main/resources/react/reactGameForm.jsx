@@ -67,10 +67,10 @@ class ReactGameForm extends React.Component {
     handleToggleDeploymentOption = (deploymentOption) => {
         let currentlySelected = this.state.deploymentOptions.includes(deploymentOption)
         if (currentlySelected){
-            let newDeploymentOptions = this.state.deploymentOptions.filter( v => v !== libraryKey )
+            let newDeploymentOptions = this.state.deploymentOptions.filter( v => v !== deploymentOption )
             this.setState({deploymentOptions: newDeploymentOptions, hasDownloaded:false, validationMessage:null });
         }else{
-            this.setState({deploymentOptions: [...this.state.deploymentOptions, libraryKey], hasDownloaded:false, validationMessage:null});
+            this.setState({deploymentOptions: [...this.state.deploymentOptions, deploymentOption], hasDownloaded:false, validationMessage:null});
         }
     }
 
