@@ -1,5 +1,6 @@
 package com.jmonkeyengine.jmeinitializer;
 
+import com.jmonkeyengine.jmeinitializer.deployment.DeploymentOption;
 import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryCategory;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
@@ -56,9 +57,9 @@ public class InitializerZipService {
         this.libraryService = libraryService;
     }
 
-    public Map<String, String> produceGradleFilePreview(String gameName, String packageName, List<String> requiredLibraryKeys ){
+    public Map<String, String> produceGradleFilePreview(String gameName, String packageName, List<String> requiredLibraryKeys, List<String> deploymentOptionKeys ){
         List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
-        Merger merger = new Merger(gameName, packageName, requiredLibraries,  calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache(), new FragmentFetcher() );
+        Merger merger = new Merger(gameName, packageName, requiredLibraries,  calculateAdditionalProfiles(requiredLibraries, deploymentOptionKeys), versionService.getJmeVersion(), versionService.getVersionCache(), new FragmentFetcher() );
 
         Map<String, String> gradleFiles = new HashMap<>();
 
@@ -75,9 +76,9 @@ public class InitializerZipService {
         return gradleFiles;
     }
 
-    public ByteArrayOutputStream produceZipInMemory(String gameName, String packageName, List<String> requiredLibraryKeys ){
+    public ByteArrayOutputStream produceZipInMemory(String gameName, String packageName, List<String> requiredLibraryKeys, List<String> deploymentOptionKeys ){
 
-        Map<String,byte[]> baseTemplate = produceTemplate(gameName, packageName, requiredLibraryKeys);
+        Map<String,byte[]> baseTemplate = produceTemplate(gameName, packageName, requiredLibraryKeys, deploymentOptionKeys);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try(ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
@@ -100,11 +101,11 @@ public class InitializerZipService {
      * @param requiredLibraryKeys the libraries required by the game
      * @return a map of paths to the file contents that should be created at that path
      */
-    public Map<String,byte[]> produceTemplate(String gameName, String packageName, List<String> requiredLibraryKeys ){
+    public Map<String,byte[]> produceTemplate(String gameName, String packageName, List<String> requiredLibraryKeys, List<String> deploymentOptionKeys){
 
         List<Library> requiredLibraries = eliminateLibrariesOnUnsupportedPlatforms(parseLibraryKeys(requiredLibraryKeys));
 
-        Merger merger = new Merger(gameName, packageName, requiredLibraries, calculateAdditionalProfiles(requiredLibraries), versionService.getJmeVersion(), versionService.getVersionCache(), new FragmentFetcher() );
+        Merger merger = new Merger(gameName, packageName, requiredLibraries, calculateAdditionalProfiles(requiredLibraries, deploymentOptionKeys), versionService.getJmeVersion(), versionService.getVersionCache(), new FragmentFetcher() );
 
         Map<String,byte[]> templateFiles = new HashMap<>();
 
@@ -182,7 +183,7 @@ public class InitializerZipService {
         }
     }
 
-    private Collection<String> calculateAdditionalProfiles(Collection<Library> requestedLibraries){
+    private Collection<String> calculateAdditionalProfiles(Collection<Library> requestedLibraries, List<String> deploymentOptionKeys){
         List<String> additionalProfiles = new ArrayList<>();
 
         long numberOfPlatforms = requestedLibraries.stream().filter(l -> l.getCategory() == LibraryCategory.JME_PLATFORM).count();
@@ -192,6 +193,8 @@ public class InitializerZipService {
         }else{
             additionalProfiles.add("SINGLEPLATFORM");
         }
+        additionalProfiles.addAll(deploymentOptionKeys);
+
         return additionalProfiles;
     }
 

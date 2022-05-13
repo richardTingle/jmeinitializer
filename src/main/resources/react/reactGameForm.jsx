@@ -39,6 +39,10 @@ class ReactGameForm extends React.Component {
                 data.specialCategories.forEach( specialCategoryData => {
                     groupSelectedLibraries[specialCategoryData.category.key] = specialCategoryData.defaultLibrary;
                 })
+                stateUpdate.deploymentOptions = []; //by default select all applicable deployment options
+                data.deploymentOptions.forEach( deploymentOption => {
+                    stateUpdate.deploymentOptions.push(deploymentOption.key);
+                })
                 stateUpdate.groupSelectedLibraries = groupSelectedLibraries;
 
                 this.setState(stateUpdate)
@@ -94,7 +98,7 @@ class ReactGameForm extends React.Component {
     }
 
     formOptionsQueryString = () => {
-        return "gameName=" + encodeURIComponent(this.state.gameName) + "&packageName=" +encodeURIComponent(this.state.package)+"&libraryList=" + encodeURIComponent(this.getRequiredLibrariesAsCommaSeperatedList())
+        return "gameName=" + encodeURIComponent(this.state.gameName) + "&packageName=" +encodeURIComponent(this.state.package)+"&libraryList=" + encodeURIComponent(this.getRequiredLibrariesAsCommaSeperatedList())+ "&deploymentOptionsList=" + encodeURIComponent(this.getRequiredDeploymentOptionsAsCommaSeperatedList());
     }
 
     handleSetLibrarySelectedInGroup =  (group, library)=>{
@@ -115,6 +119,21 @@ class ReactGameForm extends React.Component {
         }
 
         return fullRequiredLibrarys.join(",");
+    }
+
+    getRequiredDeploymentOptionsAsCommaSeperatedList = () => {
+        let fullRequiredDeploymentOptions= []
+        console.log("Form: " + this.state.deploymentOptions);
+        for(const deploymentOption of this.state.availableLibraryData.deploymentOptions ){
+            console.log("Test" + deploymentOption);
+            console.log("A" + this.state.deploymentOptions.includes(deploymentOption.key));
+            console.log("B" + this.deploymentOptionShouldBeAvailable(deploymentOption));
+            if (this.state.deploymentOptions.includes(deploymentOption.key) && this.deploymentOptionShouldBeAvailable(deploymentOption)){
+                console.log("Pass" + deploymentOption);
+                fullRequiredDeploymentOptions.push(deploymentOption.key);
+            }
+        }
+        return fullRequiredDeploymentOptions.join(",");
     }
 
     isLibrarySelectedInGroup = (group, library) => {
@@ -240,6 +259,10 @@ class ReactGameForm extends React.Component {
         }
     }
 
+    deploymentOptionShouldBeAvailable(deploymentOption){
+        return deploymentOption.applicablePlatforms.filter(value => this.state.platformLibraries.includes(value)).length>0
+    }
+
     renderDeploymentOptionsCheckboxes(){
         if (this.state.availableLibraryData === null){
             return <div/>
@@ -248,7 +271,7 @@ class ReactGameForm extends React.Component {
             //go through the selected platform. If a deployment option is relevant to that platform offer it
             this.state.availableLibraryData.deploymentOptions.forEach(deploymentOption => {
 
-                let includeOption = deploymentOption.applicablePlatforms.filter(value => this.state.platformLibraries.includes(value)).length>0;
+                let includeOption = this.deploymentOptionShouldBeAvailable(deploymentOption);
                 if (includeOption){
                     deploymentOptionsCheckboxes.push(<div className="form-check" key={"deploymentCheckboxDiv" + deploymentOption.key}>
                         <input className="form-check-input" type="checkbox" name="platformRadios"
@@ -263,7 +286,7 @@ class ReactGameForm extends React.Component {
             });
             if (deploymentOptionsCheckboxes.length > 0) {
                 return <div><h2>Deployment</h2>
-                    <p>Deployment options will provide platform specific deployments, and may also restrict available libraries</p>
+                    <p>Deployment options will provide platform specific deployments (with a bundled JRE), and may also restrict available libraries</p>
                     <div onChange={this.handleSetPlatform}>
                         {deploymentOptionsCheckboxes}
                     </div>

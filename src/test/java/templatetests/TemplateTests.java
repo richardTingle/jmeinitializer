@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,7 +88,7 @@ public class TemplateTests{
     }
 
     public static void testTemplate(String gameName, String packageName, String... listOfLibraries ) throws Exception{
-        Map<String,byte[]> template = initializerZipService.produceTemplate(gameName, packageName, Arrays.asList(listOfLibraries));
+        Map<String,byte[]> template = initializerZipService.produceTemplate(gameName, packageName, Arrays.asList(listOfLibraries), List.of());
 
         File folder = new File(tempFolder, gameName);
         log.info("Using temp folder " + folder);

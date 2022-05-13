@@ -36,6 +36,8 @@ public class InitializerRestController {
     private static final String GAME_NAME_DOC_STRING = "The name of the game, will be sanitised to something like MyExcellentGame. Caller is not required to sanitise";
     private static final String GAME_DESCRIPTION_DOC_STRING = "The proposed package for the games source, e.g. com.example. Can be blank. Caller is not required to sanitise";
     private static final String REQUIRED_LIBRARIES_DOC_STRING = "A comma delimited list of the library keys for the libraries the user requests. E.g. `JME_DESKTOP,LEMUR,LOG4J2`";
+    private static final String DEPLOYMENT_OPTIONS_DOC_STRING = "A comma delimited list of the deployment option keys the user requests. E.g. `WINDOWS,LINUX`";
+
 
     private final InitializerZipService initializerZipService;
     private final LibraryService libraryService;
@@ -61,10 +63,11 @@ public class InitializerRestController {
     public ResponseEntity<Resource> buildStarterZip(
             @Parameter(description=GAME_NAME_DOC_STRING, example = "MyGame") @RequestParam String gameName,
             @Parameter(description=GAME_DESCRIPTION_DOC_STRING, example = "com.example") @RequestParam String packageName,
-            @Parameter(description=REQUIRED_LIBRARIES_DOC_STRING, example = "JME_DESKTOP,LEMUR,LOG4J2") @RequestParam String libraryList)
+            @Parameter(description=REQUIRED_LIBRARIES_DOC_STRING, example = "JME_DESKTOP,LEMUR,LOG4J2") @RequestParam String libraryList,
+            @Parameter(description=DEPLOYMENT_OPTIONS_DOC_STRING, example = "WINDOWS,LINUX") @RequestParam String deploymentOptionsList)
             throws IOException {
 
-        try(ByteArrayOutputStream byteArrayOutputStream = initializerZipService.produceZipInMemory( gameName, packageName, Arrays.asList(libraryList.split(",")) )){
+        try(ByteArrayOutputStream byteArrayOutputStream = initializerZipService.produceZipInMemory( gameName, packageName, Arrays.asList(libraryList.split(",")), Arrays.asList(deploymentOptionsList.split(",")) )){
 
             ByteArrayResource resource = new ByteArrayResource(byteArrayOutputStream.toByteArray());
             return ResponseEntity.ok()
@@ -89,8 +92,9 @@ public class InitializerRestController {
     public ResponseEntity<Map<String, String>> previewGradleFile(
             @Parameter(description=GAME_NAME_DOC_STRING, example = "MyGame") @RequestParam String gameName,
             @Parameter(description=GAME_DESCRIPTION_DOC_STRING, example = "com.example") @RequestParam String packageName,
-            @Parameter(description=REQUIRED_LIBRARIES_DOC_STRING, example = "JME_DESKTOP,LEMUR,LOG4J2") @RequestParam String libraryList) throws IOException {
-        Map<String, String> gradleFile = initializerZipService.produceGradleFilePreview(gameName, packageName, Arrays.asList(libraryList.split(",")));
+            @Parameter(description=REQUIRED_LIBRARIES_DOC_STRING, example = "JME_DESKTOP,LEMUR,LOG4J2") @RequestParam String libraryList,
+            @Parameter(description=DEPLOYMENT_OPTIONS_DOC_STRING, example = "WINDOWS,LINUX") @RequestParam String deploymentOptionsList) {
+        Map<String, String> gradleFile = initializerZipService.produceGradleFilePreview(gameName, packageName, Arrays.asList(libraryList.split(",")), Arrays.asList(deploymentOptionsList.split(",")) );
 
         return ResponseEntity.ok().body(gradleFile);
     }
