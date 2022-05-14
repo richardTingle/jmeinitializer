@@ -1,6 +1,7 @@
 package templatetests;
 
 import com.jmonkeyengine.jmeinitializer.InitializerZipService;
+import com.jmonkeyengine.jmeinitializer.deployment.DeploymentOption;
 import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import com.jmonkeyengine.jmeinitializer.versions.VersionService;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -28,11 +29,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  * A successful build of the template passes the test. This is to catch compile failures in the templates
  */
 @Tag("TemplateTests")
-//@Log4j2
 public class TemplateTests{
 
     private static final org.apache.logging.log4j.Logger log = org.apache.logging.log4j.LogManager.getLogger(InitializerZipService.class);
-
 
     static InitializerZipService initializerZipService;
     static File tempFolder;
@@ -59,38 +58,73 @@ public class TemplateTests{
 
     @Test
     public void testMultiProjectTemplate_withTamarin() throws Exception{
-        testTemplate("MultiTamarinTest", "com.example", "JME_DESKTOP", "JME_ANDROID", "JME_EFFECTS", "JME_VR", "MINIE", "TAMARIN" );
+        testTemplate("MultiTamarinTest", "com.example", List.of("JME_DESKTOP", "JME_ANDROID", "JME_EFFECTS", "JME_VR", "MINIE", "TAMARIN" ) );
     }
 
     @Test
     public void testMultiProjectTemplate_withoutTamarin() throws Exception{
-        testTemplate("MultiNoTamarinTest", "com.example", "JME_DESKTOP", "JME_ANDROID", "JME_EFFECTS", "JME_VR", "MINIE" );
+        testTemplate("MultiNoTamarinTest", "com.example", List.of("JME_DESKTOP", "JME_ANDROID", "JME_EFFECTS", "JME_VR", "MINIE" ) );
     }
 
     @Test
     public void testDesktopTemplate() throws Exception{
-        testTemplate("DesktopTest", "com.example", "JME_DESKTOP", "JME_EFFECTS", "LEMUR" );
+        testTemplate("DesktopTest", "com.example", List.of("JME_DESKTOP", "JME_EFFECTS", "LEMUR" ) );
+    }
+
+    @Test
+    public void testDesktopTemplateWithDeploymentOptions_windows() throws Exception{
+        testTemplate("DesktopTest", "com.example", List.of("JME_DESKTOP", "JME_EFFECTS", "LEMUR" ), List.of(DeploymentOption.WINDOWS.name()) );
+    }
+
+    @Test
+    public void testDesktopTemplateWithDeploymentOptions_linux() throws Exception{
+        testTemplate("DesktopTest", "com.example", List.of("JME_DESKTOP", "JME_EFFECTS", "LEMUR" ), List.of(DeploymentOption.LINUX.name()) );
+    }
+
+    @Test
+    public void testDesktopTemplateWithDeploymentOptions_macos() throws Exception{
+        testTemplate("DesktopTest", "com.example", List.of("JME_DESKTOP", "JME_EFFECTS", "LEMUR" ), List.of(DeploymentOption.MACOS.name()) );
+    }
+
+    @Test
+    public void testDesktopTemplateWithDeploymentOptions_all() throws Exception{
+        testTemplate("DesktopTest", "com.example", List.of("JME_DESKTOP", "JME_EFFECTS", "LEMUR" ), List.of(DeploymentOption.WINDOWS.name(), DeploymentOption.LINUX.name(), DeploymentOption.MACOS.name()) );
+    }
+
+    @Test
+    public void testVrTemplateWithDeploymentOptions_all() throws Exception{
+        testTemplate("VrTest", "com.example", List.of("JME_VR", "JME_EFFECTS", "LEMUR" ), List.of(DeploymentOption.WINDOWS.name(), DeploymentOption.LINUX.name(), DeploymentOption.MACOS.name()) );
     }
 
     @Test
     public void testAndroidTemplate() throws Exception{
-        testTemplate("AndroidTest", "com.example", "JME_ANDROID", "JME_EFFECTS", "MINIE" );
+        testTemplate("AndroidTest", "com.example", List.of("JME_ANDROID", "JME_EFFECTS", "MINIE" ) );
     }
 
     @Test
     public void testVrTemplate_withoutTamarin() throws Exception{
-        testTemplate("VrNoTamarinTest", "com.example", "JME_VR", "JME_EFFECTS", "LEMUR" );
+        testTemplate("VrNoTamarinTest", "com.example", List.of("JME_VR", "JME_EFFECTS", "LEMUR") );
     }
 
     @Test
     public void testVrTemplate_withTamarin() throws Exception{
-        testTemplate("VrTamarinTest", "com.example", "JME_VR", "JME_EFFECTS", "TAMARIN", "LEMUR" );
+        testTemplate("VrTamarinTest", "com.example", List.of("JME_VR", "JME_EFFECTS", "TAMARIN", "LEMUR") );
     }
 
-    public static void testTemplate(String gameName, String packageName, String... listOfLibraries ) throws Exception{
-        Map<String,byte[]> template = initializerZipService.produceTemplate(gameName, packageName, Arrays.asList(listOfLibraries), List.of());
+    public static void testTemplate(String gameName, String packageName, List<String> listOfLibraries ) throws Exception{
+        testTemplate(gameName, packageName, listOfLibraries, List.of());
+    }
+
+    public static void testTemplate(String gameName, String packageName, List<String> listOfLibraries, List<String> listOfDeploymentOptions ) throws Exception{
+        Map<String,byte[]> template = initializerZipService.produceTemplate(gameName, packageName, listOfLibraries, listOfDeploymentOptions);
 
         File folder = new File(tempFolder, gameName);
+        int dedupeIndex = 1;
+        while (folder.exists()){ //this is for when several tests use the same game name
+            folder = new File(tempFolder + "_" + dedupeIndex, gameName);
+            dedupeIndex++;
+        }
+
         log.info("Using temp folder " + folder);
         folder.mkdirs();
 
