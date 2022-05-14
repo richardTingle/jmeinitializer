@@ -44,7 +44,7 @@ task downloadLinuxJre(type: Download) {
 }
 
 task downloadAndUnzipLinuxJre(dependsOn: downloadLinuxJre, type: Copy) {
-    from zipTree(downloadLinuxJre.dest)
+    from tarTree(downloadLinuxJre.dest)
     into "${buildDir}/jres/"
     includeEmptyDirs(false)
     filesMatching("**") {
@@ -55,7 +55,11 @@ task downloadAndUnzipLinuxJre(dependsOn: downloadLinuxJre, type: Copy) {
 task buildLinuxDistribution(dependsOn: [distZip, downloadAndUnzipLinuxJre], type: Copy)
 {
     group 'distribution'
-    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].sh"), zipTree(distZip.archiveFile), "${buildDir}/jres/linuxJre"
+    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].sh"){
+        fileMode 0755
+    }
+    from zipTree(distZip.archiveFile)
+    from "${buildDir}/jres/linuxJre"
     into new File(buildDir, 'distributions/[GAME_NAME]-linux')
     includeEmptyDirs false
     exclude 'bin/**' //we are adding our own run scripts, exclude the ones coming from distZip
@@ -65,7 +69,13 @@ task zipLinuxDistribution( dependsOn:buildLinuxDistribution, type: Zip) {
     group 'distribution'
     archiveFileName = "[GAME_NAME]-linux.tar.gz"
     destinationDirectory = file("$buildDir/distributions")
-    from "$buildDir/distributions/[GAME_NAME]-linux"
+    from ("$buildDir/distributions/[GAME_NAME]-linux"){
+      include('**.sh')
+      fileMode 0755
+    }
+    from ("$buildDir/distributions/[GAME_NAME]-linux"){
+        exclude('**.sh')
+    }
 }
 [/IF=LINUX]
 [IF=MACOS]
@@ -76,7 +86,7 @@ task downloadMacJre(type: Download) {
 }
 
 task downloadAndUnzipMacJre(dependsOn: downloadMacJre, type: Copy) {
-    from zipTree(downloadMacJre.dest)
+    from tarTree(downloadMacJre.dest)
     into "${buildDir}/jres/"
     includeEmptyDirs(false)
     filesMatching("**") {
@@ -87,7 +97,11 @@ task downloadAndUnzipMacJre(dependsOn: downloadMacJre, type: Copy) {
 task buildMacDistribution(dependsOn: [distZip, downloadAndUnzipMacJre], type: Copy)
 {
     group 'distribution'
-    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].sh"), zipTree(distZip.archiveFile), "${buildDir}/jres/macJre"
+    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].sh"){
+        fileMode 0755
+    }
+    from zipTree(distZip.archiveFile) 
+    from "${buildDir}/jres/macJre
     into new File(buildDir, 'distributions/[GAME_NAME]-mac')
     includeEmptyDirs false
     exclude 'bin/**' //we are adding our own run scripts, exclude the ones coming from distZip
@@ -97,7 +111,13 @@ task zipMacDistribution( dependsOn:buildMacDistribution, type: Zip) {
     group 'distribution'
     archiveFileName = "[GAME_NAME]-mac.tar.gz"
     destinationDirectory = file("$buildDir/distributions")
-    from "$buildDir/distributions/[GAME_NAME]-mac"
+    from ("$buildDir/distributions/[GAME_NAME]-mac"){
+      include('**.sh')
+      fileMode 0755
+    }
+    from ("$buildDir/distributions/[GAME_NAME]-mac"){
+        exclude('**.sh')
+    }
 }
 [/IF=MACOS]
 task buildAllDistributions{

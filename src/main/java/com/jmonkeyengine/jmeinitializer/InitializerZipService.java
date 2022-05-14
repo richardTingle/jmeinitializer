@@ -7,6 +7,8 @@ import com.jmonkeyengine.jmeinitializer.libraries.LibraryService;
 import com.jmonkeyengine.jmeinitializer.versions.VersionService;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.stereotype.Service;
@@ -81,13 +83,17 @@ public class InitializerZipService {
         Map<String,byte[]> baseTemplate = produceTemplate(gameName, packageName, requiredLibraryKeys, deploymentOptionKeys);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try(ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
+        try(ZipArchiveOutputStream zipOutputStream = new ZipArchiveOutputStream(byteArrayOutputStream)) {
             for( Map.Entry<String,byte[]> templateFile : baseTemplate.entrySet()){
-                ZipEntry entry = new ZipEntry(templateFile.getKey());
-                zipOutputStream.putNextEntry(entry);
+                ZipArchiveEntry entry = new ZipArchiveEntry(templateFile.getKey());
+                if (templateFile.getKey().endsWith(".sh") || templateFile.getKey().endsWith("gradlew")){
+                    //noinspection OctalInteger this is traditionally shown in octal, its a chmod argument
+                    entry.setUnixMode(0755); //set sh files as executable in the resultant zip archive
+                }
+                zipOutputStream.putArchiveEntry(entry);
                 zipOutputStream.write(templateFile.getValue());
 
-                zipOutputStream.closeEntry();
+                zipOutputStream.closeArchiveEntry();
             }
         }catch(IOException ioe) {
             throw new RuntimeException("Exception while forming zip", ioe);
