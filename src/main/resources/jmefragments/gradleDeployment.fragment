@@ -13,10 +13,10 @@ task downloadWindowsJre(type: Download) {
 
 task downloadAndUnzipWindowsJre(dependsOn: downloadWindowsJre, type: Copy) {
     from zipTree(downloadWindowsJre.dest)
-    into "${buildDir}/jres/"
+    into "${buildDir}/jres/windowsJre/"
     includeEmptyDirs(false)
     filesMatching("**") {
-        it.path = it.path.replaceAll("^[a-zA-Z0-9.+-]*[/\\\\]", "windowsJre/jre/") //rename the top level to something standard so the rest of the script will be easier
+        it.path = it.path.replaceAll("^[a-zA-Z0-9.+-]*[/\\\\]", "jre/") //rename the top level to something standard so the rest of the script will be easier
     }
 }
 
@@ -45,10 +45,10 @@ task downloadLinuxJre(type: Download) {
 
 task downloadAndUnzipLinuxJre(dependsOn: downloadLinuxJre, type: Copy) {
     from tarTree(downloadLinuxJre.dest)
-    into "${buildDir}/jres/"
+    into "${buildDir}/jres/linuxJre/"
     includeEmptyDirs(false)
     filesMatching("**") {
-        it.path = it.path.replaceAll("^[a-zA-Z0-9.+-]*[/\\\\]", "linuxJre/jre/") //rename the top level to something standard so the rest of the script will be easier
+        it.path = it.path.replaceAll("^[a-zA-Z0-9.+-]*[/\\\\]", "jre/") //rename the top level to something standard so the rest of the script will be easier
     }
 }
 
@@ -87,10 +87,10 @@ task downloadMacJre(type: Download) {
 
 task downloadAndUnzipMacJre(dependsOn: downloadMacJre, type: Copy) {
     from tarTree(downloadMacJre.dest)
-    into "${buildDir}/jres/"
+    into "${buildDir}/jres/macJre/"
     includeEmptyDirs(false)
     filesMatching("**") {
-        it.path = it.path.replaceAll("^[a-zA-Z0-9.+-]*[/\\\\]", "macJre/jre/") //rename the top level to something standard so the rest of the script will be easier
+        it.path = it.path.replaceAll("^[a-zA-Z0-9.+-]*[/\\\\]", "jre/") //rename the top level to something standard so the rest of the script will be easier
     }
 }
 
@@ -101,7 +101,7 @@ task buildMacDistribution(dependsOn: [distZip, downloadAndUnzipMacJre], type: Co
         fileMode 0755
     }
     from zipTree(distZip.archiveFile) 
-    from "${buildDir}/jres/macJre
+    from "${buildDir}/jres/macJre"
     into new File(buildDir, 'distributions/[GAME_NAME]-mac')
     includeEmptyDirs false
     exclude 'bin/**' //we are adding our own run scripts, exclude the ones coming from distZip
