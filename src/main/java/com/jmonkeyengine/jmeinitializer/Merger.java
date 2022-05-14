@@ -97,7 +97,8 @@ public class Merger {
 
         while( matcher.find() ){
             String requiredLibrary = matcher.group(1);
-            if (!libraryKeysAndProfilesInUse.contains(requiredLibrary)){
+
+            if (!libraryConditionStringPasses(requiredLibrary)){
                 return false;
             }
         }
