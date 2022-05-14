@@ -218,6 +218,7 @@ public class Merger {
     }
 
     private boolean libraryConditionStringPasses(String condition){
+        condition = condition.replace("_OR_", "|"); //| is not allowed in paths so accept _OR_ as well
         String[] libraries = condition.split("\\|");
         for(String library: libraries){
             if (libraryKeysAndProfilesInUse.contains(library)){
