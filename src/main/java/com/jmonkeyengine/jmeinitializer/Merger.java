@@ -7,12 +7,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.CaseUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -31,11 +33,20 @@ import java.util.stream.Collectors;
  * [IF=LIBRARY]
  *
  * In which case the file is only included if that library is active
+ *
+ * or
+ *
+ * [FRAGMENT=gradleDeployment.fragment]
+ *
+ * in which case that fragment (aka bit of text) is substituted into the template
  */
 public class Merger {
 
     //the "anything but = is to avoid double ifs merging
     private Pattern mergeIfConditionPattern = Pattern.compile("\\[IF=([^\\]]*)]");
+
+    private Pattern fragmentPattern = Pattern.compile("\\[FRAGMENT=([a-zA-Z0-9./]*)]");
+
     /**
      * After the allowed ifs have been processed this is used to eliminate forbidden ifs
      */
@@ -45,14 +56,18 @@ public class Merger {
 
     Set<String> libraryKeysAndProfilesInUse;
 
+    Function<String, String> fragmentSupplier;
+
     /**
      * Given the information provided by the user will evaluate merge fields in files and paths.
      *
      * libraryVersions is a map of a string of the form groupId:artifactId -> version
      *
      * additionalProfiles are things that can be used in [IF=] conditions in addition to libraries (things like MULTIPLATFORM)
+     *
+     * fragmentSupplier supplies other file's contents to add into the merged template
      */
-    public Merger(String gameName, String gamePackage, List<Library> librariesRequired, Collection<String> additionalProfiles, String jmeVersion, Map<String,String> libraryVersions){
+    public Merger(String gameName, String gamePackage, List<Library> librariesRequired, Collection<String> additionalProfiles, String jmeVersion, Map<String,String> libraryVersions, Function<String, String> fragmentSupplier){
         mergeData.put(MergeField.GAME_NAME_FULL, gameName);
         mergeData.put(MergeField.GAME_NAME, sanitiseToJavaClass(gameName));
 
@@ -64,15 +79,17 @@ public class Merger {
         mergeData.put(MergeField.GAME_PACKAGE_FOLDER, convertPackageToFolder(mergeData.get(MergeField.GAME_PACKAGE)));
         mergeData.put(MergeField.JME_VERSION, jmeVersion);
         mergeData.put(MergeField.JME_DEPENDENCIES, formJmeRequiredLibrariesMergeField(librariesRequired));
-        mergeData.put(MergeField.VR_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_VR));
-        mergeData.put(MergeField.ANDROID_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_ANDROID));
-        mergeData.put(MergeField.DESKTOP_SPECIFIC_DEPENDENCIES, formPlatformSpecificLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_DESKTOP));
-        mergeData.put(MergeField.OTHER_DEPENDENCIES, formNonJmeRequiredAnyPlatformLibrariesMergeField(librariesRequired, libraryVersions));
-        mergeData.put(MergeField.ALL_NON_JME_DEPENDENCIES, mergeData.get(MergeField.VR_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.ANDROID_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.DESKTOP_SPECIFIC_DEPENDENCIES)+"\n"+mergeData.get(MergeField.OTHER_DEPENDENCIES));
+        mergeData.put(MergeField.VR_SPECIALISED_DEPENDENCIES, formPlatformSpecialisedLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_VR));
+        mergeData.put(MergeField.ANDROID_SPECIALISED_DEPENDENCIES, formPlatformSpecialisedLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_ANDROID));
+        mergeData.put(MergeField.DESKTOP_SPECIALISED_DEPENDENCIES, formPlatformSpecialisedLibrariesMergeField(librariesRequired, libraryVersions, LibraryService.JME_DESKTOP));
+        mergeData.put(MergeField.ALL_NON_JME_NON_SPECIALISED_DEPENDENCIES, formNonJmeNonSpecialised(librariesRequired, libraryVersions));
+        mergeData.put(MergeField.ALL_NON_JME_DEPENDENCIES, eliminateEmptyLines(mergeData.get(MergeField.VR_SPECIALISED_DEPENDENCIES)+"\n"+mergeData.get(MergeField.ANDROID_SPECIALISED_DEPENDENCIES)+"\n"+mergeData.get(MergeField.DESKTOP_SPECIALISED_DEPENDENCIES)+"\n"+mergeData.get(MergeField.ALL_NON_JME_NON_SPECIALISED_DEPENDENCIES)));
         mergeData.put(MergeField.MAVEN_REPOS, formMavenRepos(librariesRequired));
 
         libraryKeysAndProfilesInUse = librariesRequired.stream().map(Library::getKey).collect(Collectors.toSet());
         libraryKeysAndProfilesInUse.addAll(additionalProfiles);
+
+        this.fragmentSupplier = fragmentSupplier;
     }
 
     public boolean pathShouldBeAllowed(String pathTemplate){
@@ -80,7 +97,8 @@ public class Merger {
 
         while( matcher.find() ){
             String requiredLibrary = matcher.group(1);
-            if (!libraryKeysAndProfilesInUse.contains(requiredLibrary)){
+
+            if (!libraryConditionStringPasses(requiredLibrary)){
                 return false;
             }
         }
@@ -107,6 +125,19 @@ public class Merger {
      */
     public byte[] mergeFileContents(byte[] fileContents){
         String fileContentsAsString = new String(fileContents, StandardCharsets.UTF_8);
+
+        //first add any fragments (as the fragments may themselves have merges or ifs in this
+        Matcher matcher = fragmentPattern.matcher(fileContentsAsString);
+        while(matcher.find()){
+            String fragmentFile = matcher.group(1);
+            String fragmentContent = fragmentSupplier.apply(fragmentFile);
+
+            if (fragmentContent == null){
+                throw new RuntimeException("Missing fragment " + fragmentFile);
+            }
+            fileContentsAsString = fileContentsAsString.replace(matcher.group(0), fragmentContent);
+            matcher = fragmentPattern.matcher(fileContentsAsString);
+        }
 
         for(Map.Entry<MergeField, String> merges : mergeData.entrySet()){
             String mergeKey = merges.getKey().getMergeFieldInText();
@@ -143,29 +174,58 @@ public class Merger {
             fileContentsAsString = fileContentsAsString.replace("[/IF=" + validProfile + "]", "");
         }
 
-        //I suspect a single really advanced regex could do the below in one go, but its a painful double "not this" so I've gone for this probably less efficient approach
-        Set<String> remainingIfs = new HashSet<>();
-        Matcher remainingIfsMatcher = mergeIfConditionPattern.matcher(fileContentsAsString);
-        while(remainingIfsMatcher.find()){
-            remainingIfs.add(remainingIfsMatcher.group(1));
-        }
-
-        for(int i=0;i<2;i++){
-            for(String remainingIf : remainingIfs){
-                //this 2 step process of first eliminating down to a _eliminated_ string and then removing that is to get any whitespace eliminated nicely
-                String regex = "\\[IF=" + remainingIf + "]((?!IF=).)*\\[/IF=" + remainingIf + "]";
-                fileContentsAsString = Pattern.compile(regex, Pattern.DOTALL).matcher(fileContentsAsString).replaceAll("_eliminated_");
-            }
-            //kill including the new line after the closure, if thats the only thing on the lin
-            fileContentsAsString = fileContentsAsString.replaceAll("\\R *_eliminated_ *\\R", "\n");
-            //then get rid of anything thats on a line with allowed text
-            fileContentsAsString = fileContentsAsString.replace("_eliminated_", "");
-        }
+        fileContentsAsString = processIfStatements(fileContentsAsString);
 
         //always end with a new character because that will make git changes better in the future (plus the test want that)
         fileContentsAsString = fileContentsAsString+"\n";
 
         return fileContentsAsString.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private String processIfStatements(String fileContentsAsString){
+        Set<String> foundIfConditions = new HashSet<>();
+        Matcher ifMatcher = mergeIfConditionPattern.matcher(fileContentsAsString);
+        while(ifMatcher.find()){
+            foundIfConditions.add(ifMatcher.group(1));
+        }
+
+        Set<String> failingIfConditions = new HashSet<>();
+        for(String foundIfCondition : foundIfConditions){
+            boolean ifConditionPasses = libraryConditionStringPasses(foundIfCondition);
+            if(ifConditionPasses){
+                fileContentsAsString = fileContentsAsString.replace("[IF=" + foundIfCondition + "]", "");
+                fileContentsAsString = fileContentsAsString.replace("[/IF=" + foundIfCondition + "]", "");
+            }else{
+                failingIfConditions.add(foundIfCondition);
+            }
+        }
+
+        //eliminate any remaining ifs and their contents
+        //I suspect a single really advanced regex could do the below in one go, but its a painful double "not this" so I've gone for this probably less efficient approach
+
+        for(int i = 0; i < 2; i++){
+            for(String remainingIf : failingIfConditions){
+                //this 2 step process of first eliminating down to a _eliminated_ string and then removing that is to get any whitespace eliminated nicely
+                String regex = "\\[IF=" + Pattern.quote(remainingIf) + "]((?!IF=).)*\\[/IF=" + Pattern.quote(remainingIf) + "]";
+                fileContentsAsString = Pattern.compile(regex, Pattern.DOTALL).matcher(fileContentsAsString).replaceAll("_eliminated_");
+            }
+            //kill including the new line after the closure, if thats the only thing on the line
+            fileContentsAsString = fileContentsAsString.replaceAll("\\R *_eliminated_ *\\R", "\n");
+            //then get rid of anything thats on a line with allowed text
+            fileContentsAsString = fileContentsAsString.replace("_eliminated_", "");
+        }
+        return fileContentsAsString;
+    }
+
+    private boolean libraryConditionStringPasses(String condition){
+        condition = condition.replace("_OR_", "|"); //| is not allowed in paths so accept _OR_ as well
+        String[] libraries = condition.split("\\|");
+        for(String library: libraries){
+            if (libraryKeysAndProfilesInUse.contains(library)){
+                return true;
+            }
+        }
+        return false;
     }
 
     protected static String formJmeRequiredLibrariesMergeField(List<Library> librariesRequired){
@@ -179,10 +239,10 @@ public class Merger {
 
     }
 
-    protected static String formNonJmeRequiredAnyPlatformLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions){
+    protected static String formNonJmeNonSpecialised(List<Library> librariesRequired, Map<String,String> libraryVersions){
         return librariesRequired.stream()
                 .filter(l -> !l.isUsesJmeVersion())
-                .filter(l -> l.getRequiredPlatforms().isEmpty())
+                .filter(l -> l.getSpecialisedToPlatforms().isEmpty())
                 .flatMap(l ->
                         l.getArtifacts().stream()
                                 .map(artifact -> {
@@ -204,10 +264,10 @@ public class Merger {
                 .collect(Collectors.joining("\n"));
     }
 
-    protected static String formPlatformSpecificLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions, String platform){
+    protected static String formPlatformSpecialisedLibrariesMergeField(List<Library> librariesRequired, Map<String,String> libraryVersions, String platform){
         return librariesRequired.stream()
                 .filter(l -> !l.isUsesJmeVersion())
-                .filter(l -> l.getRequiredPlatforms().contains(platform))
+                .filter(l -> l.getSpecialisedToPlatforms().contains(platform))
                 .flatMap(l ->
                         l.getArtifacts().stream()
                                 .map(artifact -> {
@@ -250,6 +310,10 @@ public class Merger {
             proposedName = CaseUtils.toCamelCase(proposedName, true, ' ', '_');
         }
         return proposedName;
+    }
+
+    public static String eliminateEmptyLines(String input){
+        return input.lines().filter(l -> !l.isBlank()).collect(Collectors.joining("\n"));
     }
 
 }

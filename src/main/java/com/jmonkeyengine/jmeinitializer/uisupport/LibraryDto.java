@@ -4,6 +4,7 @@ import com.jmonkeyengine.jmeinitializer.libraries.Library;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.apache.commons.collections4.ListUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -28,10 +29,22 @@ public class LibraryDto {
     @Schema( description = "If this library should be presented pre ticked in the UI")
     boolean selectedByDefault;
 
-    @Schema( example = "[\"JME_DESKTOP\"]", description = "If this library should only be presented as an option if a certain platform has been selected (e.g. only VR libraries if the VR platform has been selected). If empty the library will be available for all platforms. If populated the UI should only make the value available for selection if the platform is selected")
+    @Schema( example = "[\"JME_DESKTOP\"]", description =
+    """
+        If this library should only be presented as an option if a certain platform has been selected (e.g. only VR libraries if the VR platform has been selected). If empty the library will be available for all platforms. 
+        
+        If populated the UI should only make the value available for selection if the platform is selected.
+        
+        Note that this includes both libraries that are "specialised" to a platform and just only relevant if a platform
+        is selected. The UI shouldn't care about the difference but the initializer itself will when creating the 
+        template
+    """)
     Collection<String> requiredPlatforms;
 
+    @Schema( example = "[\"JME_ANDROID\"]", description = "If a platform is selected this library will not be allowed to be selected. If any ONE of the required platforms is present the library is unavailable. Note; this is platforms and deployment options", defaultValue = "No incompatible platform")
+    Collection<String> incompatiblePlatformsAndDeployments;
+
     public LibraryDto (Library library) {
-        this(library.getKey(), library.getDisplayName(), library.getDescriptionText(), library.isDefaultSelected(), library.getRequiredPlatforms());
+        this(library.getKey(), library.getDisplayName(), library.getDescriptionText(), library.isDefaultSelected(), ListUtils.union(library.getRequiredPlatforms(), library.getSpecialisedToPlatforms()), library.getIncompatiblePlatformsAndDeployments());
     }
 }

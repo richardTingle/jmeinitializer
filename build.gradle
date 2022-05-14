@@ -45,7 +45,8 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 
 	implementation 'com.fasterxml.jackson.module:jackson-module-jsonSchema:2.13.2'
-
+	implementation 'org.apache.commons:commons-collections4:4.4'
+	implementation 'org.apache.commons:commons-compress:1.21' //commons-compress allows us to set executable permissions for use on linux
 
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

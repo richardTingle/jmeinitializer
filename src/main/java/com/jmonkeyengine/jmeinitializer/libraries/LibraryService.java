@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.jmonkeyengine.jmeinitializer.dto.MavenVersionApiResponseDto;
+import com.jmonkeyengine.jmeinitializer.deployment.DeploymentOption;
+import com.jmonkeyengine.jmeinitializer.dto.DeploymentOptionDto;
 import com.jmonkeyengine.jmeinitializer.uisupport.CategoryAndLibrariesDto;
 import com.jmonkeyengine.jmeinitializer.uisupport.CategoryDto;
 import com.jmonkeyengine.jmeinitializer.uisupport.LibraryDto;
@@ -13,10 +14,13 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,18 +59,28 @@ public class LibraryService {
      */
     private final String fetchUrl;
 
-    public LibraryService ( @Value("${libraries.fetchUrl}" ) String fetchUrl) {
+    public LibraryService ( @Value("${libraries.fetchUrl}" ) String fetchUrl) throws MalformedURLException{
         this.fetchUrl=fetchUrl;
     }
 
     public void fetchNewLibraries(){
         log.info("fetching new libraries");
-        ResponseEntity<String> apiResponse = restTemplate.getForEntity(fetchUrl, String.class);
-
-        if ( apiResponse.getStatusCode().is2xxSuccessful() ){
-            updateLibrariesBasedOnJson(apiResponse.getBody());
+        if (fetchUrl.equals("")){
+            //this is for developer use, fetch from local file system
+            File internalLocation = new File(System.getProperty("user.dir"), "libraries.json");
+            try{
+                updateLibrariesBasedOnJson(Files.readString(internalLocation.toPath()));
+            } catch(IOException e){
+                throw new RuntimeException(e);
+            }
         }else{
-            log.warn("Failed to fetch libraries, received " + apiResponse);
+            ResponseEntity<String> apiResponse = restTemplate.getForEntity(fetchUrl, String.class);
+
+            if(apiResponse.getStatusCode().is2xxSuccessful()){
+                updateLibrariesBasedOnJson(apiResponse.getBody());
+            } else{
+                log.warn("Failed to fetch libraries, received " + apiResponse);
+            }
         }
     }
 
@@ -110,6 +123,7 @@ public class LibraryService {
 
         uiLibraryDataDto = new UiLibraryDataDto(
                 librariesOfCategory(LibraryCategory.JME_PLATFORM).stream().map(LibraryDto::new).collect(Collectors.toList()),
+                DeploymentOptionDto.wrapAsDto(DeploymentOption.values()),
                 librariesOfCategory(LibraryCategory.JME_GENERAL).stream().map(LibraryDto::new).collect(Collectors.toList()),
                 specialCategories,
                 librariesOfCategory(LibraryCategory.GENERAL).stream().map(LibraryDto::new).collect(Collectors.toList()),

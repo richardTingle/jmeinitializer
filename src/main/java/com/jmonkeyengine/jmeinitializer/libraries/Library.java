@@ -64,15 +64,35 @@ public class Library {
     @JsonProperty( required = true)
     String descriptionText;
 
-    /**
-     * If a library requires a particular platform (e.g. Tamarin requires VR) then this will prevent it being selected
-     * unless that platform is selected. Additionally, in multiplatform projects it will appear only in relevant modules.
-     *
-     * Only the keys are listed here
-     */
     @Singular()
-    @Schema( example = "[\"JME_DESKTOP\"]", description = "If this library should only be presented as an option if a certain platform has been selected (e.g. only VR libraries if the VR platform has been selected). If empty the library will be available for all platforms", defaultValue = "No required platform")
-    Collection<String> requiredPlatforms = List.of();
+    @Schema( example = "[\"JME_DESKTOP\"]", description =
+            """
+                If this library should only be presented as an option if a certain platform has been selected (e.g. only VR libraries if the VR platform has been selected). 
+                
+                If empty the library will be available for all platforms. If any ONE of the required platforms is present the library is available.
+                
+                Note that in multiplatform it will still appear in the main game dependencies (so should be compatible with all platforms even if its only
+                triggered in the required platforms (see specialisedToPlatforms if you want it only in the platform specified)
+            """,
+            defaultValue = "No required platform")
+    List<String> requiredPlatforms = List.of();
+
+
+    @Singular()
+    @Schema( example = "[\"JME_DESKTOP\"]", description =
+            """
+                If this library should only be presented as an option if a certain platform has been selected (e.g. only VR libraries if the VR platform has been selected). 
+                
+                If empty the library will be available for all platforms. If any ONE of the required platforms is present the library is available.
+                
+                Note that in multiplatform it will appear only in the relevant module (e.g. in the vrdesktop module) 
+            """,
+            defaultValue = "No required platform")
+    List<String> specialisedToPlatforms = List.of();
+
+    @Singular()
+    @Schema( example = "[\"JME_ANDROID\"]", description = "If a platform is selected this library will not be allowed to be selected. If any ONE of the required platforms is present the library is unavailable. Note; this is platforms and deployment options", defaultValue = "No incompatible platform")
+    Collection<String> incompatiblePlatformsAndDeployments = List.of();
 
     @Override
     public boolean equals(Object o){

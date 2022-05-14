@@ -14,6 +14,8 @@ class ReactGameForm extends React.Component {
             groupSelectedLibraries: {},
             //library key of the libary that supports desktop, VR etc
             platformLibraries: [],
+            //WINDOWS, LINUX etc
+            deploymentOptions:[],
             //this is the big bundle of data that comes down from the server to say what libraries are available, what the defaults are etc
             availableLibraryData : null,
             //if the user has clicked download (but not updated the data) a message is displayed. This controls that
@@ -36,6 +38,10 @@ class ReactGameForm extends React.Component {
                 let groupSelectedLibraries = {};
                 data.specialCategories.forEach( specialCategoryData => {
                     groupSelectedLibraries[specialCategoryData.category.key] = specialCategoryData.defaultLibrary;
+                })
+                stateUpdate.deploymentOptions = []; //by default select all applicable deployment options
+                data.deploymentOptions.forEach( deploymentOption => {
+                    stateUpdate.deploymentOptions.push(deploymentOption.key);
                 })
                 stateUpdate.groupSelectedLibraries = groupSelectedLibraries;
 
@@ -62,6 +68,16 @@ class ReactGameForm extends React.Component {
         }
     }
 
+    handleToggleDeploymentOption = (deploymentOption) => {
+        let currentlySelected = this.state.deploymentOptions.includes(deploymentOption)
+        if (currentlySelected){
+            let newDeploymentOptions = this.state.deploymentOptions.filter( v => v !== deploymentOption )
+            this.setState({deploymentOptions: newDeploymentOptions, hasDownloaded:false, validationMessage:null });
+        }else{
+            this.setState({deploymentOptions: [...this.state.deploymentOptions, deploymentOption], hasDownloaded:false, validationMessage:null});
+        }
+    }
+
     handleToggleFreeFormLibrary = (libraryKey) => {
         let currentlySelected = this.state.freeSelectLibraries.includes(libraryKey)
         if (currentlySelected){
@@ -82,7 +98,7 @@ class ReactGameForm extends React.Component {
     }
 
     formOptionsQueryString = () => {
-        return "gameName=" + encodeURIComponent(this.state.gameName) + "&packageName=" +encodeURIComponent(this.state.package)+"&libraryList=" + encodeURIComponent(this.getRequiredLibrariesAsCommaSeperatedList())
+        return "gameName=" + encodeURIComponent(this.state.gameName) + "&packageName=" +encodeURIComponent(this.state.package)+"&libraryList=" + encodeURIComponent(this.getRequiredLibrariesAsCommaSeperatedList())+ "&deploymentOptionsList=" + encodeURIComponent(this.getRequiredDeploymentOptionsAsCommaSeperatedList());
     }
 
     handleSetLibrarySelectedInGroup =  (group, library)=>{
@@ -103,6 +119,17 @@ class ReactGameForm extends React.Component {
         }
 
         return fullRequiredLibrarys.join(",");
+    }
+
+    getRequiredDeploymentOptionsAsCommaSeperatedList = () => {
+        let fullRequiredDeploymentOptions= []
+        for(const deploymentOption of this.state.availableLibraryData.deploymentOptions ){
+            if (this.state.deploymentOptions.includes(deploymentOption.key) && this.deploymentOptionShouldBeAvailable(deploymentOption)){
+                console.log("Pass" + deploymentOption);
+                fullRequiredDeploymentOptions.push(deploymentOption.key);
+            }
+        }
+        return fullRequiredDeploymentOptions.join(",");
     }
 
     isLibrarySelectedInGroup = (group, library) => {
@@ -152,32 +179,62 @@ class ReactGameForm extends React.Component {
     /**
      * Given a list of required platform keys (empty means no requirements) returns if at least one of those is
      * selected
-     * @param requiredPlatformList
+     * @param library
      */
-    platformAvailable = (requiredPlatformList) => {
-        if (requiredPlatformList.length === 0){
+    libraryCurrentlySupported = (library) => {
+
+        let requiredPlatformList = library.requiredPlatforms;
+        let incompatiblePlatformList = library.incompatiblePlatformsAndDeployments;
+        if (requiredPlatformList.length === 0 && incompatiblePlatformList.length === 0){
             return true;
         }
 
-        const availableRequiredPlatforms = requiredPlatformList.filter(value => this.state.platformLibraries.includes(value));
-
-        return availableRequiredPlatforms.length > 0;
+        let platformsAndDeployments = this.allSelectedPlatformsAndDeployments();
+        const availableRequiredPlatforms = requiredPlatformList.filter(value => platformsAndDeployments.includes(value));
+        const forbiddenPlatforms = incompatiblePlatformList.filter(value => platformsAndDeployments.includes(value));
+        return (requiredPlatformList.length === 0 || availableRequiredPlatforms.length > 0) && forbiddenPlatforms.length === 0;
     }
 
-    renderRequiredPlatformStatement(requiredPlatformList){
+    allSelectedPlatformsAndDeployments(){
+        return this.state.platformLibraries.concat(this.state.deploymentOptions);
+    }
 
-        if (requiredPlatformList.length === 0){
+    renderRequiredPlatformStatement(library){
+
+        if (this.libraryCurrentlySupported(library)){
             return;
         }
 
-        const platformStrings = [];
+        let requiredPlatformList = library.requiredPlatforms;
+        let incompatiblePlatformList = library.incompatiblePlatformsAndDeployments;
+
+        const requiredPlatformStrings = [];
         this.state.availableLibraryData.jmePlatforms.forEach(platform => {
             if (requiredPlatformList.includes(platform.key)){
-                platformStrings.push(platform.libraryName);
+                requiredPlatformStrings.push(platform.libraryName);
+            }
+        });
+        const incompatiblePlatformStrings = [];
+        this.state.availableLibraryData.jmePlatforms.forEach(platform => {
+            if (incompatiblePlatformList.includes(platform.key)){
+                incompatiblePlatformStrings.push(platform.libraryName);
+            }
+        });
+        this.state.availableLibraryData.deploymentOptions.forEach(deploymentOption => {
+            if (incompatiblePlatformList.includes(deploymentOption.key)){
+                incompatiblePlatformStrings.push(deploymentOption.name);
             }
         });
 
-        return <p><small>{"This library is only applicable for platform(s): " + platformStrings.join(", ") }</small></p>
+        let statement = [];
+        if (requiredPlatformStrings.length>0){
+            statement.push(<p key = {"requires_" + library.key}><small>{"This library is only applicable for platform(s): " + requiredPlatformStrings.join(", ") }</small></p>)
+        }
+        if (incompatiblePlatformStrings.length>0) {
+            statement.push(<p key={"incompatible_" + library.key}> <small>{"This library can't be used with platform(s): " + incompatiblePlatformStrings.join(", ")}</small></p>)
+        }
+
+        return statement;
     }
 
     renderPlatformCheckboxes(){
@@ -203,6 +260,44 @@ class ReactGameForm extends React.Component {
         }
     }
 
+    deploymentOptionShouldBeAvailable(deploymentOption){
+        return deploymentOption.applicablePlatforms.filter(value => this.state.platformLibraries.includes(value)).length>0
+    }
+
+    renderDeploymentOptionsCheckboxes(){
+        if (this.state.availableLibraryData === null){
+            return <div/>
+        }else {
+            const deploymentOptionsCheckboxes = [];
+            //go through the selected platform. If a deployment option is relevant to that platform offer it
+            this.state.availableLibraryData.deploymentOptions.forEach(deploymentOption => {
+
+                let includeOption = this.deploymentOptionShouldBeAvailable(deploymentOption);
+                if (includeOption){
+                    deploymentOptionsCheckboxes.push(<div className="form-check" key={"deploymentCheckboxDiv" + deploymentOption.key}>
+                        <input className="form-check-input" type="checkbox" name="platformRadios"
+                               id={"platformRadio" + deploymentOption.key} value={deploymentOption.key}
+                               checked={this.state.deploymentOptions.includes(deploymentOption.key)}
+                               onChange={event => this.handleToggleDeploymentOption(deploymentOption.key)}/>
+                        <label className="form-check-label" htmlFor={"platformRadio" + deploymentOption.key}>
+                            <b>{deploymentOption.name}</b>
+                        </label>
+                    </div>);
+                }
+            });
+            if (deploymentOptionsCheckboxes.length > 0) {
+                return <div><h2>Deployment</h2>
+                    <p>Deployment options will provide platform specific deployments (with a bundled JRE), and may also restrict available libraries</p>
+                    <div onChange={this.handleSetPlatform}>
+                        {deploymentOptionsCheckboxes}
+                    </div>
+                </div>;
+            }else{
+                return <div/>;
+            }
+        }
+    }
+
     renderFreeFormJmeLibraries(){
         if (this.state.availableLibraryData === null){
             return <div/>
@@ -211,7 +306,7 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.jmeGeneralLibraries.forEach(library => {
                 jmeLibraryChecks.push(<div className="form-check" key = {"libraryCheckDiv" + library.key}>
-                    <input disabled = {!this.platformAvailable(library.requiredPlatforms)} className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.platformAvailable(library.requiredPlatforms) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.libraryCurrentlySupported(library) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
                         <label className="form-check-label" htmlFor={"platformCheck" + library.key}>
                             <b>{library.libraryName}</b>
                             <p>{library.libraryDescription}</p>
@@ -233,12 +328,12 @@ class ReactGameForm extends React.Component {
 
                 specialCategory.libraries.forEach(library => {
                     thisGroupRadios.push(<div className="form-check" key = {"platformRadioDiv" + library.key}>
-                        <input disabled = {!this.platformAvailable(library.requiredPlatforms)} className="form-check-input" type="radio" name={specialCategory.category.key+"Radios"} id={specialCategory.category.key+"Radio" + library.key} value={library.key} checked = { this.platformAvailable(library.requiredPlatforms) && this.isLibrarySelectedInGroup(specialCategory.category.key, library.key)} onChange={event => this.handleSetLibrarySelectedInGroup(specialCategory.category.key, library.key)} />
+                        <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="radio" name={specialCategory.category.key+"Radios"} id={specialCategory.category.key+"Radio" + library.key} value={library.key} checked = { this.libraryCurrentlySupported(library) && this.isLibrarySelectedInGroup(specialCategory.category.key, library.key)} onChange={event => this.handleSetLibrarySelectedInGroup(specialCategory.category.key, library.key)} />
                         <label className="form-check-label" htmlFor={specialCategory.category.key+"Radio" + library.key}>
                             <b>{library.libraryName}</b>
                             <p>{library.libraryDescription}</p>
                         </label>
-                        {this.renderRequiredPlatformStatement(library.requiredPlatforms)}
+                        {this.renderRequiredPlatformStatement(library)}
                     </div>)
                 })
 
@@ -268,11 +363,11 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.generalLibraries.forEach(library => {
                 libraryChecks.push(<div className="form-check" key = {"libraryDiv" + library.key}>
-                    <input disabled = {!this.platformAvailable(library.requiredPlatforms)} className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.platformAvailable(library.requiredPlatforms) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.libraryCurrentlySupported(library) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
                     <label className="form-check-label" htmlFor={"libraryCheck" + library.key}>
                         <b>{library.libraryName}</b>
                         <p>{library.libraryDescription}</p>
-                        {this.renderRequiredPlatformStatement(library.requiredPlatforms)}
+                        {this.renderRequiredPlatformStatement(library)}
                     </label>
 
                 </div>);
@@ -330,12 +425,14 @@ class ReactGameForm extends React.Component {
                 <small id="gameNameHelp" className="form-text">A package name keeps your classes unique. If you have a website it's traditionally the website backwards (all lower case). So myamazinggame.co.uk would become uk.co.myamazinggame. If you don't have a website choose something like that, or just leave it blank</small>
             </div>
 
-            <h2>
-                Platform
-            </h2>
-            <p>JMonkeyEngine can target many platforms, select the platform(s) your application will target</p>
-            {this.renderPlatformCheckboxes()}
-
+            <div className="form-group">
+                <h2>
+                    Platform
+                </h2>
+                <p>JMonkeyEngine can target many platforms, select the platform(s) your application will target</p>
+                {this.renderPlatformCheckboxes()}
+            </div>
+            {this.renderDeploymentOptionsCheckboxes()}
             <br/> <br/>
             <div className="alert alert-secondary" role="alert">
                 Don't worry if you're not sure about libraries, you can always add more later

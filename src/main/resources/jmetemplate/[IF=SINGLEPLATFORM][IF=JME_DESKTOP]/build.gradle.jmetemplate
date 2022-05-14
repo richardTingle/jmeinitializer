@@ -1,6 +1,8 @@
 plugins {
     id 'application'
     id 'java'
+    id "de.undercouch.download" version "5.1.0"
+    id 'idea'
 }
 
 description = '[GAME_NAME] application'
@@ -36,6 +38,15 @@ dependencies {
     [ALL_NON_JME_DEPENDENCIES]
 }
 
+distZip {
+    //having a degenerate folder within the dist zip complicates generating the other zips
+    eachFile { file ->
+        String path = file.relativePath
+        file.setPath(path.substring(path.indexOf("/") + 1, path.length()))
+    }
+    includeEmptyDirs(false)
+}
+[FRAGMENT=gradleDeployment.fragment]
 // cleanup tasks
 clean.dependsOn('cleanDLLs', 'cleanDyLibs', 'cleanLogs', 'cleanSOs')
 task cleanDLLs(type: Delete) {
