@@ -24,6 +24,8 @@ Open this application in your preferred IDE (IntelliJ and Eclipse will support G
 
 ## How to package the game
 
+### Distribute without a JRE
+
 Either:
 
 In your IDE execute the gradle task distZip (which you'll find under gradle > distributions > distZip
@@ -35,6 +37,8 @@ In the command line open at the root of this project enter the following command
 Then you will find a zip in the build/distributions folder. This zip will contain your game, all the libraries to run it and in the bin folder launch files (for windows and linux).
 
 Note that the distribution does not contain a JRE, so java will need to be installed on the machine of anyone you give this distribution to. Alternatively you may wish to bundle a JRE with your game to remove this requirement.
+
+[FRAGMENT=gradleDeploymentReadme.fragment]
 
 ## Next Steps
 You may wish to commit your project to a git repository to keep track of your changes (so you can roll back if anything goes wrong)
