@@ -36,3 +36,4 @@ out/
 .vscode/
 /node_modules
 /src/main/resources/static/js/dist
+!/src/main/resources/jmetemplate/**/.vscode
