@@ -111,26 +111,30 @@ public class LibraryService {
     }
 
     private void createUiLibraryDataDto(){
+        Collection<String> allPlatformKeys = librariesOfCategory(LibraryCategory.JME_PLATFORM).stream().map(Library::getKey).collect(Collectors.toList());
+        Collection<String> allDeploymentKeys = Arrays.stream(DeploymentOption.values()).map(Enum::name).collect(Collectors.toList());
+
         List<CategoryAndLibrariesDto> specialCategories = new ArrayList<>();
         Arrays.stream(LibraryCategory.values())
                 .filter(c -> c!= LibraryCategory.JME_PLATFORM && c!= LibraryCategory.JME_GENERAL && c!= LibraryCategory.GENERAL)
                 .forEach(c -> specialCategories.add(new CategoryAndLibrariesDto(
                         new CategoryDto(c),
-                        librariesOfCategory(c).stream().map(LibraryDto::new).collect(Collectors.toList()),
+                        librariesOfCategory(c).stream().map(l -> LibraryDto.libraryDtoFromLibrary(l, allPlatformKeys, allDeploymentKeys)).collect(Collectors.toList()),
                         defaultLibraryInExclusiveCategory(c).map(Library::getKey).orElse(null))
                 ));
 
 
         uiLibraryDataDto = new UiLibraryDataDto(
-                librariesOfCategory(LibraryCategory.JME_PLATFORM).stream().map(LibraryDto::new).collect(Collectors.toList()),
+                librariesOfCategory(LibraryCategory.JME_PLATFORM).stream().map(l -> LibraryDto.libraryDtoFromLibrary(l, allPlatformKeys, allDeploymentKeys)).collect(Collectors.toList()),
                 DeploymentOptionDto.wrapAsDto(DeploymentOption.values()),
-                librariesOfCategory(LibraryCategory.JME_GENERAL).stream().map(LibraryDto::new).collect(Collectors.toList()),
+                librariesOfCategory(LibraryCategory.JME_GENERAL).stream().map(l -> LibraryDto.libraryDtoFromLibrary(l, allPlatformKeys, allDeploymentKeys)).collect(Collectors.toList()),
                 specialCategories,
-                librariesOfCategory(LibraryCategory.GENERAL).stream().map(LibraryDto::new).collect(Collectors.toList()),
+                librariesOfCategory(LibraryCategory.GENERAL).stream().map(l -> LibraryDto.libraryDtoFromLibrary(l, allPlatformKeys, allDeploymentKeys)).collect(Collectors.toList()),
                 Stream.of(LibraryCategory.JME_GENERAL, LibraryCategory.GENERAL).flatMap(c -> librariesOfCategory(c).stream()).filter(Library::isDefaultSelected).map(Library::getKey).collect(Collectors.toList()),
                 JME_DESKTOP
         );
     }
+
 
     public List<Library> nonJmeLibraries(){
         return nonJmeLibraries;

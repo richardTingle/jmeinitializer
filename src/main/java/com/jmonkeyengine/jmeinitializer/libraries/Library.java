@@ -91,8 +91,12 @@ public class Library {
     List<String> specialisedToPlatforms = List.of();
 
     @Singular()
-    @Schema( example = "[\"JME_ANDROID\"]", description = "If a platform is selected this library will not be allowed to be selected. If any ONE of the required platforms is present the library is unavailable. Note; this is platforms and deployment options", defaultValue = "No incompatible platform")
-    Collection<String> incompatiblePlatformsAndDeployments = List.of();
+    @Schema( example = "[\"JME_ANDROID\"]", description = "Only platforms in this list are compatible with this library. If any other platform is selected then the library will be marked as unavailable. If instead the library should just be available in only the platform module in multi-module projects see requiredPlatforms or specialisedToPlatforms", defaultValue = "All platforms compatible")
+    Collection<String> compatiblePlatforms = List.of();
+
+    @Singular()
+    @Schema( example = "[\"WINDOWS\"]", description = "Only deployments in this list are compatible with this library. If any other deployment is selected then the library will be marked as unavailable.", defaultValue = "All deployments compatible")
+    Collection<String> compatibleDeployments = List.of();
 
     @Override
     public boolean equals(Object o){
