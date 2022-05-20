@@ -125,7 +125,6 @@ class ReactGameForm extends React.Component {
         let fullRequiredDeploymentOptions= []
         for(const deploymentOption of this.state.availableLibraryData.deploymentOptions ){
             if (this.state.deploymentOptions.includes(deploymentOption.key) && this.deploymentOptionShouldBeAvailable(deploymentOption)){
-                console.log("Pass" + deploymentOption);
                 fullRequiredDeploymentOptions.push(deploymentOption.key);
             }
         }
@@ -152,7 +151,6 @@ class ReactGameForm extends React.Component {
             fetch('/jme-initializer/gradle-preview?' + this.formOptionsQueryString())
                 .then(response => response.json())
                 .then((data) => {
-                    console.log(data);
                     this.setState({gradlePreview: data});
                 })
                 .catch(console.log)
