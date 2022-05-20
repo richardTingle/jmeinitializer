@@ -97,7 +97,7 @@ task downloadAndUnzipMacJre(dependsOn: downloadMacJre, type: Copy) {
 task buildMacDistribution(dependsOn: [distZip, downloadAndUnzipMacJre], type: Copy)
 {
     group 'distribution'
-    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].sh"){
+    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].command"){
         fileMode 0755
     }
     from zipTree(distZip.archiveFile) 
