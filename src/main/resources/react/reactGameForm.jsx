@@ -62,20 +62,50 @@ class ReactGameForm extends React.Component {
         let currentlySelected = this.state.platformLibraries.includes(libraryKey)
         if (currentlySelected){
             let newFreeSelectLibraries = this.state.platformLibraries.filter( v => v !== libraryKey )
-            this.setState({platformLibraries: newFreeSelectLibraries, hasDownloaded:false, validationMessage:null });
+            this.setState({platformLibraries: newFreeSelectLibraries, hasDownloaded:false, validationMessage:null }, () => this.deselectAllUnavailableLibraries() );
         }else{
-            this.setState({platformLibraries: [...this.state.platformLibraries, libraryKey], hasDownloaded:false, validationMessage:null});
+            this.setState({platformLibraries: [...this.state.platformLibraries, libraryKey], hasDownloaded:false, validationMessage:null}, () => this.deselectAllUnavailableLibraries());
         }
+
     }
 
     handleToggleDeploymentOption = (deploymentOption) => {
         let currentlySelected = this.state.deploymentOptions.includes(deploymentOption)
         if (currentlySelected){
             let newDeploymentOptions = this.state.deploymentOptions.filter( v => v !== deploymentOption )
-            this.setState({deploymentOptions: newDeploymentOptions, hasDownloaded:false, validationMessage:null });
+            this.setState({deploymentOptions: newDeploymentOptions, hasDownloaded:false, validationMessage:null }, () => this.deselectAllUnavailableLibraries());
         }else{
-            this.setState({deploymentOptions: [...this.state.deploymentOptions, deploymentOption], hasDownloaded:false, validationMessage:null});
+            this.setState({deploymentOptions: [...this.state.deploymentOptions, deploymentOption], hasDownloaded:false, validationMessage:null}, () => this.deselectAllUnavailableLibraries());
         }
+    }
+
+    /**
+     * This checks on all the currently selected libraries and unticks any that are not not allowed
+     */
+    deselectAllUnavailableLibraries = () => {
+        console.log(this.state.freeSelectLibraries);
+        let newState = {
+            freeSelectLibraries: this.filterNonAvailableLibrariesFromList(this.state.freeSelectLibraries),
+            groupSelectedLibraries: {}
+        };
+        console.log(newState.freeSelectLibraries);
+        //console.log(this.state.groupSelectedLibraries);
+        for(let groupKey in this.state.groupSelectedLibraries){
+            //console.log(groupKey);
+            //console.log(this.state.groupSelectedLibraries[groupKey]);
+            newState.groupSelectedLibraries[groupKey] = this.filterNonAvailableLibrariesFromList(this.state.groupSelectedLibraries[groupKey])
+        }
+        this.setState(newState);
+    }
+
+    filterNonAvailableLibrariesFromList = (libraryKeys) => {
+        if (libraryKeys == null){
+            return null;
+        }
+        return libraryKeys.filter(libraryKey => {
+            let library = this.state.availableLibraryData.allLibraries[libraryKey];
+            return this.libraryCurrentlySupported(library);
+        } )
     }
 
     handleToggleFreeFormLibrary = (libraryKey) => {
@@ -304,7 +334,7 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.jmeGeneralLibraries.forEach(library => {
                 jmeLibraryChecks.push(<div className="form-check" key = {"libraryCheckDiv" + library.key}>
-                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.libraryCurrentlySupported(library) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
                         <label className="form-check-label" htmlFor={"platformCheck" + library.key}>
                             <b>{library.libraryName}</b>
                             <p>{library.libraryDescription}</p>
@@ -326,7 +356,7 @@ class ReactGameForm extends React.Component {
 
                 specialCategory.libraries.forEach(library => {
                     thisGroupRadios.push(<div className="form-check" key = {"platformRadioDiv" + library.key}>
-                        <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="radio" name={specialCategory.category.key+"Radios"} id={specialCategory.category.key+"Radio" + library.key} value={library.key} checked = { this.libraryCurrentlySupported(library) && this.isLibrarySelectedInGroup(specialCategory.category.key, library.key)} onChange={event => this.handleSetLibrarySelectedInGroup(specialCategory.category.key, library.key)} />
+                        <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="radio" name={specialCategory.category.key+"Radios"} id={specialCategory.category.key+"Radio" + library.key} value={library.key} checked = { this.isLibrarySelectedInGroup(specialCategory.category.key, library.key)} onChange={event => this.handleSetLibrarySelectedInGroup(specialCategory.category.key, library.key)} />
                         <label className="form-check-label" htmlFor={specialCategory.category.key+"Radio" + library.key}>
                             <b>{library.libraryName}</b>
                             <p>{library.libraryDescription}</p>
@@ -362,7 +392,7 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.generalLibraries.forEach(library => {
                 libraryChecks.push(<div className="form-check" key = {"libraryDiv" + library.key}>
-                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.libraryCurrentlySupported(library) && this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
                     <label className="form-check-label" htmlFor={"libraryCheck" + library.key}>
                         <b>{library.libraryName}</b>
                         <p>{library.libraryDescription}</p>

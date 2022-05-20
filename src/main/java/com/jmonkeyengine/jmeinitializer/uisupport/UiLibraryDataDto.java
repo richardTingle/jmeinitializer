@@ -6,7 +6,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * This is all the information the front end will need to render its options in a single packet.
@@ -38,4 +41,25 @@ public class UiLibraryDataDto {
 
     @Schema(example = "JME_DESKTOP", description = "The platform that should be selected by default in the UI")
     String defaultPlatform;
+
+    @Schema(description = "This contains all the libraries in a map based on their keys, for convenience of the UI")
+    Map<String, LibraryDto> allLibraries;
+
+    public UiLibraryDataDto(List<LibraryDto> jmePlatforms, List<DeploymentOptionDto> deploymentOptions, List<LibraryDto> jmeGeneralLibraries, List<CategoryAndLibrariesDto> specialCategories, List<LibraryDto> generalLibraries, List<String> defaultSelectedFreeChoiceLibraries, String defaultPlatform){
+        this.jmePlatforms = jmePlatforms;
+        this.deploymentOptions = deploymentOptions;
+        this.jmeGeneralLibraries = jmeGeneralLibraries;
+        this.specialCategories = specialCategories;
+        this.generalLibraries = generalLibraries;
+        this.defaultSelectedFreeChoiceLibraries = defaultSelectedFreeChoiceLibraries;
+        this.defaultPlatform = defaultPlatform;
+
+        allLibraries = new HashMap<>();
+
+        Consumer<List<LibraryDto>> mergeIntoAllLibraries = list -> list.forEach(lib -> allLibraries.put(lib.key, lib));
+        mergeIntoAllLibraries.accept(this.jmePlatforms);
+        mergeIntoAllLibraries.accept(this.jmeGeneralLibraries);
+        this.specialCategories.forEach(c -> mergeIntoAllLibraries.accept(c.getLibraries()));
+        mergeIntoAllLibraries.accept(this.generalLibraries);
+    }
 }
