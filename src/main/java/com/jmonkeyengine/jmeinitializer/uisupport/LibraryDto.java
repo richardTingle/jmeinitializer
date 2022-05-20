@@ -47,10 +47,12 @@ public class LibraryDto {
 
 
     public static LibraryDto libraryDtoFromLibrary (Library library, Collection<String> allPlatforms, Collection<String> allDeployments) {
-        return new LibraryDto(library.getKey(), library.getDisplayName(), library.getDescriptionText(), library.isDefaultSelected(), ListUtils.union(library.getRequiredPlatforms(), library.getSpecialisedToPlatforms()), formIncompatibleDeploymentsAndPlatforms(library.getCompatiblePlatforms(), library.getCompatibleDeployments(), allPlatforms, allDeployments));
+        return new LibraryDto(library.getKey(), library.getDisplayName(), library.getDescriptionText(), library.isDefaultSelected(), ListUtils.union(library.getRequiredPlatforms(), library.getSpecialisedToPlatforms()), formIncompatibleDeploymentsAndPlatforms(library, allPlatforms, allDeployments));
     }
 
-    private static List<String> formIncompatibleDeploymentsAndPlatforms(Collection<String> compatiblePlatforms, Collection<String> compatibleDeployments, Collection<String> allPlatforms, Collection<String> allDeployments ){
+    public static List<String> formIncompatibleDeploymentsAndPlatforms(Library library, Collection<String> allPlatforms, Collection<String> allDeployments ){
+        Collection<String> compatiblePlatforms = library.getCompatiblePlatforms();
+        Collection<String> compatibleDeployments = library.getCompatibleDeployments();
         List<String> incompatibleList = new ArrayList<>();
         if (!compatiblePlatforms.isEmpty()){
             incompatibleList.addAll(allPlatforms);
