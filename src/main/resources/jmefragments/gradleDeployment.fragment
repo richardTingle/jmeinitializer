@@ -71,10 +71,12 @@ task zipLinuxDistribution( dependsOn:buildLinuxDistribution, type: Zip) {
     destinationDirectory = file("$buildDir/distributions")
     from ("$buildDir/distributions/[GAME_NAME]-linux"){
       include('**.sh')
+      include('**/java')
       fileMode 0755
     }
     from ("$buildDir/distributions/[GAME_NAME]-linux"){
         exclude('**.sh')
+        exclude('**/java')
     }
 }
 [/IF=LINUX]
@@ -97,7 +99,7 @@ task downloadAndUnzipMacJre(dependsOn: downloadMacJre, type: Copy) {
 task buildMacDistribution(dependsOn: [distZip, downloadAndUnzipMacJre], type: Copy)
 {
     group 'distribution'
-    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].sh"){
+    from files("${projectDir}/scripts/desktopDeployment/[GAME_NAME].command"){
         fileMode 0755
     }
     from zipTree(distZip.archiveFile) 
@@ -112,11 +114,13 @@ task zipMacDistribution( dependsOn:buildMacDistribution, type: Zip) {
     archiveFileName = "[GAME_NAME]-mac.tar.gz"
     destinationDirectory = file("$buildDir/distributions")
     from ("$buildDir/distributions/[GAME_NAME]-mac"){
-      include('**.sh')
+      include('**.command')
+      include('**/java')
       fileMode 0755
     }
     from ("$buildDir/distributions/[GAME_NAME]-mac"){
-        exclude('**.sh')
+        exclude('**.command')
+        exclude('**/java')
     }
 }
 [/IF=MACOS]

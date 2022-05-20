@@ -15,6 +15,7 @@ public class [GAME_NAME] extends SimpleApplication {
 
     public static void main(String[] args) {
         [GAME_NAME] app = new [GAME_NAME]();
+        [IF=MACOS]app.setShowSettings(false); //Settings dialog not supported on mac[/IF=MACOS]
         app.start();
     }
 
