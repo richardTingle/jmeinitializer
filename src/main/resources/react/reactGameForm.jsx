@@ -21,7 +21,8 @@ class ReactGameForm extends React.Component {
             //if the user has clicked download (but not updated the data) a message is displayed. This controls that
             hasDownloaded: false,
             gradlePreview: null,
-            validationMessage: null
+            validationMessage: null,
+            explicitlyUnticked: [] //this allows for "default selections" to work, as it allows us to differentiate between things that have been unticked deliberately and just were not available till now
         };
     }
 
@@ -45,7 +46,7 @@ class ReactGameForm extends React.Component {
                 })
                 stateUpdate.groupSelectedLibraries = groupSelectedLibraries;
 
-                this.setState(stateUpdate)
+                this.setState(stateUpdate, () => this.handleAutoSelectAndDeselect())
             })
             .catch(console.log)
     }
@@ -62,9 +63,9 @@ class ReactGameForm extends React.Component {
         let currentlySelected = this.state.platformLibraries.includes(libraryKey)
         if (currentlySelected){
             let newFreeSelectLibraries = this.state.platformLibraries.filter( v => v !== libraryKey )
-            this.setState({platformLibraries: newFreeSelectLibraries, hasDownloaded:false, validationMessage:null }, () => this.deselectAllUnavailableLibraries() );
+            this.setState({platformLibraries: newFreeSelectLibraries, hasDownloaded:false, validationMessage:null }, () => this.handleAutoSelectAndDeselect() );
         }else{
-            this.setState({platformLibraries: [...this.state.platformLibraries, libraryKey], hasDownloaded:false, validationMessage:null}, () => this.deselectAllUnavailableLibraries());
+            this.setState({platformLibraries: [...this.state.platformLibraries, libraryKey], hasDownloaded:false, validationMessage:null}, () => this.handleAutoSelectAndDeselect());
         }
 
     }
@@ -73,27 +74,35 @@ class ReactGameForm extends React.Component {
         let currentlySelected = this.state.deploymentOptions.includes(deploymentOption)
         if (currentlySelected){
             let newDeploymentOptions = this.state.deploymentOptions.filter( v => v !== deploymentOption )
-            this.setState({deploymentOptions: newDeploymentOptions, hasDownloaded:false, validationMessage:null }, () => this.deselectAllUnavailableLibraries());
+            this.setState({deploymentOptions: newDeploymentOptions, hasDownloaded:false, validationMessage:null }, () => this.handleAutoSelectAndDeselect());
         }else{
-            this.setState({deploymentOptions: [...this.state.deploymentOptions, deploymentOption], hasDownloaded:false, validationMessage:null}, () => this.deselectAllUnavailableLibraries());
+            this.setState({deploymentOptions: [...this.state.deploymentOptions, deploymentOption], hasDownloaded:false, validationMessage:null}, () => this.handleAutoSelectAndDeselect());
         }
     }
 
-    /**
-     * This checks on all the currently selected libraries and unticks any that are not not allowed
-     */
-    deselectAllUnavailableLibraries = () => {
-        console.log(this.state.freeSelectLibraries);
-        let newState = {
-            freeSelectLibraries: this.filterNonAvailableLibrariesFromList(this.state.freeSelectLibraries),
-            groupSelectedLibraries: {}
-        };
-        console.log(newState.freeSelectLibraries);
-        //console.log(this.state.groupSelectedLibraries);
+    handleAutoSelectAndDeselect = () => {
+        //select default libraries
+        let newState = { freeSelectLibraries : this.state.freeSelectLibraries,  groupSelectedLibraries: {} };
+
+        let newlySelectedLibraries = this.state.availableLibraryData.defaultSelectedFreeChoiceLibraries
+            .filter(libKey => {
+                let lib = this.state.availableLibraryData.allLibraries[libKey];
+                return this.libraryCurrentlySupported(lib) && !this.state.explicitlyUnticked.includes(libKey) && !this.state.freeSelectLibraries.includes(libKey)
+            });
+
+        if (newlySelectedLibraries.length !== 0){
+            newState.freeSelectLibraries = [...this.state.freeSelectLibraries, ...newlySelectedLibraries ]
+        }
+
+        //deselect illegal libraries
+        newState.freeSelectLibraries = this.filterNonAvailableLibrariesFromList(newState.freeSelectLibraries);
         for(let groupKey in this.state.groupSelectedLibraries){
-            //console.log(groupKey);
-            //console.log(this.state.groupSelectedLibraries[groupKey]);
-            newState.groupSelectedLibraries[groupKey] = this.filterNonAvailableLibrariesFromList(this.state.groupSelectedLibraries[groupKey])
+            let currentLibrary = this.state.groupSelectedLibraries[groupKey];
+            if (currentLibrary !== null && this.libraryCurrentlySupported(this.state.availableLibraryData.allLibraries[currentLibrary])){
+                newState.groupSelectedLibraries[groupKey] = currentLibrary;
+            }else{
+                newState.groupSelectedLibraries[groupKey] = null;
+            }
         }
         this.setState(newState);
     }
@@ -108,14 +117,21 @@ class ReactGameForm extends React.Component {
         } )
     }
 
-    handleToggleFreeFormLibrary = (libraryKey) => {
+    handleToggleFreeFormLibrary = (library) => {
+        let libraryKey = library.key;
         let currentlySelected = this.state.freeSelectLibraries.includes(libraryKey)
         if (currentlySelected){
             let newFreeSelectLibraries = this.state.freeSelectLibraries.filter( v => v !== libraryKey )
             this.setState({freeSelectLibraries: newFreeSelectLibraries, hasDownloaded:false, validationMessage:null });
+
+            if (library.selectedByDefault && !this.state.explicitlyUnticked.includes(libraryKey)){
+                this.setState({ explicitlyUnticked: [...this.state.explicitlyUnticked, libraryKey] });
+            }
+
         }else{
             this.setState({freeSelectLibraries: [...this.state.freeSelectLibraries, libraryKey], hasDownloaded:false, validationMessage:null});
         }
+
     }
 
     handleSubmit = (event) =>  {
@@ -334,7 +350,7 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.jmeGeneralLibraries.forEach(library => {
                 jmeLibraryChecks.push(<div className="form-check" key = {"libraryCheckDiv" + library.key}>
-                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"platformCheck" + library.key} checked = {this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library)} />
                         <label className="form-check-label" htmlFor={"platformCheck" + library.key}>
                             <b>{library.libraryName}</b>
                             <p>{library.libraryDescription}</p>
@@ -392,7 +408,7 @@ class ReactGameForm extends React.Component {
 
             this.state.availableLibraryData.generalLibraries.forEach(library => {
                 libraryChecks.push(<div className="form-check" key = {"libraryDiv" + library.key}>
-                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library.key)} />
+                    <input disabled = {!this.libraryCurrentlySupported(library)} className="form-check-input" type="checkbox" value={library.key} id={"libraryCheck" + library.key} checked = {this.state.freeSelectLibraries.includes(library.key)} onChange = {event => this.handleToggleFreeFormLibrary(library)} />
                     <label className="form-check-label" htmlFor={"libraryCheck" + library.key}>
                         <b>{library.libraryName}</b>
                         <p>{library.libraryDescription}</p>
