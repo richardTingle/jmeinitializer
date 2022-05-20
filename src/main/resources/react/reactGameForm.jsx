@@ -231,7 +231,7 @@ class ReactGameForm extends React.Component {
             statement.push(<p key = {"requires_" + library.key}><small>{"This library is only applicable for platform(s): " + requiredPlatformStrings.join(", ") }</small></p>)
         }
         if (incompatiblePlatformStrings.length>0) {
-            statement.push(<p key={"incompatible_" + library.key}> <small>{"This library can't be used with platform(s): " + incompatiblePlatformStrings.join(", ")}</small></p>)
+            statement.push(<p key={"incompatible_" + library.key}> <small>{"This library can't be used with: " + incompatiblePlatformStrings.join(", ")}</small></p>)
         }
 
         return statement;
@@ -332,8 +332,9 @@ class ReactGameForm extends React.Component {
                         <label className="form-check-label" htmlFor={specialCategory.category.key+"Radio" + library.key}>
                             <b>{library.libraryName}</b>
                             <p>{library.libraryDescription}</p>
+                            {this.renderRequiredPlatformStatement(library)}
                         </label>
-                        {this.renderRequiredPlatformStatement(library)}
+
                     </div>)
                 })
 
